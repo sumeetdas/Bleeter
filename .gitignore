@@ -294,3 +294,6 @@ __pycache__/
 *.xsd.cs
 
 autogen_README.md
+
+src/sdNotes.fs
+.ionide
