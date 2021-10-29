@@ -8,5 +8,8 @@
   <ItemGroup>
     <PackageReference Include="Fable.Browser.Dom" Version="2.2.0" />
     <PackageReference Include="Fable.Core" Version="3.2.3" />
+    <PackageReference Include="Fable.Elmish" Version="3.1.0" />
+    <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
+    <PackageReference Include="Feliz" Version="1.54.0" />
   </ItemGroup>
 </Project>
