@@ -4,19 +4,6 @@ open Elmish
 open Elmish.React
 open Feliz
 
-
-module Cmd =
-    let fromAsync (operation: Async<'msg>) : Cmd<'msg> =
-        let delayedCmd (dispatch: 'msg -> unit) : unit =
-            let delayedDispatch = async {
-                let! msg = operation
-                dispatch msg
-            }
-
-            Async.StartImmediate delayedDispatch
-
-        Cmd.ofSub delayedCmd
-
 // data model
 type State =
     { Count: int; Loading: bool }
@@ -36,11 +23,14 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
     | Decrement -> {state with Count = state.Count - 1}, Cmd.none
     | IncrementDelayed when state.Loading -> state, Cmd.none
     | IncrementDelayed -> 
-        let delayedDispatch = async {
+        let incrementDelayedCmd (dispatch: Msg -> Unit) = 
+            let delayedDispatch = async {
                 do! Async.Sleep 1000
-                return Increment
+                dispatch Increment
             }
-        {state with Loading = true}, Cmd.fromAsync delayedDispatch
+            Async.StartImmediate delayedDispatch
+        
+        {state with Loading = true}, Cmd.ofSub incrementDelayedCmd
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let content = 
