@@ -3,7 +3,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="App.fs" />
+    <!-- <Content Include="public\index.html" />
+    <Content Include="public\tailwind-source.css" /> -->
+    <Compile Include="src\App.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Browser.Dom" Version="2.2.0" />
