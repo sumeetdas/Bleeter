@@ -4,19 +4,6 @@ open Elmish
 open Elmish.React
 open Feliz
 
-
-module Cmd =
-    let fromAsync (operation: Async<'msg>) : Cmd<'msg> =
-        let delayedCmd (dispatch: 'msg -> unit) : unit =
-            let delayedDispatch = async {
-                let! msg = operation
-                dispatch msg
-            }
-
-            Async.StartImmediate delayedDispatch
-
-        Cmd.ofSub delayedCmd
-
 // data model
 type State =
     { Count: int; Loading: bool }
@@ -48,6 +35,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
         else Html.h1 state.Count
 
     Html.div [
+        //SideNav.render state dispatch
         content 
 
         Html.button [
