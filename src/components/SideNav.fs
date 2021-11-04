@@ -3,6 +3,7 @@ module SideNav
 
 open Elmish
 open Feliz
+open Tailwind
 
 type State = { Count : int }
 
@@ -25,19 +26,35 @@ let icon (name:string) (size:string) =
 
 let bigIcon (name:string) = icon name "48"
 
-let nav (iconName:string) (text:string) = 
+let nav (iconName:string, text:string, url: string) = 
     Html.a [
-        Html.div [
-            bigIcon iconName
-
+        prop.href url
+        prop.children [
             Html.div [
-                Html.span [
-                    prop.text text
+                bigIcon iconName
+
+                Html.div [
+                    Html.span [
+                        prop.text text
+                    ]
                 ]
             ]
         ]
     ]
 
+let sideNavTemp = 
+    let navList = [
+        ("ant-design:home-outlined", "Home", "#/home")
+        ("akar-icons:hashtag", "Explore", "#/explore")
+        ("bx:bx-user-circle", "Profile", "#/profile")
+    ] 
+
+    Html.div [
+        prop.classes [
+            tw.``flex-grow-1``
+        ]
+        prop.children ((bigIcon "mdi:sheep") :: (navList |> List.map nav))
+    ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
     Html.div [
