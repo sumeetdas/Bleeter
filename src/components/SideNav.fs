@@ -48,12 +48,25 @@ let sideNavTemp =
         ("akar-icons:hashtag", "Explore", "#/explore")
         ("bx:bx-user-circle", "Profile", "#/profile")
     ] 
+    let navList = navList |> List.map nav
+    let bleeterIcon = (bigIcon "mdi:sheep")
+    let bleetButton = 
+        Html.button [
+            prop.text "Bleet"
+        ]
 
     Html.div [
         prop.classes [
-            tw.``flex-grow-1``
+            tw.``flex-grow-2``
         ]
-        prop.children ((bigIcon "mdi:sheep") :: (navList |> List.map nav))
+        prop.children [
+            Html.div [
+                prop.classes [
+                    tw.``float-right``
+                ]
+                prop.children (List.concat [[bleeterIcon]; navList; [bleetButton]])
+            ]
+        ] 
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
