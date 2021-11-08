@@ -2,3 +2,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .bg-trending {
+        --bg-opacity: 1;
+        @apply bg-green-100;
+    }
+}
