@@ -30,6 +30,78 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
             }
         {state with Loading = true}, Cmd.fromAsync delayedDispatch
 
+type Profile = {Name: string; ProfilePic: string; Banner: string; Handle: string; Following: int; Followers: int}
+
+type Bleet = {Name: string; Content: string; ProfilePic: string; Handle: string; Time: string; Rebleets: int; Likes: int; Replies: int}
+
+let bleets = [
+    {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
+    {Name= "Sheeple"; Content= "We the Sheeple!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "Sheeple"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 0}
+]
+
+let bleetElem (bleet:Bleet) = 
+    Html.div [
+        prop.classes []
+        prop.children [
+            Html.div [
+                prop.classes []
+                prop.children [
+                    Html.img [
+                        prop.classes [
+                            tw.``h-12``
+                            tw.``w-12``
+                            tw.``rounded-full``
+                            tw.``border-2``
+                            tw.``border-indigo-400``
+                        ]
+                        prop.src bleet.ProfilePic
+                    ]
+                ]
+            ]
+            Html.div [ 
+                prop.classes []
+                prop.children [
+                    Html.div [
+                        prop.classes []
+                        prop.children [
+                            Html.span [
+                                prop.text bleet.Name
+                            ]
+                            Html.span [
+                                prop.text ("@" + bleet.Handle)
+                            ]
+                            Menu.icon "bi:dot" "16"
+                            Menu.icon "ant-design:ellipsis-outlined" "16"
+                        ]
+                    ]
+                    Html.span [
+                        prop.text bleet.Content
+                    ]
+                    Html.div [ 
+                        Html.div [
+                            Menu.icon "ei:comment" "24"
+                            Html.span [
+                                prop.text bleet.Replies
+                            ]
+                        ]
+                        Html.div [
+                            Menu.icon "ei:retweet" "24"
+                            Html.span [
+                                prop.text bleet.Rebleets
+                            ]
+                        ]
+                        Html.div [
+                            Menu.icon "ei:heart" "24"
+                            Html.span [
+                                prop.text bleet.Likes
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+
 let main = 
     Html.div [ 
         Html.div [ 
@@ -68,6 +140,28 @@ let main =
             Html.span [
                 prop.text ("24" + " Followers")
             ]
+            Html.div [
+                prop.children (bleets |> List.map bleetElem)
+            ]
+        ]
+    ]
+
+let searchBox = 
+    Html.div [ 
+        prop.classes []
+        prop.children [
+            Html.div [ 
+                Menu.icon "ant-design:search-outlined" "24"
+            ]
+            Html.input [
+                prop.placeholder "Search Bleeter"
+            ]
+            Html.div [ 
+                prop.classes [ tw.``text-indigo-400`` ]
+                prop.children [
+                    Menu.icon "gridicons:cross-circle" "24"
+                ]
+            ]
         ]
     ]
 
@@ -77,20 +171,28 @@ let trending =
         ("Trending in WonderLand", "#AliceRocks", "150K Tweets")
     ]
 
-    let elem (description:string, name:string, numTweets:string) = Html.div [ 
-        Html.span [
-            prop.text description
+    let elem (description:string, name:string, numTweets:string) = 
+        Html.div [ 
+            Html.span [
+                prop.text description
+            ]
+            Html.span [
+                prop.text name
+            ]
+            Html.span [
+                prop.text numTweets
+            ]
         ]
-        Html.span [
-            prop.text name
-        ]
-        Html.span [
-            prop.text numTweets
-        ]
-    ]
 
     Html.div [ 
-        prop.children (trendList |> List.map elem)
+        prop.children [
+            Html.h3 [
+                prop.text "Trending"
+            ]
+            Html.div [
+                prop.children (trendList |> List.map elem)
+            ]  
+        ] 
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
@@ -104,11 +206,12 @@ let render (state: State) (dispatch: Msg -> Unit) =
             tw.``flex-row``            
         ]
         prop.children [
-            SideNav.sideNavTemp
+            Menu.menuHtml
             
             Html.div [
                 prop.classes [
-                    tw.``flex-grow-3``
+                    tw.``flex-grow-1``
+                    tw.``max-w-screen-sm``
                 ]
                 prop.children [
                     main
@@ -132,19 +235,26 @@ let render (state: State) (dispatch: Msg -> Unit) =
 
             Html.div [
                 prop.classes [
-                    tw.``flex-grow-2``
+                    tw.``flex-grow-1``
                 ]
                 prop.children [
+                    searchBox
                     trending
+                    Html.a [
+                        prop.children [
+                            Html.span [
+                                prop.text "About Bleeter"
+                            ]
+                        ]
+                    ]
+                    Html.br []
                     Html.button [
                         prop.onClick (fun _ -> dispatch Increment)
                         prop.text "Increment"
                     ]
                 ]
             ]
-        ]
-        //SideNav.render state dispatch
-        
+        ]        
     ]
 
 Program.mkProgram init update render
