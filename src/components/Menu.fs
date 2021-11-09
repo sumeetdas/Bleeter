@@ -78,6 +78,7 @@ let menuHtml =
                 tw.``rounded-full``
                 tw.``leading-5``
                 tw.``h-12``
+                tw.``text-lg``
             ]
             prop.text "Bleet"
         ]
@@ -87,6 +88,7 @@ let menuHtml =
             tw.``flex-grow-2``
             tw.``flex-1``
             tw.``w-max``
+            tw.``mr-4``
         ]
         prop.children [
             Html.div [
@@ -94,7 +96,7 @@ let menuHtml =
                     tw.``float-right``
                 ]
                 prop.style [
-                    style.width 275
+                    style.width 250
                 ]
                 prop.children (List.concat [[bleeterIcon]; navList; [bleetButton]])
             ]
