@@ -30,266 +30,6 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
             }
         {state with Loading = true}, Cmd.fromAsync delayedDispatch
 
-type Profile = {Name: string; ProfilePic: string; Banner: string; Handle: string; Following: int; Followers: int; Location: string; Url: string}
-
-type Bleet = {Name: string; Content: string; ProfilePic: string; Handle: string; Time: string; Rebleets: int; Likes: int; Replies: int}
-
-let bleets = [
-    {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
-    {Name= "Sheeple"; Content= "We the Sheeple!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "Sheeple"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 0}
-]
-
-let bleetElem (bleet:Bleet) = 
-    Html.article [
-        prop.classes [
-            tw.``hover:bg-gray-300``
-            tw.``flex``
-            tw.``flex-row``
-            tw.``p-4``
-            tw.``pb-0``
-        ]
-        prop.children [
-            Html.div [
-                prop.classes [
-                    tw.``flex``
-                    tw.``flex-grow-0``
-                    tw.``w-12``
-                ]
-                prop.children [
-                    Html.img [
-                        prop.classes [
-                            tw.``h-12``
-                            tw.``w-12``
-                            tw.``rounded-full``
-                            tw.``border-2``
-                            tw.``border-gray-100``
-                        ]
-                        prop.src bleet.ProfilePic
-                    ]
-                ]
-            ]
-            Html.div [ 
-                prop.classes [
-                    tw.``flex``
-                    tw.``flex-col``
-                    tw.``flex-grow-1``
-                    tw.``pl-2``
-                ]
-                prop.children [
-                    Html.div [
-                        prop.classes [
-                            tw.``flex``
-                            tw.``flex-row``
-                        ]
-                        prop.children [
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``flex-grow-1``
-                                ]
-                                prop.children [
-                                    Html.span [
-                                        prop.classes [
-                                            tw.``hover:underline``
-                                        ]
-                                        prop.text bleet.Name
-                                    ]
-                                    Html.span [
-                                        prop.text ("@" + bleet.Handle)
-                                    ]
-                                    Html.span [
-                                        prop.classes [
-                                            tw.``p-1``
-                                        ]
-                                        prop.children [
-                                            Menu.icon "bi:dot" "16"
-                                        ]
-                                    ]
-                                ]
-                            ]
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``float-right``
-                                    tw.``w-8``
-                                    tw.``p-1``
-                                ]
-                                prop.children [
-                                    Menu.icon "ant-design:ellipsis-outlined" "16"
-                                ]
-                            ]
-                        ]
-                    ]
-                    Html.div [
-                        prop.classes [ 
-                            tw.``flex``
-                        ]
-                        prop.children [
-                            Html.span [
-                                prop.text bleet.Content
-                            ]
-                        ]
-                    ]
-                    Html.div [ 
-                        prop.classes [
-                            tw.``flex``
-                            tw.``py-4``
-                        ]
-                        prop.children [
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``flex-1``
-                                ]
-                                prop.children [
-                                    Menu.icon "ei:comment" "24"
-                                    Html.text bleet.Replies
-                                ]
-                            ]
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``flex-1``
-                                ]
-                                prop.children [
-                                    Menu.icon "ei:retweet" "24"
-                                    Html.text bleet.Rebleets
-                                ]
-                            ]
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``flex-1``
-                                ]
-                                prop.children [
-                                    Menu.icon "ei:heart" "24"
-                                    Html.text bleet.Likes
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ]
-
-let bleetProfileElem (profile: Profile) = 
-    Html.div [ 
-        Html.img [
-            prop.classes [
-                tw.``w-full``
-                tw.``bg-cover``
-            ]
-            prop.src profile.Banner
-        ]
-        Html.img [
-            prop.classes [
-                tw.``h-24``
-                tw.``w-24``
-                tw.``rounded-full``
-                tw.``border-4``
-                tw.``border-gray-100``
-            ]
-            prop.src profile.ProfilePic
-        ]
-        Html.div [
-            prop.classes [
-                tw.``flex``
-            ]
-            prop.children [
-                Html.span [ 
-                    prop.text profile.Name
-                ]
-            ]
-        ]
-        Html.div [
-            prop.classes [
-                tw.``flex``
-            ]
-            prop.children [
-                Html.span [ 
-                    prop.text ("@" + profile.Handle)
-                ]
-            ]
-        ]
-        Html.div [
-            prop.classes [
-                tw.``flex``
-                tw.``flex-row``
-            ]
-            prop.children [
-                Html.div [
-                    prop.classes [
-                        tw.``flex``
-                        tw.``flex-row``
-                    ]
-                    prop.children [
-                        Menu.icon "akar-icons:location" "12"
-                        Html.span [ 
-                            prop.text profile.Location
-                        ]
-                    ]
-                ]
-                Html.div [
-                    prop.classes [
-                        tw.``flex``
-                        tw.``flex-row``
-                    ]
-                    prop.children [
-                        Menu.icon "il:url" "12"
-                        Html.span [ 
-                            prop.text profile.Url
-                        ]
-                    ]
-                ]
-            ]
-        ]
-        Html.div [
-            prop.classes [
-                tw.``flex``
-                tw.``flex-row``
-            ]
-            prop.children [
-                Html.a [
-                    prop.href "#"
-                    prop.children [
-                        Html.span [
-                            prop.text (string profile.Following)
-                        ]
-                        Html.span [
-                            prop.text "Following"
-                        ]
-                    ]
-                ]
-                Html.a [
-                    prop.href "#"
-                    prop.children [
-                        Html.span [
-                            prop.text (string profile.Following)
-                        ]
-                        Html.span [
-                            prop.text "Followers"
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ]
-
-let main = 
-    Html.div [ 
-        bleetProfileElem ({Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
-        Url = "sumeetdas.me/bleeter"; Location = "Hill"})
-
-        Html.h2 [
-            prop.text "Latest Bleets"
-        ]
-
-        Html.div [
-            prop.children (bleets |> List.map bleetElem)
-        ]
-    ]
-
 let searchBox = 
     Html.div [ 
         prop.classes [
@@ -309,7 +49,7 @@ let searchBox =
                     tw.``mx-3``
                 ]
                 prop.children [
-                    Menu.icon "ant-design:search-outlined" "24"
+                    Bleeter.icon "ant-design:search-outlined" "24"
                 ]
             ]
             Html.input [
@@ -329,7 +69,7 @@ let searchBox =
                     tw.``mx-3``
                 ]
                 prop.children [
-                    Menu.icon "gridicons:cross-circle" "24"
+                    Bleeter.icon "gridicons:cross-circle" "24"
                 ]
             ]
         ]
@@ -394,7 +134,7 @@ let trending =
                         tw.``hover:bg-green-400``
                     ]
                     prop.children [
-                        Menu.icon "ant-design:ellipsis-outlined" "12"
+                        Bleeter.icon "ant-design:ellipsis-outlined" "12"
                     ]
                 ]
             ]
@@ -429,15 +169,10 @@ let trending =
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
-    let content = 
-        if state.Loading then Html.h1 "Loading.."
-        else Html.h1 state.Count
-
     Html.div [
         prop.classes [
             tw.flex
-            tw.``flex-row``    
-            tw.``bg-gray-100``        
+            tw.``flex-row``
         ]
         prop.children [
             Menu.menuHtml
@@ -448,22 +183,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                     tw.``max-w-screen-sm``
                 ]
                 prop.children [
-                    main
-                    content 
-                    Html.button [
-                        prop.onClick (fun _ -> dispatch Increment)
-                        prop.text "Increment"
-                    ]
-
-                    Html.button [
-                        prop.onClick (fun _ -> dispatch Decrement)
-                        prop.text "Decrement"
-                    ]
-
-                    Html.button [
-                        prop.onClick (fun _ -> dispatch IncrementDelayed)
-                        prop.text "IncrementDelayed"
-                    ]
+                    Main.mainElem
                 ]
             ]
 
@@ -482,10 +202,6 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         ]
                     ]
                     Html.br []
-                    Html.button [
-                        prop.onClick (fun _ -> dispatch Increment)
-                        prop.text "Increment"
-                    ]
                 ]
             ]
         ]        
