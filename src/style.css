@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 @layer components {
-    .bg-trending {
+    .bg-bleet-dim {
         --bg-opacity: 1;
         @apply bg-green-100;
     }

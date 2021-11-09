@@ -39,8 +39,8 @@ let nav (iconName:string, text:string, url: string) =
             tw.``leading-5``
             tw.``font-medium``
             tw.``rounded-full``
-            tw.``hover:bg-gray-800``
-            tw.``hover:text-green-300``
+            tw.``hover:bg-gray-300``
+            tw.``hover:text-green-800``
         ]
         prop.href url
         prop.children [
