@@ -72,6 +72,9 @@ let bleetElem (bleet:Bleet) =
                                         prop.text bleet.Name
                                     ]
                                     Html.span [
+                                        prop.classes [
+                                            tw.``ml-1``
+                                        ]
                                         prop.text ("@" + bleet.Handle)
                                     ]
                                     Html.span [
@@ -159,19 +162,71 @@ let bleetProfileElem (profile: Profile) =
             ]
             prop.src profile.Banner
         ]
-        Html.img [
-            prop.classes [
-                tw.``h-24``
-                tw.``w-24``
-                tw.``rounded-full``
-                tw.``border-4``
-                tw.``border-gray-100``
-            ]
-            prop.src profile.ProfilePic
-        ]
         Html.div [
             prop.classes [
                 tw.``flex``
+                tw.``flex-row``
+            ]
+            prop.children [
+                Html.img [
+                    prop.classes [
+                        tw.``h-24``
+                        tw.``w-24``
+                        tw.``rounded-full``
+                        tw.``border-4``
+                        tw.``border-gray-100``
+                        tw.``m-2``
+                        tw.``flex``
+                    ]
+                    prop.src profile.ProfilePic
+                ]
+                Html.div [
+                    prop.classes [
+                        tw.``float-right``
+                        tw.``flex``
+                        tw.``flex-grow-2``
+                        tw.``flex-row-reverse``
+                        tw.``mr-2``
+                    ]
+                    prop.children [
+                        Html.button [
+                            prop.classes [
+                                tw.``rounded-full``
+                                tw.``border``
+                                tw.``h-10``
+                                tw.``w-20``
+                                tw.``mt-3``
+                                tw.``ml-2``
+                                tw.``border-green-500``
+                                tw.``text-green-500``
+                            ]
+                            prop.text "Follow"
+                        ]
+                        Html.div [
+                            prop.classes [
+                                tw.``rounded-full``
+                                tw.``border``
+                                tw.``h-10``
+                                tw.``w-10``
+                                tw.``mt-3``
+                                tw.``p-3``
+                                tw.``pl-3.5``
+                                tw.``border-green-500``
+                                tw.``text-green-500``
+                            ]
+                            prop.children [
+                                Bleeter.icon "ant-design:ellipsis-outlined" "12"
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+        
+        Html.div [
+            prop.classes [
+                tw.``flex``
+                tw.``ml-2``
             ]
             prop.children [
                 Html.span [ 
@@ -182,6 +237,7 @@ let bleetProfileElem (profile: Profile) =
         Html.div [
             prop.classes [
                 tw.``flex``
+                tw.``ml-2``
             ]
             prop.children [
                 Html.span [ 
@@ -236,13 +292,17 @@ let bleetProfileElem (profile: Profile) =
                                 Bleeter.icon "il:url" "12"
                             ]
                         ]
-                        Html.div [
+                        Html.a [
+                            prop.href profile.Url
+                            prop.target "_blank"
                             prop.classes [
                                 tw.``flex-1``
+                                tw.``underline``
+                                tw.``text-green-600``
                             ]
                             prop.children [
                                 Html.span [ 
-                                    prop.text profile.Url
+                                    prop.text (Bleeter.getUrl profile.Url)
                                 ]
                             ]
                         ]
@@ -306,7 +366,7 @@ let mainElem =
         ]
         prop.children [
             bleetProfileElem ({Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
-            Url = "sumeetdas.me/bleeter"; Location = "Hill"})
+            Url = "https://sumeetdas.me/bleeter"; Location = "Hill"})
 
             Html.div [
                 prop.classes [

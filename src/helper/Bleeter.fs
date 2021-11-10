@@ -3,6 +3,9 @@ module Bleeter
 
 open Feliz
 
+module String = 
+    let replace (oldStr:string) (newStr:string) (message:string) = message.Replace(oldStr, newStr)
+
 let icon (name:string) (size:string) =
     Html.span [
         prop.className "iconify-inline" 
@@ -12,3 +15,5 @@ let icon (name:string) (size:string) =
     ]
 
 let bigIcon (name:string) = icon name "48"
+
+let getUrl (url:string) = url |> String.replace "https" "" |> String.replace "//" "" |> String.replace ":" ""

@@ -51,9 +51,20 @@ let menuHtml =
         ("ant-design:home-outlined", "Home", "#/home")
         ("bx:bx-user-circle", "Profile", "#/profile")
         ("codicon:github", "Github", "https://www.github.com/sumeetdas")
+        ("akar-icons:info", "Bleeter", "#/bleeter-info")
     ] 
     let navList = navList |> List.map nav
-    let bleeterIcon = (Bleeter.bigIcon "mdi:sheep")
+    let bleeterIcon = 
+        Html.div [
+            prop.classes [
+                tw.``py-2``
+                tw.``px-2``
+                tw.``mt-1``
+            ]
+            prop.children [
+                Bleeter.bigIcon "mdi:sheep"
+            ]
+        ]
     let bleetButton = 
         Html.button [
             prop.classes [

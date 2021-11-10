@@ -194,14 +194,6 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 prop.children [
                     searchBox
                     trending
-                    Html.a [
-                        prop.children [
-                            Html.span [
-                                prop.text "About Bleeter"
-                            ]
-                        ]
-                    ]
-                    Html.br []
                 ]
             ]
         ]        
