@@ -3,6 +3,7 @@ module Main
 
 open Elmish
 open Feliz
+open Feliz.Router
 open Tailwind
 
 type Profile = {Name: string; ProfilePic: string; Banner: string; Handle: string; Following: int; Followers: int; Location: string; Url: string}
@@ -391,3 +392,21 @@ let mainElem =
             ]
         ]
     ]
+
+type State = { CurrentUrl: string list }
+
+type Msg = | UrlChanged of string list
+
+let init() = { CurrentUrl = Router.currentUrl() }
+
+let update (msg:Msg) (state:State) : State =
+    match msg with
+    | UrlChanged url -> { CurrentUrl = url }
+
+let render (state:State) = 
+    printf "%A" state.CurrentUrl
+
+    match state.CurrentUrl with 
+    | [ "home" ] -> Html.h1 "Hello home!!!!"
+    | _ -> mainElem
+    

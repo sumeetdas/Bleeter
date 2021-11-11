@@ -12,3 +12,9 @@ let fromAsync (operation: Async<'msg>) : Cmd<'msg> =
         Async.StartImmediate delayedDispatch
 
     Cmd.ofSub delayedCmd
+
+/// When emitting the message, map to another type
+let dupMap (f: 'a -> 'msg) (cmd: Cmd<'a>) : Cmd<'msg> =
+    let innerFn = fun d -> f >> d
+    let outerFn = fun g -> innerFn >> g
+    cmd |> List.map outerFn

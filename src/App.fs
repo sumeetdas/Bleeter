@@ -3,32 +3,27 @@ module App
 open Elmish
 open Elmish.React
 open Feliz
+open Feliz.Router
 open Tailwind
 
 // data model
 type State =
-    { Count: int; Loading: bool }
+    { CurrentUrl: string list; Main: Main.State }
 
 // events
 type Msg = 
-    | Increment
-    | Decrement
-    | IncrementDelayed
+    | UrlChanged of string list
+    | MainMsg of Main.Msg
 
 // need parentheses for indicating that init is a function
-let init() = { Count = 0; Loading = false }, Cmd.none
+let init() = { CurrentUrl = Router.currentUrl(); Main = Main.init() }, Cmd.none
 
 let update (msg: Msg) (state: State): State * Cmd<Msg> =
     match msg with 
-    | Increment -> {state with Loading = false; Count = state.Count + 1}, Cmd.none
-    | Decrement -> {state with Count = state.Count - 1}, Cmd.none
-    | IncrementDelayed when state.Loading -> state, Cmd.none
-    | IncrementDelayed -> 
-        let delayedDispatch = async {
-                do! Async.Sleep 1000
-                return Increment
-            }
-        {state with Loading = true}, Cmd.fromAsync delayedDispatch
+    | UrlChanged url ->
+        let main = Main.update (Main.Msg.UrlChanged url) state.Main
+        {CurrentUrl = url; Main = main}, Cmd.none
+    | _ -> state, Cmd.none
 
 let searchBox = 
     Html.div [ 
@@ -169,34 +164,40 @@ let trending =
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-row``
-        ]
-        prop.children [
-            Menu.menuHtml
-            
-            Html.div [
-                prop.classes [
-                    tw.``flex-grow-1``
-                    tw.``max-w-screen-sm``
-                ]
-                prop.children [
-                    Main.mainElem
-                ]
+    let page =
+        Html.div [
+            prop.classes [
+                tw.flex
+                tw.``flex-row``
             ]
+            prop.children [
+                Menu.menuHtml
+                
+                Html.div [
+                    prop.classes [
+                        tw.``flex-grow-1``
+                        tw.``max-w-screen-sm``
+                    ]
+                    prop.children [
+                        (Main.render state.Main)
+                    ]
+                ]
 
-            Html.div [
-                prop.classes [
-                    tw.``flex-grow-1``
+                Html.div [
+                    prop.classes [
+                        tw.``flex-grow-1``
+                    ]
+                    prop.children [
+                        searchBox
+                        trending
+                    ]
                 ]
-                prop.children [
-                    searchBox
-                    trending
-                ]
-            ]
-        ]        
+            ]        
+        ]
+
+    React.router [
+        router.onUrlChanged (UrlChanged >> dispatch)
+        router.children page
     ]
 
 Program.mkProgram init update render

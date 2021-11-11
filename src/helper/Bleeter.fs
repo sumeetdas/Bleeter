@@ -3,9 +3,6 @@ module Bleeter
 
 open Feliz
 
-module String = 
-    let replace (oldStr:string) (newStr:string) (message:string) = message.Replace(oldStr, newStr)
-
 let icon (name:string) (size:string) =
     Html.span [
         prop.className "iconify-inline" 

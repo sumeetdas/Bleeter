@@ -32,6 +32,10 @@ let nav (iconName:string, text:string, url: string) =
             tw.``hover:bg-gray-300``
             tw.``hover:text-green-800``
         ]
+        prop.target (
+            if (url |> String.contains "http") then "_blank" 
+            else ""
+        )
         prop.href url
         prop.children [
             Html.div [
