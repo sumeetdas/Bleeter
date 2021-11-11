@@ -19,13 +19,13 @@ let init() = initState(), Cmd.none
 let update (msg:Msg) (state:State) : State * Cmd<Msg> =
     state, Cmd.none
 
-let render (state:State) (dispatch: Msg -> Unit) = 
+let render = 
     Html.div [
         prop.classes [ 
             tw.``ml-3``
         ]
         prop.children [
-            Html.text "Hello Home!"
+            Html.text "Hello Home!!!!!!!!!!!!"
         ]
         
     ]
