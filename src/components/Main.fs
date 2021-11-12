@@ -1,11 +1,9 @@
 [<RequireQualifiedAccess>]
 module Main
 
-open Elmish
 open Feliz
 open Feliz.Router
 open Tailwind
-open Browser
 
 type State = { CurrentUrl: string list; Height: int }
 

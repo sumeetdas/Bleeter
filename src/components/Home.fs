@@ -1,9 +1,7 @@
 [<RequireQualifiedAccess>]
 module Home
 
-open Cmd
 open Elmish
-open Elmish.React
 open Feliz
 open Tailwind
 

@@ -6,7 +6,6 @@ open Feliz
 open Feliz.Router
 open Tailwind
 open Browser
-open System
 
 // data model
 type State =

@@ -1,9 +1,7 @@
 [<RequireQualifiedAccess>]
 module Profile
 
-open Elmish
 open Feliz
-open Feliz.Router
 open Tailwind
 
 type Profile = {Name: string; ProfilePic: string; Banner: string; Handle: string; Following: int; Followers: int; Location: string; Url: string}
