@@ -25,7 +25,7 @@ let render =
             tw.``ml-3``
         ]
         prop.children [
-            Html.text "Hello Home!!!!!!!!!!!!"
+            for i in [1..1000] do
+                Html.text "Hello Home!!!!!!!!!!!!"
         ]
-        
     ]

@@ -5,6 +5,8 @@ open Elmish.React
 open Feliz
 open Feliz.Router
 open Tailwind
+open Browser
+open System
 
 // data model
 type State =
@@ -22,8 +24,10 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
     match msg with 
     | UrlChanged url ->
         let main = Main.update (Main.Msg.UrlChanged url) state.Main
-        {CurrentUrl = url; Main = main}, Cmd.none
-    | _ -> state, Cmd.none
+        {state with CurrentUrl = url; Main = main}, Cmd.none
+    | MainMsg msg' -> 
+        let main = Main.update msg' state.Main
+        {state with Main = main}, Cmd.none
 
 let searchBox = 
     Html.div [ 
@@ -169,19 +173,13 @@ let render (state: State) (dispatch: Msg -> Unit) =
             prop.classes [
                 tw.flex
                 tw.``flex-row``
+                tw.``min-h-full``
+                tw.``h-full``
             ]
             prop.children [
                 Menu.menuHtml
                 
-                Html.div [
-                    prop.classes [
-                        tw.``flex-grow-1``
-                        tw.``max-w-screen-sm``
-                    ]
-                    prop.children [
-                        (Main.render state.Main)
-                    ]
-                ]
+                (Main.render state.Main)
 
                 Html.div [
                     prop.classes [
@@ -200,6 +198,17 @@ let render (state: State) (dispatch: Msg -> Unit) =
         router.children page
     ]
 
+let appHeight initial =
+    let sub dispatch = window.addEventListener("load", 
+        fun _ -> 
+            let scrollHeight = (document.getElementById "elmish-app").scrollHeight |> int
+            let windowHeight = window.innerHeight |> int
+            let finalHeight = if scrollHeight > windowHeight then scrollHeight else windowHeight
+            (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
+    )
+    Cmd.ofSub sub
+
 Program.mkProgram init update render
 |> Program.withReactSynchronous "elmish-app"
+|> Program.withSubscription appHeight
 |> Program.run

@@ -361,34 +361,31 @@ let bleetProfileElem (profile: Profile) =
 
 let page = 
     Html.div [ 
-        prop.classes [
-            tw.``border-l``
-            tw.``border-r``
-        ]
-        prop.children [
-            bleetProfileElem ({Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
-            Url = "https://sumeetdas.me/bleeter"; Location = "Hill"})
+        bleetProfileElem ({Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
+        Url = "https://sumeetdas.me/bleeter"; Location = "Hill"})
 
-            Html.div [
-                prop.classes [
-                    tw.``text-2xl``
-                    tw.``h-12``
-                    tw.``border-b``
-                    tw.``border-gray-300``
-                    tw.``text-green-600``
-                ]
-                prop.children [
-                    Html.span [
-                        prop.classes [
-                            tw.``m-6``
-                        ]
-                        prop.text "Latest Bleets"
+        Html.div [
+            prop.classes [
+                tw.``text-2xl``
+                tw.``h-12``
+                tw.``border-b``
+                tw.``border-gray-300``
+                tw.``text-green-600``
+            ]
+            prop.children [
+                Html.span [
+                    prop.classes [
+                        tw.``m-6``
                     ]
+                    prop.text "Latest Bleets"
                 ]
             ]
+        ]
 
-            Html.div [
-                prop.children (bleets |> List.map bleetElem)
-            ]
+        // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
+        let bleetList = bleets |> (List.map bleetElem)
+
+        Html.div [
+            prop.children bleetList
         ]
     ]
