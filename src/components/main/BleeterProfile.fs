@@ -1,17 +1,20 @@
 [<RequireQualifiedAccess>]
-module Profile
+module BleeterProfile
 
 open Feliz
 open Tailwind
 
-type Profile = {Name: string; ProfilePic: string; Banner: string; Handle: string; Following: int; Followers: int; Location: string; Url: string}
+type State = {Bleets: Bleet list; Profile: Profile}
 
-type Bleet = {Name: string; Content: string; ProfilePic: string; Handle: string; Time: string; Rebleets: int; Likes: int; Replies: int}
+let init() = 
+    let bleets: Bleet list = [
+        {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
+        {Name= "Sheeple"; Content= "We the Sheeple!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "Sheeple"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 1}
+    ]
+    let profile: Profile = {Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
+            Url = "https://sumeetdas.me/bleeter"; Location = "Hill"}
 
-let bleets = [
-    {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
-    {Name= "Sheeple"; Content= "We the Sheeple!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "Sheeple"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 1}
-]
+    {Bleets = bleets; Profile = profile}
 
 let bleetElem (bleet:Bleet) = 
     Html.article [
@@ -91,7 +94,13 @@ let bleetElem (bleet:Bleet) =
                                     tw.``flex``
                                     tw.``float-right``
                                     tw.``w-8``
+                                    tw.``h-8``
+                                    tw.``rounded-full``
                                     tw.``p-1``
+                                    tw.``pl-2``
+                                    tw.``pt-2``
+                                    tw.``cursor-pointer``
+                                    tw.``hover:bg-green-400``
                                 ]
                                 prop.children [
                                     Bleeter.icon "ant-design:ellipsis-outlined" "16"
@@ -212,6 +221,9 @@ let bleetProfileElem (profile: Profile) =
                                 tw.``pl-3.5``
                                 tw.``border-green-500``
                                 tw.``text-green-500``
+                                tw.``cursor-pointer``
+                                tw.``hover:bg-green-400``
+                                tw.``hover:text-gray-800``
                             ]
                             prop.children [
                                 Bleeter.icon "ant-design:ellipsis-outlined" "12"
@@ -357,10 +369,9 @@ let bleetProfileElem (profile: Profile) =
         ]
     ]
 
-let page = 
+let render (state:State) =
     Html.div [ 
-        bleetProfileElem ({Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
-        Url = "https://sumeetdas.me/bleeter"; Location = "Hill"})
+        bleetProfileElem state.Profile
 
         Html.div [
             prop.classes [
@@ -381,7 +392,7 @@ let page =
         ]
 
         // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
-        let bleetList = bleets |> (List.map bleetElem)
+        let bleetList = state.Bleets |> (List.map bleetElem)
 
         Html.div [
             prop.children bleetList

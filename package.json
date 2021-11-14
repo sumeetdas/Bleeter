@@ -4,6 +4,7 @@
     "postinstall": "dotnet tool restore",
     "start": "dotnet fable watch App.fsproj --run webpack-dev-server",
     "build": "npm run css && dotnet fable App.fsproj && webpack",
+    "fsbuild": "dotnet fable App.fsproj && webpack",
     "css": "tailwindcss build -i src/style.css -o public/style.css"
   },
   "devDependencies": {

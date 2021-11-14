@@ -9,24 +9,32 @@ open Browser
 
 // data model
 type State =
-    { CurrentUrl: string list; Main: Main.State }
+    { CurrentUrl: string list; Main: Main.State; CreateBleet: CreateBleet.State; Profile: Profile }
 
 // events
 type Msg = 
     | UrlChanged of string list
     | MainMsg of Main.Msg
+    | CreateBleetMsg of CreateBleet.Msg
 
 // need parentheses for indicating that init is a function
-let init() = { CurrentUrl = Router.currentUrl(); Main = Main.init() }, Cmd.none
+let init() = { CurrentUrl = Router.currentUrl(); Main = Main.init(); CreateBleet = CreateBleet.init(); Profile = Profile.init() }, Cmd.none
 
 let update (msg: Msg) (state: State): State * Cmd<Msg> =
     match msg with 
     | UrlChanged url ->
-        let main = Main.update (Main.Msg.UrlChanged url) state.Main
-        {state with CurrentUrl = url; Main = main}, Cmd.none
+        if (url |> List.contains "create") then
+            let create = CreateBleet.update (CreateBleet.Msg.DisplayWeb state.Profile) state.CreateBleet
+            {state with CreateBleet = create}, Cmd.none
+        else 
+            let main = Main.update (Main.Msg.UrlChanged url) state.Main
+            {state with CurrentUrl = url; Main = main}, Cmd.none
     | MainMsg msg' -> 
         let main = Main.update msg' state.Main
         {state with Main = main}, Cmd.none
+    | CreateBleetMsg msg' -> 
+        let createBleet = CreateBleet.update msg' state.CreateBleet
+        {state with CreateBleet = createBleet}, Cmd.none
 
 let searchBox = 
     Html.div [ 
@@ -189,6 +197,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         trending
                     ]
                 ]
+                (CreateBleet.render state.CreateBleet)
             ]        
         ]
 
@@ -198,14 +207,16 @@ let render (state: State) (dispatch: Msg -> Unit) =
     ]
 
 let appHeight initial =
-    let sub dispatch = window.addEventListener("load", 
-        fun _ -> 
-            let scrollHeight = (document.getElementById "elmish-app").scrollHeight |> int
-            let windowHeight = window.innerHeight |> int
-            let finalHeight = if scrollHeight > windowHeight then scrollHeight else windowHeight
-            (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
+    let sub dispatch = window.addEventListener("load", fun _ -> 
+        let scrollHeight = (document.getElementById "elmish-app").scrollHeight |> int
+        let windowHeight = window.innerHeight |> int
+        let finalHeight = if scrollHeight > windowHeight then scrollHeight else windowHeight
+        (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
     )
-    Cmd.ofSub sub
+    Cmd.batch [
+        Cmd.ofSub sub
+        Cmd.map CreateBleetMsg (CreateBleet.createBleetSub initial.CreateBleet)
+    ]
 
 Program.mkProgram init update render
 |> Program.withReactSynchronous "elmish-app"

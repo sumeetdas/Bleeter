@@ -70,22 +70,27 @@ let menuHtml =
             ]
         ]
     let bleetButton = 
-        Html.button [
-            prop.classes [
-                tw.``bg-green-400`` 
-                tw.``hover:bg-green-500``
-                tw.``w-full``
-                tw.``mt-5``
-                tw.``text-white``
-                tw.``font-bold``
-                tw.``py-2``
-                tw.``px-4``
-                tw.``rounded-full``
-                tw.``leading-5``
-                tw.``h-12``
-                tw.``text-lg``
-            ]
-            prop.text "Bleet"
+        Html.a [
+            prop.href "#/create/bleet"
+            prop.children [
+                Html.button [
+                    prop.classes [
+                        tw.``bg-green-400`` 
+                        tw.``hover:bg-green-500``
+                        tw.``w-full``
+                        tw.``mt-5``
+                        tw.``text-white``
+                        tw.``font-bold``
+                        tw.``py-2``
+                        tw.``px-4``
+                        tw.``rounded-full``
+                        tw.``leading-5``
+                        tw.``h-12``
+                        tw.``text-lg``
+                    ]
+                    prop.text "Bleet"
+                ]
+            ]    
         ]
 
     Html.div [

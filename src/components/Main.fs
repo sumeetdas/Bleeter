@@ -5,16 +5,13 @@ open Feliz
 open Feliz.Router
 open Tailwind
 
-type State = { CurrentUrl: string list; Height: int }
+type State = { CurrentUrl: string list; Height: int; BleeterProfile: BleeterProfile.State }
 
 type Msg = 
     | UrlChanged of string list
     | AppHeight of int
 
-// let init() = { CurrentUrl = Router.currentUrl(); Height = window.innerHeight |> int }
-let init() = { CurrentUrl = Router.currentUrl(); Height = 0 }
-// let height = document.readyState (document.getElementById "elmish-app").scrollHeight |> int
-    
+let init() = { CurrentUrl = Router.currentUrl(); Height = 0; BleeterProfile = BleeterProfile.init() }
 
 let update (msg:Msg) (state:State) : State =
     match msg with
@@ -31,6 +28,7 @@ let render (state:State) =
             tw.``border-l``
             tw.``border-r``
             tw.``h-full``
+            tw.``w-full``
         ]
         prop.style [
             style.height state.Height
@@ -38,9 +36,9 @@ let render (state:State) =
         prop.children [
             match state.CurrentUrl with 
             | [ "home" ] -> Home.render
-            | [ "profile" ] -> Profile.page
+            | [ "profile" ] -> BleeterProfile.render state.BleeterProfile
             | [ "bleeter-info" ] -> BleeterInfo.page
-            | _ -> Profile.page
+            | _ -> BleeterProfile.render state.BleeterProfile
         ]
     ]
     
