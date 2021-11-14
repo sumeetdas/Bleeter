@@ -39,7 +39,6 @@ let mainElem (profile:Profile option) (dispatch: Msg -> unit) =
             Likes = 0
             Replies = 0
         }
-        printf "profile %A" profile
         dispatch (AddBleet bleet)
     
     Html.div [

@@ -13,6 +13,7 @@ let init() =
     let bleets: Bleet list = [
         {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
         {Name= "Sheeple"; Content= "We the Sheeple!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "Sheeple"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 1}
+        {Name= "John Xina"; Content= "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"; ProfilePic= "/john_xina.png"; Handle = "JohnXina"; Time = ""; Rebleets = 1230; Likes = 40000; Replies = 1}
     ]
     let profile: Profile = {Name = "Bleeter"; ProfilePic = "/bleeter_profile_pic.png"; Banner = "/bleeter_banner.jpg"; Handle = "bleeter"; Following = 30; Followers = 24;
             Url = "https://sumeetdas.me/bleeter"; Location = "Hill"}

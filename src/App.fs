@@ -33,7 +33,6 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
         let main = Main.update msg' state.Main
         {state with Main = main}, Cmd.none
     | CreateBleetMsg msg' -> 
-        printf "profile11 %A" state.Main.BleeterProfile.Profile
         let createBleet = CreateBleet.update msg' state.CreateBleet
         match createBleet.Bleet with
         | None -> state, Cmd.none
