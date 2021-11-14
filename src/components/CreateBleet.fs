@@ -1,10 +1,10 @@
 [<RequireQualifiedAccess>]
 module CreateBleet
 
-open Elmish
 open Feliz
 open Tailwind
 open Browser
+open Browser.Types
 
 type State = { display: bool; isModal: bool; Profile: Profile option; Bleet: Bleet option}
 
@@ -21,28 +21,28 @@ let update (msg:Msg) (state:State) : State =
     | DisplayWeb profile -> {state with display = true; isModal = false; Profile = Some profile}
     | DisplayModal profile -> {state with display = true; isModal = true; Profile = Some profile}
     | Close -> {display = false; isModal = false; Profile = None; Bleet = None}
-    | AddBleet bleet -> {state with Bleet = Some bleet}
+    | AddBleet bleet -> 
+        let bleet = if state.Profile.IsNone then None else Some bleet
+        {state with Bleet = bleet; Profile = None}
 
-let createBleetSub model =
-    let bleetText = (document.getElementById "create-bleet").innerText
-    let profile = model.Profile |> Option.defaultWith (fun () -> Profile.init())
-    let bleet = {
-        Name = profile.Name
-        Content = bleetText
-        ProfilePic = profile.Url
-        Handle = profile.Handle
-        Time = ""
-        Rebleets = 0
-        Likes = 0
-        Replies = 0
-    }
-    let sub dispatch = window.addEventListener("onClick", fun _ -> dispatch (AddBleet bleet))
-    Cmd.ofSub sub
-
-let mainElem (profile:Profile option) = 
-    match profile with
-    | None -> Html.div []
-    | Some profile -> Html.div [
+let mainElem (profile:Profile option) (dispatch: Msg -> unit) =
+    let bleetBtnClick = fun _ -> 
+        let bleetText = ((document.getElementById "create-bleet-text") :?> HTMLTextAreaElement).value
+        let profile = profile |> Option.defaultWith (fun () -> Profile.init())
+        let bleet = {
+            Name = profile.Name
+            Content = bleetText
+            ProfilePic = profile.ProfilePic
+            Handle = profile.Handle
+            Time = ""
+            Rebleets = 0
+            Likes = 0
+            Replies = 0
+        }
+        printf "profile %A" profile
+        dispatch (AddBleet bleet)
+    
+    Html.div [
         prop.classes [
             tw.``flex``
         ]
@@ -56,31 +56,33 @@ let mainElem (profile:Profile option) =
                         prop.classes [
                             
                         ]
-                        prop.href profile.Url
+                        prop.href (profile |> Option.fold (fun _ p -> p.Url) "")
                     ]
                 ]
             ]
             Html.div [
                 Html.textarea [
-                    prop.id "create-bleet"
+                    prop.id "create-bleet-text"
                     prop.classes []
                     prop.placeholder "Mehehe?"
                 ]
                 Html.button [
+                    prop.id "create-bleet-button"
                     prop.classes []
+                    prop.onClick bleetBtnClick
                     prop.text "Bleet"
                 ]
             ]
         ]
     ]
 
-let render (state:State) = 
+let render (state:State) (dispatch: Msg -> unit) = 
     Html.div [
         prop.classes [
             tw.``ml-3``
         ]
         prop.children [
             Html.h1 "Bleeter Info!!!!"    
-            (mainElem state.Profile)
+            (mainElem state.Profile dispatch)
         ]
     ]

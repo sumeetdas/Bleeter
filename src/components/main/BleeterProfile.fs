@@ -6,6 +6,9 @@ open Tailwind
 
 type State = {Bleets: Bleet list; Profile: Profile}
 
+type Msg =
+    | AddBleet of Bleet
+
 let init() = 
     let bleets: Bleet list = [
         {Name= "Bleeter Boi"; Content= "Hello Bleeter!"; ProfilePic= "/bleeter_profile_pic.png"; Handle = "BleeterBoi"; Time = ""; Rebleets = 123; Likes = 3000; Replies = 0}
@@ -15,6 +18,12 @@ let init() =
             Url = "https://sumeetdas.me/bleeter"; Location = "Hill"}
 
     {Bleets = bleets; Profile = profile}
+
+let update (msg:Msg) (state:State) : State =
+    match msg with 
+    | AddBleet bleet -> 
+        let bleets = bleet :: state.Bleets
+        {state with Bleets = bleets}
 
 let bleetElem (bleet:Bleet) = 
     Html.article [
@@ -198,6 +207,7 @@ let bleetProfileElem (profile: Profile) =
                     ]
                     prop.children [
                         Html.button [
+                            prop.id "bleeter-follow"
                             prop.classes [
                                 tw.``rounded-full``
                                 tw.``border``

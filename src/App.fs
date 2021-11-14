@@ -9,7 +9,7 @@ open Browser
 
 // data model
 type State =
-    { CurrentUrl: string list; Main: Main.State; CreateBleet: CreateBleet.State; Profile: Profile }
+    { CurrentUrl: string list; Main: Main.State; CreateBleet: CreateBleet.State }
 
 // events
 type Msg = 
@@ -18,13 +18,13 @@ type Msg =
     | CreateBleetMsg of CreateBleet.Msg
 
 // need parentheses for indicating that init is a function
-let init() = { CurrentUrl = Router.currentUrl(); Main = Main.init(); CreateBleet = CreateBleet.init(); Profile = Profile.init() }, Cmd.none
+let init() = { CurrentUrl = Router.currentUrl(); Main = Main.init(); CreateBleet = CreateBleet.init()}, Cmd.none
 
 let update (msg: Msg) (state: State): State * Cmd<Msg> =
     match msg with 
     | UrlChanged url ->
         if (url |> List.contains "create") then
-            let create = CreateBleet.update (CreateBleet.Msg.DisplayWeb state.Profile) state.CreateBleet
+            let create = CreateBleet.update (CreateBleet.Msg.DisplayModal state.Main.BleeterProfile.Profile) state.CreateBleet
             {state with CreateBleet = create}, Cmd.none
         else 
             let main = Main.update (Main.Msg.UrlChanged url) state.Main
@@ -33,8 +33,14 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
         let main = Main.update msg' state.Main
         {state with Main = main}, Cmd.none
     | CreateBleetMsg msg' -> 
+        printf "profile11 %A" state.Main.BleeterProfile.Profile
         let createBleet = CreateBleet.update msg' state.CreateBleet
-        {state with CreateBleet = createBleet}, Cmd.none
+        match createBleet.Bleet with
+        | None -> state, Cmd.none
+        | Some bleet -> 
+            let main = Main.update (Main.Msg.AddBleet bleet) state.Main
+            let createBleet = CreateBleet.init()
+            {state with Main = main; CreateBleet = createBleet}, Cmd.none
 
 let searchBox = 
     Html.div [ 
@@ -144,7 +150,6 @@ let trending =
                     ]
                 ]
             ]
-            
         ]
 
     Html.div [ 
@@ -197,7 +202,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         trending
                     ]
                 ]
-                (CreateBleet.render state.CreateBleet)
+                (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
             ]        
         ]
 
@@ -213,12 +218,14 @@ let appHeight initial =
         let finalHeight = if scrollHeight > windowHeight then scrollHeight else windowHeight
         (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
     )
+    Cmd.ofSub sub
+
+let subscribers initial = 
     Cmd.batch [
-        Cmd.ofSub sub
-        Cmd.map CreateBleetMsg (CreateBleet.createBleetSub initial.CreateBleet)
+        appHeight initial
     ]
 
 Program.mkProgram init update render
 |> Program.withReactSynchronous "elmish-app"
-|> Program.withSubscription appHeight
+|> Program.withSubscription subscribers
 |> Program.run
