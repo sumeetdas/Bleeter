@@ -1,3 +1,4 @@
+```f#
 // to print to console, use `printfn` function
 printfn "Hello console!"
 
@@ -57,3 +58,4 @@ let render (state: State) (dispatch: Msg -> Unit) =
 Program.mkSimple init update render
 |> Program.withReactSynchronous "elmish-app"
 |> Program.run
+```
