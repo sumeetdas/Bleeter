@@ -6,6 +6,8 @@ open Feliz
 open Feliz.Router
 open Tailwind
 open Browser
+// for `?` operator
+open Fable.Core.JsInterop
 
 // data model
 type State =
@@ -33,9 +35,10 @@ let update (msg: Msg) (state: State): State * Cmd<Msg> =
         let main = Main.update msg' state.Main
         {state with Main = main}, Cmd.none
     | CreateBleetMsg msg' -> 
+        Router.navigate(state.CurrentUrl |> List.toArray)
         let createBleet = CreateBleet.update msg' state.CreateBleet
         match createBleet.Bleet with
-        | None -> state, Cmd.none
+        | None -> {state with CreateBleet = createBleet}, Cmd.none
         | Some bleet -> 
             let main = Main.update (Main.Msg.AddBleet bleet) state.Main
             let createBleet = CreateBleet.init()
@@ -210,7 +213,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
         router.children page
     ]
 
-let appHeight initial =
+let appOnLoadHeight initial =
     let sub dispatch = window.addEventListener("load", fun _ -> 
         let scrollHeight = (document.getElementById "elmish-app").scrollHeight |> int
         let windowHeight = window.innerHeight |> int
@@ -219,9 +222,30 @@ let appHeight initial =
     )
     Cmd.ofSub sub
 
+let appOnResizeHeight initial =
+    let sub dispatch = window.addEventListener("resize", fun _ -> 
+        let scrollHeight = (document.getElementById "elmish-app").scrollHeight |> int
+        let windowHeight = window.innerHeight |> int
+        let finalHeight = if scrollHeight > windowHeight then scrollHeight else windowHeight
+        (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
+    )
+    Cmd.ofSub sub
+
+// Subscriptions for DOM events doesn't work.
+// GitHub Issue: https://github.com/elmish/elmish/issues/229
+// let followClick initial =
+//     let sub dispatch = window.addEventListener("load", fun _ -> 
+//         let followButton = document.getElementById "bleeter-follow"
+//         followButton.addEventListener("onClick", fun _ -> 
+//             printf "yolo"
+//         )
+//     )
+//     Cmd.ofSub sub
+
 let subscribers initial = 
     Cmd.batch [
-        appHeight initial
+        appOnLoadHeight initial
+        appOnResizeHeight initial
     ]
 
 Program.mkProgram init update render
