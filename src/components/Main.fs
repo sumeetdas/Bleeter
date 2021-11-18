@@ -25,10 +25,13 @@ let update (msg: Msg) (state: State) : State =
     | UrlChanged url -> { state with CurrentUrl = url }
     | AppHeight height -> { state with Height = height }
     | BleeterProfileMsg msg' ->
-        let bleeterProfile = BleeterProfile.update msg' state.BleeterProfile
-        {state with BleeterProfile = bleeterProfile}
+        let bleeterProfile =
+            BleeterProfile.update msg' state.BleeterProfile
 
-let render (state: State) (dispatch:Msg->unit) =
+        { state with
+              BleeterProfile = bleeterProfile }
+
+let render (state: State) (dispatch: Msg -> unit) =
     Html.div [ prop.classes [ tw.flex
                               tw.``flex-grow-1``
                               tw.``max-w-screen-sm``
@@ -39,6 +42,7 @@ let render (state: State) (dispatch:Msg->unit) =
                prop.style [ style.height state.Height ]
                prop.children [ match state.CurrentUrl with
                                | [ "home" ] -> Home.render
-                               | [ "profile" ] -> BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch)
+                               | [ "profile" ] ->
+                                   BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch)
                                | [ "bleeter-info" ] -> BleeterInfo.page
                                | _ -> BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch) ] ]

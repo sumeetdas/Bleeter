@@ -57,7 +57,11 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
             let main =
-                Main.update ((BleeterProfile.Msg.AddBleet >> Main.Msg.BleeterProfileMsg) bleet) state.Main
+                Main.update
+                    ((BleeterProfile.Msg.AddBleet
+                      >> Main.Msg.BleeterProfileMsg)
+                        bleet)
+                    state.Main
 
             let createBleet = CreateBleet.init ()
 

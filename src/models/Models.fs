@@ -2,7 +2,7 @@
 [<AutoOpen>]
 module Models
 
-type Coordinates = {X: float; Y: float}
+type Coordinates = { X: float; Y: float }
 
 type Profile =
     { Name: string
