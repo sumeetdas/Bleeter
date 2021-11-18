@@ -3,12 +3,22 @@ module BleeterProfile
 
 open Feliz
 open Tailwind
+open Browser
+// for `?` operator
+open Fable.Core.JsInterop
+
+type ProfileOption = { IsProfileOptionOpen: bool; Coordinates: Coordinates  }
 
 type State =
     { Bleets: Bleet list
-      Profile: Profile }
+      Profile: Profile
+      ProfileOption: ProfileOption }
 
-type Msg = AddBleet of Bleet
+type Msg = 
+    | AddBleet of Bleet
+    | Follow
+    | CloseProfileOptions
+    | OpenProfileOptions of Coordinates
 
 let init () =
     let bleets: Bleet list =
@@ -45,15 +55,27 @@ let init () =
           Following = 30
           Followers = 24
           Url = "https://sumeetdas.me/bleeter"
-          Location = "Hill" }
+          Location = "Hill"
+          IsFollow = Some false }
 
-    { Bleets = bleets; Profile = profile }
+    let profileOption = {IsProfileOptionOpen = false; Coordinates = {X = 0 |> float; Y = 0 |> float}}
+    { Bleets = bleets; Profile = profile; ProfileOption = profileOption }
 
 let update (msg: Msg) (state: State) : State =
     match msg with
     | AddBleet bleet ->
         let bleets = bleet :: state.Bleets
         { state with Bleets = bleets }
+    | Follow -> 
+        match state.Profile.IsFollow with
+        | None -> state
+        | Some isFollow -> 
+            let profile = {state.Profile with IsFollow = Some (not isFollow)} 
+            {state with Profile = profile}
+    | CloseProfileOptions -> {state with ProfileOption = {state.ProfileOption with IsProfileOptionOpen = false}}
+    | OpenProfileOptions coordinates -> 
+        printf "%A" coordinates
+        {state with ProfileOption = {IsProfileOptionOpen = true; Coordinates = coordinates}}
 
 let bleetElem (bleet: Bleet) =
     Html.article [ prop.classes [ tw.``hover:bg-gray-300``
@@ -131,7 +153,94 @@ let bleetElem (bleet: Bleet) =
                                                                                                                     Html.text
                                                                                                                         bleet.Likes ] ] ] ] ] ] ] ]
 
-let bleetProfileElem (profile: Profile) =
+let bleetProfileElem (state: State) (dispatch:Msg->unit) =
+    let profile = state.Profile
+    let followBtn = 
+        let noShowBtnClasses = [ tw.``hidden``]
+        let yesFollowClasses = [ tw.``w-36`` ]
+        let noFollowClasses = [ tw.``w-20`` ]
+        let classes = [[
+            tw.``rounded-full``
+            tw.border
+            tw.``h-10``
+            tw.``mt-3``
+            tw.``ml-2``
+            tw.``border-green-500``
+            tw.``text-green-500``
+        ] ; (match profile.IsFollow with
+            | None -> noShowBtnClasses
+            | Some isFollow -> if isFollow then yesFollowClasses else noFollowClasses)] |> List.concat
+        Html.button [ 
+            prop.id "bleeter-follow"
+            prop.classes classes
+            prop.onClick (fun _ -> dispatch(Follow))
+            prop.text (
+                match profile.IsFollow with
+                | None -> ""
+                | Some isFollow -> if isFollow then "Following" else "Follow") ]
+    
+    let profileOptions = 
+        let optionsElem = 
+            Html.div [
+                prop.children [
+                    Html.div [
+                        prop.onClick (fun _ -> dispatch(CloseProfileOptions))
+                        prop.classes [
+                            tw.``fixed`` 
+                            tw.``inset-0`` 
+                            tw.``h-full`` 
+                            tw.``w-full``
+                            (if state.ProfileOption.IsProfileOptionOpen then tw.``block`` else tw.``hidden``)
+                        ]
+                    ]
+                    Html.div [
+                        prop.style [
+                            style.top (state.ProfileOption.Coordinates.Y |> int)
+                            style.left (state.ProfileOption.Coordinates.X |> int)
+                        ]
+                        prop.classes [
+                            tw.``w-28``
+                            tw.``bg-white``
+                            tw.``rounded-md``
+                            tw.``overflow-hidden``
+                            tw.``shadow-xl``
+                            tw.``border``
+                            tw.``border-solid``
+                            (if state.ProfileOption.IsProfileOptionOpen then tw.``absolute`` else tw.``hidden``)
+                        ]
+                        prop.children [
+                            Html.div [
+                                prop.text "Meow"
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        Html.div [ 
+            Html.div [
+                prop.onClick (fun event -> 
+                    // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
+                    let coordinates = {X = event.currentTarget?offsetLeft; Y = event.currentTarget?offsetTop}
+                    let coordinates = {X = coordinates.X - 80.0; Y = coordinates.Y + 30.0}
+                    dispatch(OpenProfileOptions coordinates))
+                prop.classes [  
+                    tw.``rounded-full``
+                    tw.border
+                    tw.``h-10``
+                    tw.``w-10``
+                    tw.``mt-3``
+                    tw.``p-3``
+                    tw.``pl-3.5``
+                    tw.``border-green-500``
+                    tw.``text-green-500``
+                    tw.``cursor-pointer``
+                    tw.``hover:bg-green-400``
+                    tw.``hover:text-gray-800`` ]
+                prop.children [ Bleeter.icon "ant-design:ellipsis-outlined" "12"]
+            ]
+            optionsElem 
+        ] 
+
     Html.div [ Html.img [ prop.classes [ tw.``w-full``
                                          tw.``bg-cover`` ]
                           prop.src profile.Banner ]
@@ -150,31 +259,8 @@ let bleetProfileElem (profile: Profile) =
                                                                     tw.``flex-grow-2``
                                                                     tw.``flex-row-reverse``
                                                                     tw.``mr-2`` ]
-                                                     prop.children [ Html.button [ prop.id "bleeter-follow"
-                                                                                   prop.classes [ tw.``rounded-full``
-                                                                                                  tw.border
-                                                                                                  tw.``h-10``
-                                                                                                  tw.``w-20``
-                                                                                                  tw.``mt-3``
-                                                                                                  tw.``ml-2``
-                                                                                                  tw.``border-green-500``
-                                                                                                  tw.``text-green-500`` ]
-                                                                                   prop.text "Follow" ]
-                                                                     Html.div [ prop.classes [ tw.``rounded-full``
-                                                                                               tw.border
-                                                                                               tw.``h-10``
-                                                                                               tw.``w-10``
-                                                                                               tw.``mt-3``
-                                                                                               tw.``p-3``
-                                                                                               tw.``pl-3.5``
-                                                                                               tw.``border-green-500``
-                                                                                               tw.``text-green-500``
-                                                                                               tw.``cursor-pointer``
-                                                                                               tw.``hover:bg-green-400``
-                                                                                               tw.``hover:text-gray-800`` ]
-                                                                                prop.children [ Bleeter.icon
-                                                                                                    "ant-design:ellipsis-outlined"
-                                                                                                    "12" ] ] ] ] ] ]
+                                                     prop.children [ followBtn; profileOptions ] ] ] ]
+                                                                     
 
                Html.div [ prop.classes [ tw.flex; tw.``ml-2`` ]
                           prop.children [ Html.span [ prop.text profile.Name ] ] ]
@@ -221,8 +307,8 @@ let bleetProfileElem (profile: Profile) =
                                                                    Html.span [ prop.classes [ tw.``ml-1`` ]
                                                                                prop.text "Followers" ] ] ] ] ] ]
 
-let render (state: State) =
-    Html.div [ bleetProfileElem state.Profile
+let render (state: State) (dispatch:Msg->unit) =
+    Html.div [ bleetProfileElem state  dispatch
 
                Html.div [ prop.classes [ tw.``text-2xl``
                                          tw.``h-12``

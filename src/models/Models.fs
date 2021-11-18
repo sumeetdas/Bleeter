@@ -2,6 +2,8 @@
 [<AutoOpen>]
 module Models
 
+type Coordinates = {X: float; Y: float}
+
 type Profile =
     { Name: string
       ProfilePic: string
@@ -10,7 +12,8 @@ type Profile =
       Following: int
       Followers: int
       Location: string
-      Url: string }
+      Url: string
+      IsFollow: bool option }
 
 [<RequireQualifiedAccess>]
 module Profile =
@@ -22,7 +25,8 @@ module Profile =
           Following = 0
           Followers = 0
           Location = ""
-          Url = "" }
+          Url = ""
+          IsFollow = None }
 
 type Bleet =
     { Name: string

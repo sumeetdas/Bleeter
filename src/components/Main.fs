@@ -13,7 +13,7 @@ type State =
 type Msg =
     | UrlChanged of string list
     | AppHeight of int
-    | AddBleet of Bleet
+    | BleeterProfileMsg of BleeterProfile.Msg
 
 let init () =
     { CurrentUrl = Router.currentUrl ()
@@ -24,14 +24,11 @@ let update (msg: Msg) (state: State) : State =
     match msg with
     | UrlChanged url -> { state with CurrentUrl = url }
     | AppHeight height -> { state with Height = height }
-    | AddBleet bleet ->
-        let bleeterProfile =
-            BleeterProfile.update (BleeterProfile.Msg.AddBleet bleet) state.BleeterProfile
+    | BleeterProfileMsg msg' ->
+        let bleeterProfile = BleeterProfile.update msg' state.BleeterProfile
+        {state with BleeterProfile = bleeterProfile}
 
-        { state with
-              BleeterProfile = bleeterProfile }
-
-let render (state: State) =
+let render (state: State) (dispatch:Msg->unit) =
     Html.div [ prop.classes [ tw.flex
                               tw.``flex-grow-1``
                               tw.``max-w-screen-sm``
@@ -42,6 +39,6 @@ let render (state: State) =
                prop.style [ style.height state.Height ]
                prop.children [ match state.CurrentUrl with
                                | [ "home" ] -> Home.render
-                               | [ "profile" ] -> BleeterProfile.render state.BleeterProfile
+                               | [ "profile" ] -> BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch)
                                | [ "bleeter-info" ] -> BleeterInfo.page
-                               | _ -> BleeterProfile.render state.BleeterProfile ] ]
+                               | _ -> BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch) ] ]

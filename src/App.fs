@@ -57,7 +57,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
             let main =
-                Main.update (Main.Msg.AddBleet bleet) state.Main
+                Main.update ((BleeterProfile.Msg.AddBleet >> Main.Msg.BleeterProfileMsg) bleet) state.Main
 
             let createBleet = CreateBleet.init ()
 
@@ -145,7 +145,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                                   tw.``h-full`` ]
                    prop.children [ Menu.menuHtml
 
-                                   (Main.render state.Main)
+                                   (Main.render state.Main (MainMsg >> dispatch))
 
                                    Html.div [ prop.classes [ tw.``flex-grow-1`` ]
                                               prop.children [ searchBox; trending ] ]
