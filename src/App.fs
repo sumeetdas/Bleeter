@@ -37,16 +37,16 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
 
             { state with CreateBleet = create }, Cmd.none
         else
-            let main =
+            let main, cmd =
                 Main.update (Main.Msg.UrlChanged url) state.Main
 
             { state with
                   CurrentUrl = url
                   Main = main },
-            Cmd.none
+            (Cmd.map MainMsg cmd)
     | MainMsg msg' ->
-        let main = Main.update msg' state.Main
-        { state with Main = main }, Cmd.none
+        let main, cmd = Main.update msg' state.Main
+        { state with Main = main }, (Cmd.map MainMsg cmd)
     | CreateBleetMsg msg' ->
         Router.navigate (state.CurrentUrl |> List.toArray)
 
@@ -56,7 +56,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         match createBleet.Bleet with
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
-            let main =
+            let main, cmd =
                 Main.update
                     ((BleeterProfile.Msg.AddBleet
                       >> Main.Msg.BleeterProfileMsg)
@@ -68,7 +68,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { state with
                   Main = main
                   CreateBleet = createBleet },
-            Cmd.none
+            (Cmd.map MainMsg cmd)
 
 let searchBox =
     Html.div [ prop.classes [ tw.``bg-bleet-dim``

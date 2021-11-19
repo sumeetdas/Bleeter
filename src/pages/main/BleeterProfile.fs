@@ -1,26 +1,21 @@
 [<RequireQualifiedAccess>]
 module BleeterProfile
 
+open Elmish
 open Feliz
 open Tailwind
-open Browser
-// for `?` operator
-open Fable.Core.JsInterop
-
-type ProfileOption =
-    { IsProfileOptionOpen: bool
-      Coordinates: Coordinates }
-
-type State =
-    { Bleets: Bleet list
-      Profile: Profile
-      ProfileOption: ProfileOption }
 
 type Msg =
     | AddBleet of Bleet
     | Follow
-    | CloseProfileOptions
-    | OpenProfileOptions of Coordinates
+    | ProfileOptionMsg of Msg EllipsisOption.Msg
+    | Meow
+    | Woof
+
+type State =
+    { Bleets: Bleet list
+      Profile: Profile
+      ProfileOption: Msg EllipsisOption.State }
 
 let init () =
     let bleets: Bleet list =
@@ -60,40 +55,49 @@ let init () =
           Location = "Hill"
           IsFollow = Some false }
 
-    let profileOption =
-        { IsProfileOptionOpen = false
-          Coordinates = { X = 0 |> float; Y = 0 |> float } }
+    let optionList: Msg EllipsisOption.Option list =
+        [ { Name = "Meow"
+            Command = Cmd.ofMsg Meow }
+          { Name = "Woof"
+            Command = Cmd.ofMsg Woof }  ]
+
+    let profileOption: Msg EllipsisOption.State =
+        { IsOptionOpen = false
+          Coordinates = { X = 0 |> float; Y = 0 |> float }
+          Options = optionList }
 
     { Bleets = bleets
       Profile = profile
       ProfileOption = profileOption }
 
-let update (msg: Msg) (state: State) : State =
+let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | AddBleet bleet ->
         let bleets = bleet :: state.Bleets
-        { state with Bleets = bleets }
+        { state with Bleets = bleets }, Cmd.none
     | Follow ->
         match state.Profile.IsFollow with
-        | None -> state
+        | None -> state, Cmd.none
         | Some isFollow ->
             let profile =
                 { state.Profile with
                       IsFollow = Some(not isFollow) }
 
-            { state with Profile = profile }
-    | CloseProfileOptions ->
-        { state with
-              ProfileOption =
-                  { state.ProfileOption with
-                        IsProfileOptionOpen = false } }
-    | OpenProfileOptions coordinates ->
-        printf "%A" coordinates
+            { state with Profile = profile }, Cmd.none
+    | ProfileOptionMsg msg ->
+        let profileOption, cmd =
+            EllipsisOption.update msg state.ProfileOption
 
         { state with
-              ProfileOption =
-                  { IsProfileOptionOpen = true
-                    Coordinates = coordinates } }
+              ProfileOption = profileOption },
+        cmd
+    | Meow -> 
+        printf "Meow"
+        state, Cmd.none
+    | Woof -> 
+        printf "Woof"
+        state, Cmd.none
+
 
 let bleetElem (bleet: Bleet) =
     Html.article [ prop.classes [ tw.``hover:bg-gray-300``
@@ -209,59 +213,6 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
                                   "Follow"
                       ) ]
 
-    let profileOptions =
-        let optionsElem =
-            Html.div [ prop.children [ Html.div [ prop.onClick (fun _ -> dispatch (CloseProfileOptions))
-                                                  prop.classes [ tw.``fixed``
-                                                                 tw.``inset-0``
-                                                                 tw.``h-full``
-                                                                 tw.``w-full``
-                                                                 (if state.ProfileOption.IsProfileOptionOpen then
-                                                                      tw.block
-                                                                  else
-                                                                      tw.hidden) ] ]
-                                       Html.div [ prop.style [ style.top (state.ProfileOption.Coordinates.Y |> int)
-                                                               style.left (state.ProfileOption.Coordinates.X |> int) ]
-                                                  prop.classes [ tw.``w-28``
-                                                                 tw.``bg-white``
-                                                                 tw.``rounded-md``
-                                                                 tw.``overflow-hidden``
-                                                                 tw.``shadow-xl``
-                                                                 tw.border
-                                                                 tw.``border-solid``
-                                                                 (if state.ProfileOption.IsProfileOptionOpen then
-                                                                      tw.absolute
-                                                                  else
-                                                                      tw.hidden) ]
-                                                  prop.children [ Html.div [ prop.text "Meow" ] ] ] ] ]
-
-        Html.div [ Html.div [ prop.onClick
-                                  (fun event ->
-                                      // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
-                                      let coordinates =
-                                          { X = event.currentTarget?offsetLeft
-                                            Y = event.currentTarget?offsetTop }
-
-                                      let coordinates =
-                                          { X = coordinates.X - 80.0
-                                            Y = coordinates.Y + 30.0 }
-
-                                      dispatch (OpenProfileOptions coordinates))
-                              prop.classes [ tw.``rounded-full``
-                                             tw.border
-                                             tw.``h-10``
-                                             tw.``w-10``
-                                             tw.``mt-3``
-                                             tw.``p-3``
-                                             tw.``pl-3.5``
-                                             tw.``border-green-500``
-                                             tw.``text-green-500``
-                                             tw.``cursor-pointer``
-                                             tw.``hover:bg-green-400``
-                                             tw.``hover:text-gray-800`` ]
-                              prop.children [ Bleeter.icon "ant-design:ellipsis-outlined" "12" ] ]
-                   optionsElem ]
-
     Html.div [ Html.img [ prop.classes [ tw.``w-full``
                                          tw.``bg-cover`` ]
                           prop.src profile.Banner ]
@@ -281,7 +232,9 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
                                                                     tw.``flex-row-reverse``
                                                                     tw.``mr-2`` ]
                                                      prop.children [ followBtn
-                                                                     profileOptions ] ] ] ]
+                                                                     EllipsisOption.render
+                                                                         state.ProfileOption
+                                                                         (ProfileOptionMsg >> dispatch) ] ] ] ]
 
 
                Html.div [ prop.classes [ tw.flex; tw.``ml-2`` ]

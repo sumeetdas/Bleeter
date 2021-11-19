@@ -1,6 +1,7 @@
 [<RequireQualifiedAccess>]
 module Main
 
+open Elmish
 open Feliz
 open Feliz.Router
 open Tailwind
@@ -20,16 +21,17 @@ let init () =
       Height = 0
       BleeterProfile = BleeterProfile.init () }
 
-let update (msg: Msg) (state: State) : State =
+let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | UrlChanged url -> { state with CurrentUrl = url }
-    | AppHeight height -> { state with Height = height }
+    | UrlChanged url -> { state with CurrentUrl = url }, Cmd.none
+    | AppHeight height -> { state with Height = height }, Cmd.none
     | BleeterProfileMsg msg' ->
-        let bleeterProfile =
+        let bleeterProfile, cmd =
             BleeterProfile.update msg' state.BleeterProfile
 
         { state with
-              BleeterProfile = bleeterProfile }
+              BleeterProfile = bleeterProfile },
+        (Cmd.map BleeterProfileMsg cmd)
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [ prop.classes [ tw.flex
