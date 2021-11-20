@@ -29,9 +29,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let bleeterProfile, cmd =
             BleeterProfile.update msg' state.BleeterProfile
 
-        { state with
-              BleeterProfile = bleeterProfile },
-        (Cmd.map BleeterProfileMsg cmd)
+        { state with BleeterProfile = bleeterProfile }, (Cmd.map BleeterProfileMsg cmd)
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [ prop.classes [ tw.flex

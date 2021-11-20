@@ -45,14 +45,9 @@ let update (msg: Msg) (state: State) : State =
     | Close -> init ()
     | AddBleet bleet ->
         let bleet =
-            if state.Profile.IsNone then
-                None
-            else
-                Some bleet
+            if state.Profile.IsNone then None else Some bleet
 
-        { state with
-              Bleet = bleet
-              Profile = None }
+        { state with Bleet = bleet; Profile = None }
     | UpdateBleetContent content -> { state with BleetContent = content }
     | OutsideModalClickClose id ->
         if (state.Display
@@ -72,8 +67,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
                     .value
 
             let profile =
-                profile
-                |> Option.defaultWith (fun () -> Profile.init ())
+                profile |> Option.defaultWith (fun () -> Profile.init ())
 
             let bleet =
                 { Name = profile.Name

@@ -19,11 +19,7 @@ let init () =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | Increment ->
-        { state with
-              Loading = false
-              Count = state.Count + 1 },
-        Cmd.none
+    | Increment -> { state with Loading = false; Count = state.Count + 1 }, Cmd.none
     | Decrement -> { state with Count = state.Count - 1 }, Cmd.none
     | IncrementDelayed when state.Loading -> state, Cmd.none
     | IncrementDelayed ->

@@ -50,10 +50,7 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
                                                              tw.``inset-0``
                                                              tw.``h-full``
                                                              tw.``w-full``
-                                                             (if state.IsOptionOpen then
-                                                                  tw.block
-                                                              else
-                                                                  tw.hidden) ] ]
+                                                             (if state.IsOptionOpen then tw.block else tw.hidden) ] ]
                                    Html.div [ prop.style [ style.top (state.Coordinates.Y |> int)
                                                            style.left (state.Coordinates.X |> int) ]
                                               prop.classes [ tw.``w-28``
@@ -77,8 +74,7 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
                                         Y = event.currentTarget?offsetTop }
 
                                   let coordinates =
-                                      { X = coordinates.X - 80.0
-                                        Y = coordinates.Y + 30.0 }
+                                      { X = coordinates.X - 80.0; Y = coordinates.Y + 30.0 }
 
                                   dispatch (Open coordinates))
                           prop.classes [ tw.``rounded-full``

@@ -5,15 +5,18 @@ open Elmish
 open Feliz
 open Tailwind
 
+type BleetId = int
+
 type Msg =
     | AddBleet of Bleet
     | Follow
     | ProfileOptionMsg of Msg EllipsisOption.Msg
     | Meow
     | Woof
+    | BleetElemMsg of BleetId * BleetElem.Msg
 
 type State =
-    { Bleets: Bleet list
+    { Bleets: BleetElem.State list
       Profile: Profile
       ProfileOption: Msg EllipsisOption.State }
 
@@ -56,124 +59,51 @@ let init () =
           IsFollow = Some false }
 
     let optionList: Msg EllipsisOption.Option list =
-        [ { Name = "Meow"
-            Command = Cmd.ofMsg Meow }
-          { Name = "Woof"
-            Command = Cmd.ofMsg Woof }  ]
+        [ { Name = "Meow"; Command = Cmd.ofMsg Meow }
+          { Name = "Woof"; Command = Cmd.ofMsg Woof } ]
 
     let profileOption: Msg EllipsisOption.State =
         { IsOptionOpen = false
           Coordinates = { X = 0 |> float; Y = 0 |> float }
           Options = optionList }
 
-    { Bleets = bleets
+    { Bleets = (bleets |> List.map BleetElem.init)
       Profile = profile
       ProfileOption = profileOption }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | AddBleet bleet ->
-        let bleets = bleet :: state.Bleets
+        let bleets =
+            (bleet |> BleetElem.init) :: state.Bleets
+
         { state with Bleets = bleets }, Cmd.none
     | Follow ->
         match state.Profile.IsFollow with
         | None -> state, Cmd.none
         | Some isFollow ->
             let profile =
-                { state.Profile with
-                      IsFollow = Some(not isFollow) }
+                { state.Profile with IsFollow = Some(not isFollow) }
 
             { state with Profile = profile }, Cmd.none
     | ProfileOptionMsg msg ->
         let profileOption, cmd =
             EllipsisOption.update msg state.ProfileOption
 
-        { state with
-              ProfileOption = profileOption },
-        cmd
-    | Meow -> 
+        { state with ProfileOption = profileOption }, cmd
+    | Meow ->
         printf "Meow"
         state, Cmd.none
-    | Woof -> 
+    | Woof ->
         printf "Woof"
         state, Cmd.none
+    | BleetElemMsg (id, msg) ->
+        let bleet =
+            state.Bleets
+            |> List.item id
+            |> (fun bleetState -> BleetElem.update msg bleetState)
 
-
-let bleetElem (bleet: Bleet) =
-    Html.article [ prop.classes [ tw.``hover:bg-gray-300``
-                                  tw.flex
-                                  tw.``flex-row``
-                                  tw.``p-4``
-                                  tw.``pb-0``
-                                  tw.``border-b``
-                                  tw.``border-gray-300`` ]
-                   prop.children [ Html.div [ prop.classes [ tw.flex
-                                                             tw.``flex-grow-0``
-                                                             tw.``w-12`` ]
-                                              prop.children [ Html.img [ prop.classes [ tw.``h-12``
-                                                                                        tw.``w-12``
-                                                                                        tw.``rounded-full``
-                                                                                        tw.``border-2``
-                                                                                        tw.``border-gray-100`` ]
-                                                                         prop.src bleet.ProfilePic ] ] ]
-                                   Html.div [ prop.classes [ tw.flex
-                                                             tw.``flex-col``
-                                                             tw.``flex-grow-1``
-                                                             tw.``pl-2`` ]
-                                              prop.children [ Html.div [ prop.classes [ tw.flex
-                                                                                        tw.``flex-row`` ]
-                                                                         prop.children [ Html.div [ prop.classes [ tw.flex
-                                                                                                                   tw.``flex-grow-1`` ]
-                                                                                                    prop.children [ Html.span [ prop.classes [ tw.``hover:underline`` ]
-                                                                                                                                prop.text
-                                                                                                                                    bleet.Name ]
-                                                                                                                    Html.span [ prop.classes [ tw.``ml-1`` ]
-                                                                                                                                prop.text (
-                                                                                                                                    "@"
-                                                                                                                                    + bleet.Handle
-                                                                                                                                ) ]
-                                                                                                                    Html.span [ prop.classes [ tw.``p-1`` ]
-                                                                                                                                prop.children [ Bleeter.icon
-                                                                                                                                                    "bi:dot"
-                                                                                                                                                    "16" ] ] ] ]
-                                                                                         Html.div [ prop.classes [ tw.flex
-                                                                                                                   tw.``float-right``
-                                                                                                                   tw.``w-8``
-                                                                                                                   tw.``h-8``
-                                                                                                                   tw.``rounded-full``
-                                                                                                                   tw.``p-1``
-                                                                                                                   tw.``pl-2``
-                                                                                                                   tw.``pt-2``
-                                                                                                                   tw.``cursor-pointer``
-                                                                                                                   tw.``hover:bg-green-400`` ]
-                                                                                                    prop.children [ Bleeter.icon
-                                                                                                                        "ant-design:ellipsis-outlined"
-                                                                                                                        "16" ] ] ] ]
-                                                              Html.div [ prop.classes [ tw.flex ]
-                                                                         prop.children [ Html.span [ prop.text
-                                                                                                         bleet.Content ] ] ]
-                                                              Html.div [ prop.classes [ tw.flex; tw.``py-4`` ]
-                                                                         prop.children [ Html.div [ prop.classes [ tw.flex
-                                                                                                                   tw.``flex-1`` ]
-                                                                                                    prop.children [ Bleeter.icon
-                                                                                                                        "ei:comment"
-                                                                                                                        "24"
-                                                                                                                    Html.text
-                                                                                                                        bleet.Replies ] ]
-                                                                                         Html.div [ prop.classes [ tw.flex
-                                                                                                                   tw.``flex-1`` ]
-                                                                                                    prop.children [ Bleeter.icon
-                                                                                                                        "ei:retweet"
-                                                                                                                        "24"
-                                                                                                                    Html.text
-                                                                                                                        bleet.Rebleets ] ]
-                                                                                         Html.div [ prop.classes [ tw.flex
-                                                                                                                   tw.``flex-1`` ]
-                                                                                                    prop.children [ Bleeter.icon
-                                                                                                                        "ei:heart"
-                                                                                                                        "24"
-                                                                                                                    Html.text
-                                                                                                                        bleet.Likes ] ] ] ] ] ] ] ]
+        state, Cmd.none
 
 let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
     let profile = state.Profile
@@ -206,11 +136,7 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
                       prop.text (
                           match profile.IsFollow with
                           | None -> ""
-                          | Some isFollow ->
-                              if isFollow then
-                                  "Following"
-                              else
-                                  "Follow"
+                          | Some isFollow -> if isFollow then "Following" else "Follow"
                       ) ]
 
     Html.div [ Html.img [ prop.classes [ tw.``w-full``
@@ -294,6 +220,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                                                       prop.text "Latest Bleets" ] ] ]
 
                // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
-               let bleetList = state.Bleets |> (List.map bleetElem)
+               let bleetList =
+                   state.Bleets
+                   |> List.map (fun bleet -> BleetElem.render bleet ((fun msg -> BleetElemMsg(1, msg)) >> dispatch))
 
                Html.div [ prop.children bleetList ] ]

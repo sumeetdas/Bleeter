@@ -1,0 +1,8 @@
+[*.fs]
+indent_size=4
+max_line_length=120
+fsharp_space_before_member=true
+fsharp_indent_on_try_with=true
+fsharp_max_if_then_else_short_width=50
+fsharp_max_infix_operator_expression=60
+fsharp_max_record_width=60
