@@ -140,7 +140,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                         (state.BleetElems
                          |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)
                 },
-                cmd
+                (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
             | None -> state, Cmd.none)
 
 let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
@@ -353,7 +353,8 @@ let render (state: State) (dispatch: Msg -> unit) =
         // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
         let bleetList =
             state.BleetElems
-            |> List.map (fun bleet -> BleetElem.render bleet ((fun msg -> BleetElemMsg(1, msg)) >> dispatch))
+            |> List.map
+                (fun bleet -> BleetElem.render bleet ((fun msg -> BleetElemMsg(bleet.Bleet.Id, msg)) >> dispatch))
 
         Html.div [ prop.children bleetList ]
     ]

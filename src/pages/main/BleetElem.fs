@@ -22,14 +22,13 @@ let init bleet =
     let cssClasses =
         [
             tw.``rounded-full``
-            tw.``text-green-500``
             tw.``cursor-pointer``
             tw.``hover:bg-green-400``
             tw.flex
             tw.``float-right``
         ]
 
-    let offset: Coordinates = { X = 10.0; Y = 10.0 }
+    let offset: Coordinates = { X = -100.0; Y = 20.0 }
 
     {
         Bleet = bleet
@@ -47,7 +46,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | BleetOptionMsg msg ->
         let bleetOption, cmd = EllipsisOption.update msg state.BleetOption
         { state with BleetOption = bleetOption }, cmd
-    | _ -> state, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet
@@ -118,23 +116,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                     ]
                                 ]
                             ]
-                            Html.div [
-                                prop.classes [
-                                    tw.flex
-                                    tw.``float-right``
-                                    tw.``w-8``
-                                    tw.``h-8``
-                                    tw.``rounded-full``
-                                    tw.``p-1``
-                                    tw.``pl-2``
-                                    tw.``pt-2``
-                                    tw.``cursor-pointer``
-                                    tw.``hover:bg-green-400``
-                                ]
-                                prop.children [
-                                    Bleeter.icon "ant-design:ellipsis-outlined" "16"
-                                ]
-                            ]
+                            EllipsisOption.render state.BleetOption (BleetOptionMsg >> dispatch)
                         ]
                     ]
                     Html.div [
