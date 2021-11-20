@@ -24,23 +24,32 @@ type 'a State =
         Offset: Coordinates
     }
 
-type Size = {CssClasses: string list; IconSize: string}
-    
-let sizes: Map<int,Size> = 
-    Map.empty.
-        Add(20, {CssClasses = [
-        tw.``h-10``
-        tw.``w-10``
-        tw.``mt-3``
-        tw.``p-2.5``
-    ]; IconSize = "20"}).
-        Add(16, {CssClasses = [
-        tw.``w-8``
-        tw.``h-8``
-        tw.``p-1``
-        tw.``pl-2``
-        tw.``pt-2``
-    ]; IconSize = "16"});;
+type Size = { CssClasses: string list; IconSize: string }
+
+let sizes: Map<int, Size> =
+    Map
+        .empty
+        .Add(
+            20,
+            {
+                CssClasses = [ tw.``h-10``; tw.``w-10``; tw.``mt-3``; tw.``p-2.5`` ]
+                IconSize = "20"
+            }
+        )
+        .Add(
+            16,
+            {
+                CssClasses =
+                    [
+                        tw.``w-8``
+                        tw.``h-8``
+                        tw.``p-1``
+                        tw.``pl-2``
+                        tw.``pt-2``
+                    ]
+                IconSize = "16"
+            }
+        )
 
 let init options (size: int) (cssClasses: string list) (offset: Coordinates) =
     {
@@ -106,8 +115,9 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
             ]
         ]
 
-    let renderedElem size = 
+    let renderedElem size =
         let classes = [ size.CssClasses; state.CssClasses ] |> List.concat
+
         Html.div [
             Html.div [
                 prop.onClick
@@ -119,7 +129,11 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
                                 Y = event.currentTarget?offsetTop
                             }
 
-                        let coordinates = { X = coordinates.X + state.Offset.X; Y = coordinates.Y + state.Offset.Y }
+                        let coordinates =
+                            {
+                                X = coordinates.X + state.Offset.X
+                                Y = coordinates.Y + state.Offset.Y
+                            }
 
                         dispatch (Open coordinates))
                 prop.classes classes
@@ -130,6 +144,6 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
             optionsElem
         ]
 
-    match sizes.TryFind state.Size with 
+    match sizes.TryFind state.Size with
     | Some size -> renderedElem size
     | None -> Html.div []

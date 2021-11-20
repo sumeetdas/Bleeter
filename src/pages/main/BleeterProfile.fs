@@ -85,16 +85,17 @@ let init () =
             Coordinates = { X = 0 |> float; Y = 0 |> float }
             Options = optionList
             Size = 20
-            CssClasses = [
-                tw.border
-                tw.``rounded-full``
-                tw.``border-green-500``
-                tw.``text-green-500``
-                tw.``cursor-pointer``
-                tw.``hover:bg-green-400``
-                tw.``hover:text-gray-800``
-            ]
-            Offset = {X = -90.0; Y = 30.0}
+            CssClasses =
+                [
+                    tw.border
+                    tw.``rounded-full``
+                    tw.``border-green-500``
+                    tw.``text-green-500``
+                    tw.``cursor-pointer``
+                    tw.``hover:bg-green-400``
+                    tw.``hover:text-gray-800``
+                ]
+            Offset = { X = -90.0; Y = 30.0 }
         }
 
     {
@@ -129,13 +130,19 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | BleetElemMsg (id: int, msg) ->
         state.BleetElems
         |> List.tryFind (fun bleet -> bleet.Bleet.Id = id)
-        |> (fun bleetElemOpt -> 
+        |> (fun bleetElemOpt ->
             match bleetElemOpt with
-                | Some bleetElem -> 
-                    let bleetElem, cmd = BleetElem.update msg bleetElem
-                    {state with BleetElems = (state.BleetElems |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)}, cmd
-                | None -> state, Cmd.none)
-        
+            | Some bleetElem ->
+                let bleetElem, cmd = BleetElem.update msg bleetElem
+
+                { state with
+                    BleetElems =
+                        (state.BleetElems
+                         |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)
+                },
+                cmd
+            | None -> state, Cmd.none)
+
 let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
     let profile = state.Profile
 
