@@ -7,6 +7,7 @@ open Browser
 open Browser.Types
 // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
 open Fable.Core.JsInterop
+open System
 
 type State =
     {
@@ -75,6 +76,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
 
             let bleet =
                 {
+                    Id = System.Random().Next(1000, 10_000)
                     Name = profile.Name
                     Content = bleetText
                     ProfilePic = profile.ProfilePic

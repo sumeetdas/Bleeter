@@ -17,7 +17,7 @@ type Msg =
 
 type State =
     {
-        Bleets: BleetElem.State list
+        BleetElems: BleetElem.State list
         Profile: Profile
         ProfileOption: Msg EllipsisOption.State
     }
@@ -26,6 +26,7 @@ let init () =
     let bleets: Bleet list =
         [
             {
+                Id = 1
                 Name = "Bleeter Boi"
                 Content = "Hello Bleeter!"
                 ProfilePic = "/bleeter_profile_pic.png"
@@ -36,6 +37,7 @@ let init () =
                 Replies = 0
             }
             {
+                Id = 2
                 Name = "Sheeple"
                 Content = "We the Sheeple!"
                 ProfilePic = "/bleeter_profile_pic.png"
@@ -46,6 +48,7 @@ let init () =
                 Replies = 1
             }
             {
+                Id = 3
                 Name = "John Xina"
                 Content = "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"
                 ProfilePic = "/john_xina.png"
@@ -81,10 +84,21 @@ let init () =
             IsOptionOpen = false
             Coordinates = { X = 0 |> float; Y = 0 |> float }
             Options = optionList
+            Size = 20
+            CssClasses = [
+                tw.border
+                tw.``rounded-full``
+                tw.``border-green-500``
+                tw.``text-green-500``
+                tw.``cursor-pointer``
+                tw.``hover:bg-green-400``
+                tw.``hover:text-gray-800``
+            ]
+            Offset = {X = -90.0; Y = 30.0}
         }
 
     {
-        Bleets = (bleets |> List.map BleetElem.init)
+        BleetElems = (bleets |> List.map BleetElem.init)
         Profile = profile
         ProfileOption = profileOption
     }
@@ -92,9 +106,9 @@ let init () =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | AddBleet bleet ->
-        let bleets = (bleet |> BleetElem.init) :: state.Bleets
+        let bleets = (bleet |> BleetElem.init) :: state.BleetElems
 
-        { state with Bleets = bleets }, Cmd.none
+        { state with BleetElems = bleets }, Cmd.none
     | Follow ->
         match state.Profile.IsFollow with
         | None -> state, Cmd.none
@@ -112,14 +126,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | Woof ->
         printf "Woof"
         state, Cmd.none
-    | BleetElemMsg (id, msg) ->
-        let bleet =
-            state.Bleets
-            |> List.item id
-            |> (fun bleetState -> BleetElem.update msg bleetState)
-
-        state, Cmd.none
-
+    | BleetElemMsg (id: int, msg) ->
+        state.BleetElems
+        |> List.tryFind (fun bleet -> bleet.Bleet.Id = id)
+        |> (fun bleetElemOpt -> 
+            match bleetElemOpt with
+                | Some bleetElem -> 
+                    let bleetElem, cmd = BleetElem.update msg bleetElem
+                    {state with BleetElems = (state.BleetElems |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)}, cmd
+                | None -> state, Cmd.none)
+        
 let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
     let profile = state.Profile
 
@@ -329,7 +345,7 @@ let render (state: State) (dispatch: Msg -> unit) =
 
         // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
         let bleetList =
-            state.Bleets
+            state.BleetElems
             |> List.map (fun bleet -> BleetElem.render bleet ((fun msg -> BleetElemMsg(1, msg)) >> dispatch))
 
         Html.div [ prop.children bleetList ]

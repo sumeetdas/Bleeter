@@ -34,6 +34,7 @@ module Profile =
 
 type Bleet =
     {
+        Id: int
         Name: string
         Content: string
         ProfilePic: string
@@ -48,6 +49,7 @@ type Bleet =
 module Bleet =
     let init () =
         {
+            Id = 0
             Name = ""
             Content = ""
             ProfilePic = ""

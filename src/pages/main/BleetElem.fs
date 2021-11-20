@@ -18,10 +18,31 @@ let init bleet =
             { Name = "Delete"; Command = Cmd.ofMsg DeleteBleet }
             { Name = "Report"; Command = Cmd.ofMsg ReportBleet }
         ]
+    let cssClasses = [
+        tw.``rounded-full``
+        tw.``text-green-500``
+        tw.``cursor-pointer``
+        tw.``hover:bg-green-400``
+        tw.flex
+        tw.``float-right``
+    ]
 
-    { Bleet = bleet; BleetOption = EllipsisOption.init options }
+    let offset:Coordinates = {X = 10.0; Y = 10.0}
 
-let update (msg: Msg) (state: State) : State = state
+    { Bleet = bleet; BleetOption = EllipsisOption.init options 16 cssClasses offset }
+
+let update (msg: Msg) (state: State) : State * Msg Cmd= 
+    match msg with 
+    | DeleteBleet -> 
+        printf "delete bleet"
+        state, Cmd.none
+    | ReportBleet -> 
+        printf "report bleet"
+        state, Cmd.none
+    | BleetOptionMsg msg -> 
+        let bleetOption, cmd = EllipsisOption.update msg state.BleetOption
+        {state with BleetOption = bleetOption}, cmd
+    | _ -> state, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet

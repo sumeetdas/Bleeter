@@ -19,13 +19,37 @@ type 'a State =
         IsOptionOpen: bool
         Coordinates: Coordinates
         Options: 'a Option list
+        Size: int
+        CssClasses: string list
+        Offset: Coordinates
     }
 
-let init options =
+type Size = {CssClasses: string list; IconSize: string}
+    
+let sizes: Map<int,Size> = 
+    Map.empty.
+        Add(20, {CssClasses = [
+        tw.``h-10``
+        tw.``w-10``
+        tw.``mt-3``
+        tw.``p-2.5``
+    ]; IconSize = "20"}).
+        Add(16, {CssClasses = [
+        tw.``w-8``
+        tw.``h-8``
+        tw.``p-1``
+        tw.``pl-2``
+        tw.``pt-2``
+    ]; IconSize = "16"});;
+
+let init options (size: int) (cssClasses: string list) (offset: Coordinates) =
     {
         IsOptionOpen = false
         Coordinates = { X = 0 |> float; Y = 0 |> float }
         Options = options
+        Size = size
+        CssClasses = cssClasses
+        Offset = offset
     }
 
 let update (msg: 'a Msg) (state: 'a State) : 'a State * 'a Cmd =
@@ -33,8 +57,6 @@ let update (msg: 'a Msg) (state: 'a State) : 'a State * 'a Cmd =
     | CommandMsg cmd -> state, cmd
     | Close -> { state with IsOptionOpen = false }, Cmd.none
     | Open coordinates ->
-        printf "%A" coordinates
-
         { state with
             IsOptionOpen = true
             Coordinates = coordinates
@@ -84,37 +106,30 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
             ]
         ]
 
-    Html.div [
+    let renderedElem size = 
+        let classes = [ size.CssClasses; state.CssClasses ] |> List.concat
         Html.div [
-            prop.onClick
-                (fun event ->
-                    // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
-                    let coordinates =
-                        {
-                            X = event.currentTarget?offsetLeft
-                            Y = event.currentTarget?offsetTop
-                        }
+            Html.div [
+                prop.onClick
+                    (fun event ->
+                        // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
+                        let coordinates =
+                            {
+                                X = event.currentTarget?offsetLeft
+                                Y = event.currentTarget?offsetTop
+                            }
 
-                    let coordinates = { X = coordinates.X - 80.0; Y = coordinates.Y + 30.0 }
+                        let coordinates = { X = coordinates.X + state.Offset.X; Y = coordinates.Y + state.Offset.Y }
 
-                    dispatch (Open coordinates))
-            prop.classes [
-                tw.``rounded-full``
-                tw.border
-                tw.``h-10``
-                tw.``w-10``
-                tw.``mt-3``
-                tw.``p-3``
-                tw.``pl-3.5``
-                tw.``border-green-500``
-                tw.``text-green-500``
-                tw.``cursor-pointer``
-                tw.``hover:bg-green-400``
-                tw.``hover:text-gray-800``
+                        dispatch (Open coordinates))
+                prop.classes classes
+                prop.children [
+                    Bleeter.icon "ant-design:ellipsis-outlined" (size.IconSize)
+                ]
             ]
-            prop.children [
-                Bleeter.icon "ant-design:ellipsis-outlined" "12"
-            ]
+            optionsElem
         ]
-        optionsElem
-    ]
+
+    match sizes.TryFind state.Size with 
+    | Some size -> renderedElem size
+    | None -> Html.div []
