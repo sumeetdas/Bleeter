@@ -37,8 +37,7 @@ let init bleet =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | DeleteBleet ->
-        state, Cmd.none
+    | DeleteBleet -> state, Cmd.none
     | ReportBleet ->
         printf "report bleet"
         state, Cmd.none

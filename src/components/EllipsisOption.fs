@@ -53,12 +53,7 @@ let sizes: Map<int, Size> =
         .Add(
             12,
             {
-                CssClasses =
-                    [
-                        tw.``w-5``
-                        tw.``h-5``
-                        tw.``p-1``
-                    ]
+                CssClasses = [ tw.``w-5``; tw.``h-5``; tw.``p-1`` ]
                 IconSize = "12"
             }
         )
@@ -90,6 +85,15 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
         |> List.map
             (fun opt ->
                 Html.div [
+                    prop.classes [
+                        tw.``h-10``
+                        tw.``border-b``
+                        tw.flex
+                        tw.``items-center``
+                        tw.``pl-4``
+                        tw.``hover:bg-gray-300``
+                        tw.``cursor-pointer``
+                    ]
                     prop.text opt.Name
                     prop.onClick (fun _ -> dispatch (CommandMsg opt.Command))
                 ])
@@ -113,13 +117,15 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
                         style.left (state.Coordinates.X |> int)
                     ]
                     prop.classes [
-                        tw.``w-28``
+                        tw.``w-36``
                         tw.``bg-white``
                         tw.``rounded-md``
                         tw.``overflow-hidden``
                         tw.``shadow-xl``
                         tw.border
                         tw.``border-solid``
+                        tw.flex
+                        tw.``flex-col``
                         (if state.IsOptionOpen then tw.absolute else tw.hidden)
                     ]
                     prop.children optionList

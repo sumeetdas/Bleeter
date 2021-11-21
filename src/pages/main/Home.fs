@@ -17,9 +17,22 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> = state, Cmd.none
 
 let render =
     Html.div [
-        prop.classes [ tw.``ml-3`` ]
+        prop.classes [
+            tw.``ml-3``
+            tw.flex
+            tw.``flex-col``
+        ]
         prop.children [
-            for i in [ 1 .. 1000 ] do
-                Html.text "Hello Home!!!!!!!!!!!!"
+            Html.div [
+                prop.classes [ tw.flex; tw.``h-32`` ]
+                prop.text "Home"
+            ]
+            Html.div [
+                prop.classes [
+                    tw.flex
+                    tw.``flex-col``
+                ]
+                prop.children bleets
+            ]
         ]
     ]

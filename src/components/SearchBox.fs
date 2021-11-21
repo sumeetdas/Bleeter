@@ -7,22 +7,20 @@ open Browser.Types
 // for `?` operator
 open Fable.Core.JsInterop
 
-type State = {Content: string}
+type State = { Content: string }
 
-type Msg = 
-    | Clear 
+type Msg =
+    | Clear
     | Update of string
 
-let init () = {Content = ""}
+let init () = { Content = "" }
 
-let update (msg:Msg) (state:State) : State =
+let update (msg: Msg) (state: State) : State =
     match msg with
-    | Clear -> 
-        {Content = ""}
-    | Update content -> 
-        {Content = content}
+    | Clear -> { Content = "" }
+    | Update content -> { Content = content }
 
-let render (state:State) (dispatch:Msg -> unit) =
+let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
             tw.``bg-bleet-dim``
@@ -53,9 +51,7 @@ let render (state:State) (dispatch:Msg -> unit) =
                 ]
                 prop.placeholder "Search Bleeter"
                 prop.value state.Content
-                prop.onChange
-                    (fun (ev: Event) ->
-                        dispatch (Update(ev.target?value |> string)))
+                prop.onChange (fun (ev: Event) -> dispatch (Update(ev.target?value |> string)))
             ]
             Html.button [
                 prop.classes [
@@ -63,7 +59,7 @@ let render (state:State) (dispatch:Msg -> unit) =
                     tw.``mx-3``
                     (if state.Content.Length = 0 then tw.hidden else tw.block)
                 ]
-                prop.onClick (fun _ -> dispatch(Clear))
+                prop.onClick (fun _ -> dispatch (Clear))
                 prop.children [
                     Bleeter.icon "gridicons:cross-circle" "24"
                 ]

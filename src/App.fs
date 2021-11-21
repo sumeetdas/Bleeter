@@ -66,12 +66,12 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             let createBleet = CreateBleet.init ()
 
             { state with Main = main; CreateBleet = createBleet }, (Cmd.map MainMsg cmd)
-    | TrendingMsg msg -> 
+    | TrendingMsg msg ->
         let trending, cmd = Trending.update msg state.Trending
-        {state with Trending = trending}, (Cmd.map TrendingMsg cmd)
+        { state with Trending = trending }, (Cmd.map TrendingMsg cmd)
     | SearchBoxMsg msg ->
         let searchBox = SearchBox.update msg state.SearchBox
-        {state with SearchBox = searchBox}, Cmd.none
+        { state with SearchBox = searchBox }, Cmd.none
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let page =
@@ -89,9 +89,10 @@ let render (state: State) (dispatch: Msg -> Unit) =
 
                 Html.div [
                     prop.classes [ tw.``flex-grow-1`` ]
-                    prop.children [ 
+                    prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
-                        Trending.render state.Trending (TrendingMsg >> dispatch) ]
+                        Trending.render state.Trending (TrendingMsg >> dispatch)
+                    ]
                 ]
                 (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
             ]

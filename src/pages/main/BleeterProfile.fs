@@ -127,13 +127,15 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         state, Cmd.none
     | BleetElemMsg (id: int, msg) ->
         match msg with
-        | BleetElem.Msg.DeleteBleet -> 
+        | BleetElem.Msg.DeleteBleet ->
             printf "delete bleet %d" id
-            let updatedBleetElems = 
+
+            let updatedBleetElems =
                 state.BleetElems
                 |> List.removeBy (fun bleetElem -> bleetElem.Bleet.Id = id)
-            {state with BleetElems = updatedBleetElems}, Cmd.none
-        | _ -> 
+
+            { state with BleetElems = updatedBleetElems }, Cmd.none
+        | _ ->
             state.BleetElems
             |> List.tryFind (fun bleet -> bleet.Bleet.Id = id)
             |> (fun bleetElemOpt ->
@@ -144,7 +146,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                     { state with
                         BleetElems =
                             (state.BleetElems
-                            |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)
+                             |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)
                     },
                     (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
                 | None -> state, Cmd.none)
@@ -360,7 +362,11 @@ let render (state: State) (dispatch: Msg -> unit) =
         let bleetList =
             state.BleetElems
             |> List.map
-                (fun bleetElem -> BleetElem.render bleetElem ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg)) >> dispatch))
+                (fun bleetElem ->
+                    BleetElem.render
+                        bleetElem
+                        ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                         >> dispatch))
 
         Html.div [ prop.children bleetList ]
     ]
