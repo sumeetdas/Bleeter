@@ -32,9 +32,11 @@ module Profile =
             IsFollow = None
         }
 
+type BleetId = int
+
 type Bleet =
     {
-        Id: int
+        Id: BleetId
         Name: string
         Content: string
         ProfilePic: string

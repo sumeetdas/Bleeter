@@ -38,7 +38,6 @@ let init bleet =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DeleteBleet ->
-        printf "delete bleet"
         state, Cmd.none
     | ReportBleet ->
         printf "report bleet"
@@ -51,8 +50,10 @@ let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet
 
     Html.article [
+        prop.key state.Bleet.Id
+        prop.id ("bleet-" + (state.Bleet.Id |> string))
         prop.classes [
-            tw.``hover:bg-gray-300``
+            tw.``hover:bg-green-100``
             tw.flex
             tw.``flex-row``
             tw.``p-4``
@@ -74,7 +75,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                             tw.``w-12``
                             tw.``rounded-full``
                             tw.``border-2``
-                            tw.``border-gray-100``
+                            tw.``border-green-100``
                         ]
                         prop.src bleet.ProfilePic
                     ]
