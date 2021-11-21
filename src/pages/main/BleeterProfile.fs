@@ -340,33 +340,40 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
-        bleetProfileElem state dispatch
+        prop.classes [
+            tw.flex 
+            tw.``flex-col`` 
+            tw.``flex-grow-1``
+        ]
+        prop.children [
+            bleetProfileElem state dispatch
 
-        Html.div [
-            prop.classes [
-                tw.``text-2xl``
-                tw.``h-12``
-                tw.``border-b``
-                tw.``border-gray-300``
-                tw.``text-green-600``
-            ]
-            prop.children [
-                Html.span [
-                    prop.classes [ tw.``m-6`` ]
-                    prop.text "Latest Bleets"
+            Html.div [
+                prop.classes [
+                    tw.``text-2xl``
+                    tw.``h-12``
+                    tw.``border-b``
+                    tw.``border-gray-300``
+                    tw.``text-green-600``
+                ]
+                prop.children [
+                    Html.span [
+                        prop.classes [ tw.``m-6`` ]
+                        prop.text "Latest Bleets"
+                    ]
                 ]
             ]
+
+            // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
+            let bleetList =
+                state.BleetElems
+                |> List.map
+                    (fun bleetElem ->
+                        BleetElem.render
+                            bleetElem
+                            ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                            >> dispatch))
+
+            Html.div [ prop.children bleetList ]
         ]
-
-        // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
-        let bleetList =
-            state.BleetElems
-            |> List.map
-                (fun bleetElem ->
-                    BleetElem.render
-                        bleetElem
-                        ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
-                         >> dispatch))
-
-        Html.div [ prop.children bleetList ]
     ]
