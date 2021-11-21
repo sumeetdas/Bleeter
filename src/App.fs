@@ -15,6 +15,8 @@ type State =
         CurrentUrl: string list
         Main: Main.State
         CreateBleet: CreateBleet.State
+        Trending: Trending.State
+        SearchBox: SearchBox.State
     }
 
 // events
@@ -22,6 +24,8 @@ type Msg =
     | UrlChanged of string list
     | MainMsg of Main.Msg
     | CreateBleetMsg of CreateBleet.Msg
+    | TrendingMsg of Trending.Msg
+    | SearchBoxMsg of SearchBox.Msg
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -29,6 +33,8 @@ let init () =
         CurrentUrl = Router.currentUrl ()
         Main = Main.init ()
         CreateBleet = CreateBleet.init ()
+        Trending = Trending.init ()
+        SearchBox = SearchBox.init ()
     },
     Cmd.none
 
@@ -60,6 +66,12 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             let createBleet = CreateBleet.init ()
 
             { state with Main = main; CreateBleet = createBleet }, (Cmd.map MainMsg cmd)
+    | TrendingMsg msg -> 
+        let trending, cmd = Trending.update msg state.Trending
+        {state with Trending = trending}, (Cmd.map TrendingMsg cmd)
+    | SearchBoxMsg msg ->
+        let searchBox = SearchBox.update msg state.SearchBox
+        {state with SearchBox = searchBox}, Cmd.none
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let page =
@@ -77,7 +89,9 @@ let render (state: State) (dispatch: Msg -> Unit) =
 
                 Html.div [
                     prop.classes [ tw.``flex-grow-1`` ]
-                    prop.children [ SearchBox.render; Trending.render ]
+                    prop.children [ 
+                        SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
+                        Trending.render state.Trending (TrendingMsg >> dispatch) ]
                 ]
                 (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
             ]

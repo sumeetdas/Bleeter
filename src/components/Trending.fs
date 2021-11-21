@@ -1,10 +1,40 @@
 [<RequireQualifiedAccess>]
 module Trending
 
+open Elmish
 open Feliz
 open Tailwind
 
-let render =
+type Msg = 
+    | TrendOptionMsg of Msg EllipsisOption.Msg
+    | ReportTrend
+
+type State = {TrendOption: Msg EllipsisOption.State}
+
+let init() = 
+    let options: Msg EllipsisOption.Option list = [
+        {Name = "Report"; Command = Cmd.ofMsg ReportTrend}
+    ]
+    let size = 12
+    let cssClasses = [
+        tw.``mt-3``
+        tw.``rounded-full``
+        tw.``cursor-pointer``
+        tw.``hover:bg-green-400``
+    ]
+    let offset = {X = -100.0; Y = 15.0}
+    {TrendOption = EllipsisOption.init options size cssClasses offset}
+
+let update (msg:Msg) (state:State) : State * Cmd<Msg> = 
+    match msg with
+    | TrendOptionMsg msg ->
+        let trendOption, cmd = EllipsisOption.update msg state.TrendOption
+        {state with TrendOption = trendOption}, cmd
+    | ReportTrend ->
+        printf "Report trend"
+        state, Cmd.none
+
+let render (state:State) (dispatch:Msg -> unit) =
     let trendList =
         [
             ("Trending in SheepLand", "#SheepCare", "100K Tweets")
@@ -50,20 +80,7 @@ let render =
                         ]
                     ]
                 ]
-                Html.div [
-                    prop.classes [
-                        tw.``mt-3``
-                        tw.``h-5``
-                        tw.``w-5``
-                        tw.``p-1``
-                        tw.``rounded-full``
-                        tw.``cursor-pointer``
-                        tw.``hover:bg-green-400``
-                    ]
-                    prop.children [
-                        Bleeter.icon "ant-design:ellipsis-outlined" "12"
-                    ]
-                ]
+                EllipsisOption.render state.TrendOption (TrendOptionMsg >> dispatch)
             ]
         ]
 

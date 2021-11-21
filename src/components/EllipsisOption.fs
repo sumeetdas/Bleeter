@@ -50,6 +50,18 @@ let sizes: Map<int, Size> =
                 IconSize = "16"
             }
         )
+        .Add(
+            12,
+            {
+                CssClasses =
+                    [
+                        tw.``w-5``
+                        tw.``h-5``
+                        tw.``p-1``
+                    ]
+                IconSize = "12"
+            }
+        )
 
 let init options (size: int) (cssClasses: string list) (offset: Coordinates) =
     {

@@ -3,8 +3,26 @@ module SearchBox
 
 open Feliz
 open Tailwind
+open Browser.Types
+// for `?` operator
+open Fable.Core.JsInterop
 
-let render =
+type State = {Content: string}
+
+type Msg = 
+    | Clear 
+    | Update of string
+
+let init () = {Content = ""}
+
+let update (msg:Msg) (state:State) : State =
+    match msg with
+    | Clear -> 
+        {Content = ""}
+    | Update content -> 
+        {Content = content}
+
+let render (state:State) (dispatch:Msg -> unit) =
     Html.div [
         prop.classes [
             tw.``bg-bleet-dim``
@@ -34,12 +52,18 @@ let render =
                     tw.``focus:outline-none``
                 ]
                 prop.placeholder "Search Bleeter"
+                prop.value state.Content
+                prop.onChange
+                    (fun (ev: Event) ->
+                        dispatch (Update(ev.target?value |> string)))
             ]
             Html.button [
                 prop.classes [
                     tw.``text-green-600``
                     tw.``mx-3``
+                    (if state.Content.Length = 0 then tw.hidden else tw.block)
                 ]
+                prop.onClick (fun _ -> dispatch(Clear))
                 prop.children [
                     Bleeter.icon "gridicons:cross-circle" "24"
                 ]
