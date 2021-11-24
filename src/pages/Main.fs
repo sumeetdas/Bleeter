@@ -25,7 +25,7 @@ let init () =
         CurrentUrl = Router.currentUrl ()
         Height = 0
         BleeterProfile = BleeterProfile.init ()
-        Home = Home.init()
+        Home = Home.init ()
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
@@ -36,9 +36,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let bleeterProfile, cmd = BleeterProfile.update msg' state.BleeterProfile
 
         { state with BleeterProfile = bleeterProfile }, (Cmd.map BleeterProfileMsg cmd)
-    | HomeMsg msg' -> 
+    | HomeMsg msg' ->
         let newHome, cmd = Home.update msg' state.Home
-        {state with Home = newHome}, (Cmd.map HomeMsg cmd)
+        { state with Home = newHome }, (Cmd.map HomeMsg cmd)
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [

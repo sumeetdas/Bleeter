@@ -1,0 +1,35 @@
+[
+    {
+      "Id": 1,
+      "Name": "Bleeter Boi",
+      "Content": "Hello Bleeter!",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "BleeterBoi",
+      "Time": "",
+      "Rebleets": 123,
+      "Likes": 3000,
+      "Replies": 0
+    },
+    {
+      "Id": 2,
+      "Name": "Sheeple",
+      "Content": "We the Sheeple!",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "Sheeple",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1
+    },
+    {
+      "Id": 3,
+      "Name": "John Xina",
+      "Content": "“The enemy can’t hit what they can’t see.”- John Xina, the art of war",
+      "ProfilePic": "/img/john_xina.png",
+      "Handle": "JohnXina",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1
+    }
+]

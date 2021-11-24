@@ -1,0 +1,11 @@
+{
+    "Name": "Bleeter",
+    "ProfilePic": "/img/bleeter_profile_pic.png",
+    "Banner": "/img/bleeter_banner.jpg",
+    "Handle": "bleeter",
+    "Following": 30,
+    "Followers": 24,
+    "Location": "Hill",
+    "Url": "https://sumeetdas.me/bleeter",
+    "IsFollow": false
+}

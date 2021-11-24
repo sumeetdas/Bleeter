@@ -4,6 +4,8 @@ module BleeterProfile
 open Elmish
 open Feliz
 open Tailwind
+open Thoth.Json
+open Fable.SimpleHttp
 
 type Msg =
     | AddBleet of Bleet
@@ -12,72 +14,74 @@ type Msg =
     | Meow
     | Woof
     | BleetElemMsg of BleetId * BleetElem.Msg
+    | LoadProfile of Result<Profile, string> AsyncOperationStatus
 
 type State =
     {
         BleetElems: BleetElem.State list
-        Profile: Profile
+        Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
     }
 
-let init () =
-    let bleets: Bleet list =
-        [
-            {
-                Id = 1
-                Name = "Bleeter Boi"
-                Content = "Hello Bleeter!"
-                ProfilePic = "/bleeter_profile_pic.png"
-                Handle = "BleeterBoi"
-                Time = ""
-                Rebleets = 123
-                Likes = 3000
-                Replies = 0
-            }
-            {
-                Id = 2
-                Name = "Sheeple"
-                Content = "We the Sheeple!"
-                ProfilePic = "/bleeter_profile_pic.png"
-                Handle = "Sheeple"
-                Time = ""
-                Rebleets = 1230
-                Likes = 40000
-                Replies = 1
-            }
-            {
-                Id = 3
-                Name = "John Xina"
-                Content = "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"
-                ProfilePic = "/john_xina.png"
-                Handle = "JohnXina"
-                Time = ""
-                Rebleets = 1230
-                Likes = 40000
-                Replies = 1
-            }
-        ]
-
-    let profile: Profile =
+let bleets: Bleet list =
+    [
         {
-            Name = "Bleeter"
-            ProfilePic = "/bleeter_profile_pic.png"
-            Banner = "/bleeter_banner.jpg"
-            Handle = "bleeter"
-            Following = 30
-            Followers = 24
-            Url = "https://sumeetdas.me/bleeter"
-            Location = "Hill"
-            IsFollow = Some false
+            Id = 1
+            Name = "Bleeter Boi"
+            Content = "Hello Bleeter!"
+            ProfilePic = "/img/bleeter_profile_pic.png"
+            Handle = "BleeterBoi"
+            Time = ""
+            Rebleets = 123
+            Likes = 3000
+            Replies = 0
         }
+        {
+            Id = 2
+            Name = "Sheeple"
+            Content = "We the Sheeple!"
+            ProfilePic = "/img/bleeter_profile_pic.png"
+            Handle = "Sheeple"
+            Time = ""
+            Rebleets = 1230
+            Likes = 40000
+            Replies = 1
+        }
+        {
+            Id = 3
+            Name = "John Xina"
+            Content = "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"
+            ProfilePic = "/img/john_xina.png"
+            Handle = "JohnXina"
+            Time = ""
+            Rebleets = 1230
+            Likes = 40000
+            Replies = 1
+        }
+    ]
 
-    let optionList: Msg EllipsisOption.Option list =
-        [
-            { Name = "Meow"; Command = Cmd.ofMsg Meow }
-            { Name = "Woof"; Command = Cmd.ofMsg Woof }
-        ]
+let profile: Profile =
+    {
+        Name = "Bleeter"
+        ProfilePic = "/img/bleeter_profile_pic.png"
+        Banner = "/img/bleeter_banner.jpg"
+        Handle = "bleeter"
+        Following = 30
+        Followers = 24
+        Url = "https://sumeetdas.me/bleeter"
+        Location = "Hill"
+        IsFollow = Some false
+    }
+
+let init () =
 
     let profileOption: Msg EllipsisOption.State =
+        let optionList: Msg EllipsisOption.Option list =
+            [
+                { Name = "Meow"; Command = Cmd.ofMsg Meow }
+                { Name = "Woof"; Command = Cmd.ofMsg Woof }
+            ]
+
         {
             IsOptionOpen = false
             Coordinates = { X = 0 |> float; Y = 0 |> float }
@@ -98,7 +102,7 @@ let init () =
 
     {
         BleetElems = (bleets |> List.map BleetElem.init)
-        Profile = profile
+        Profile = HasNotStartedYet
         ProfileOption = profileOption
     }
 
@@ -109,12 +113,15 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with BleetElems = bleets }, Cmd.none
     | Follow ->
-        match state.Profile.IsFollow with
-        | None -> state, Cmd.none
-        | Some isFollow ->
-            let profile = { state.Profile with IsFollow = Some(not isFollow) }
+        match state.Profile with
+        | Resolved (Ok profile) ->
+            match profile.IsFollow with
+            | None -> state, Cmd.none
+            | Some isFollow ->
+                let profile = { profile with IsFollow = Some(not isFollow) }
 
-            { state with Profile = profile }, Cmd.none
+                { state with Profile = Resolved(Ok profile) }, Cmd.none
+        | _ -> state, Cmd.none
     | ProfileOptionMsg msg ->
         let profileOption, cmd = EllipsisOption.update msg state.ProfileOption
 
@@ -150,10 +157,27 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                     },
                     (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
                 | None -> state, Cmd.none)
+    | LoadProfile asyncOpStatus ->
+        match asyncOpStatus with
+        | Started ->
+            let nextState = { state with Profile = InProgress }
 
-let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
-    let profile = state.Profile
+            let loadProfileCmd =
+                async {
+                    let! (statusCode, profile) = Http.get "/data/profile/Bleeter.json"
 
+                    if statusCode = 200 then
+                        return LoadProfile(Finished(profile |> Profile.decodeResult))
+                    else
+                        return LoadProfile(Finished(Error "error while fetching profile"))
+                }
+
+            nextState, Cmd.fromAsync loadProfileCmd
+        | Finished result ->
+            let nextState = { state with Profile = Resolved result }
+            nextState, Cmd.none
+
+let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
     let followBtn =
         let noShowBtnClasses = [ tw.hidden ]
         let yesFollowClasses = [ tw.``w-36`` ]
@@ -223,7 +247,7 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
                     ]
                     prop.children [
                         followBtn
-                        EllipsisOption.render state.ProfileOption (ProfileOptionMsg >> dispatch)
+                        EllipsisOption.render profileOption (ProfileOptionMsg >> dispatch)
                     ]
                 ]
             ]
@@ -339,41 +363,54 @@ let bleetProfileElem (state: State) (dispatch: Msg -> unit) =
     ]
 
 let render (state: State) (dispatch: Msg -> unit) =
-    Html.div [
-        prop.classes [
-            tw.flex 
-            tw.``flex-col`` 
-            tw.``flex-grow-1``
-        ]
-        prop.children [
-            bleetProfileElem state dispatch
+    let renderedElem
+        (profile: Profile)
+        (profileOption: Msg EllipsisOption.State)
+        (bleetElems: BleetElem.State list)
+        : ReactElement =
+        Html.div [
+            prop.classes [
+                tw.flex
+                tw.``flex-col``
+                tw.``flex-grow-1``
+            ]
+            prop.children [
+                bleetProfileElem profile profileOption dispatch
 
-            Html.div [
-                prop.classes [
-                    tw.``text-2xl``
-                    tw.``h-12``
-                    tw.``border-b``
-                    tw.``border-gray-300``
-                    tw.``text-green-600``
-                ]
-                prop.children [
-                    Html.span [
-                        prop.classes [ tw.``m-6`` ]
-                        prop.text "Latest Bleets"
+                Html.div [
+                    prop.classes [
+                        tw.``text-2xl``
+                        tw.``h-12``
+                        tw.``border-b``
+                        tw.``border-gray-300``
+                        tw.``text-green-600``
+                    ]
+                    prop.children [
+                        Html.span [
+                            prop.classes [ tw.``m-6`` ]
+                            prop.text "Latest Bleets"
+                        ]
                     ]
                 ]
+
+                // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
+                let bleetList =
+                    bleetElems
+                    |> List.map
+                        (fun bleetElem ->
+                            BleetElem.render
+                                bleetElem
+                                ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                                 >> dispatch))
+
+                Html.div [ prop.children bleetList ]
+
+                Html.div [
+                    prop.text (Encode.toString 4 profile)
+                ]
             ]
-
-            // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
-            let bleetList =
-                state.BleetElems
-                |> List.map
-                    (fun bleetElem ->
-                        BleetElem.render
-                            bleetElem
-                            ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
-                            >> dispatch))
-
-            Html.div [ prop.children bleetList ]
         ]
-    ]
+
+    match state.Profile with
+    | Resolved (Ok profile) -> renderedElem profile state.ProfileOption state.BleetElems
+    | _ -> Html.none

@@ -1,6 +1,8 @@
 // "types-only" module
 [<AutoOpen>]
-module Models
+module BleeterModels
+
+open Thoth.Json
 
 type Coordinates = { X: float; Y: float }
 
@@ -31,6 +33,8 @@ module Profile =
             Url = ""
             IsFollow = None
         }
+
+    let decodeResult (json: string) : Result<Profile, string> = Decode.Auto.fromString<Profile> (json)
 
 type BleetId = int
 

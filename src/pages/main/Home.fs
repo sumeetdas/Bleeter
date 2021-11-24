@@ -57,11 +57,11 @@ let init () =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | BleetElemMsg (id, msg) ->
-        match msg with 
-        | BleetElem.Msg.ReportBleet -> 
+        match msg with
+        | BleetElem.Msg.ReportBleet ->
             printf "Report"
             state, Cmd.none
-        | _ -> 
+        | _ ->
             state.BleetElems
             |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
             |> (fun bleetElemOpt ->

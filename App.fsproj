@@ -16,8 +16,10 @@
     <PackageReference Include="Fable.Core" Version="3.2.3" />
     <PackageReference Include="Fable.Elmish" Version="3.1.0" />
     <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
+    <PackageReference Include="Fable.SimpleHttp" Version="3.0.0" />
     <PackageReference Include="Feliz" Version="1.54.0" />
     <PackageReference Include="Feliz.Router" Version="3.8.0" />
+    <PackageReference Include="Thoth.Json" Version="3.3.0" />
     <PackageReference Include="Zanaptak.TypedCssClasses" Version="1.0.0" />
   </ItemGroup>
 </Project>
