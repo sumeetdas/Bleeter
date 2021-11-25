@@ -48,7 +48,7 @@ let menuHtml =
     let navList =
         [
             ("ant-design:home-outlined", "Home", "#/home")
-            ("bx:bx-user-circle", "Profile", "#/profile")
+            ("bx:bx-user-circle", "Profile", "#/Bleeter")
             ("codicon:github", "Github", "https://www.github.com/sumeetdas")
             ("akar-icons:info", "Bleeter", "#/bleeter-info")
         ]

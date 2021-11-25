@@ -15,12 +15,14 @@ type Msg =
     | Woof
     | BleetElemMsg of BleetId * BleetElem.Msg
     | LoadProfile of Result<Profile, string> AsyncOperationStatus
+    | UrlChanged of string
 
 type State =
     {
         BleetElems: BleetElem.State list
         Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
+        Handle: string
     }
 
 let bleets: Bleet list =
@@ -104,10 +106,14 @@ let init () =
         BleetElems = (bleets |> List.map BleetElem.init)
         Profile = HasNotStartedYet
         ProfileOption = profileOption
+        Handle = "Bleeter"
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | UrlChanged handle ->
+        let newState = {state with Handle = handle}
+        newState, Cmd.ofMsg (LoadProfile Started)
     | AddBleet bleet ->
         let bleets = (bleet |> BleetElem.init) :: state.BleetElems
 
@@ -164,15 +170,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
             let loadProfileCmd =
                 async {
-                    let! (statusCode, profile) = Http.get "/data/profile/Bleeter.json"
-
+                    let! (statusCode, profile) = sprintf "/data/profile/%s.json" nextState.Handle |> Http.get
                     if statusCode = 200 then
                         return LoadProfile(Finished(profile |> Profile.decodeResult))
                     else
                         return LoadProfile(Finished(Error "error while fetching profile"))
                 }
-
             nextState, Cmd.fromAsync loadProfileCmd
+
         | Finished result ->
             let nextState = { state with Profile = Resolved result }
             nextState, Cmd.none

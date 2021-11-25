@@ -29,42 +29,41 @@ type Msg =
 
 // need parentheses for indicating that init is a function
 let init () =
+    let currentUrl = Router.currentUrl ()
+    let main, mainCmd = Main.init currentUrl
     {
-        CurrentUrl = Router.currentUrl ()
-        Main = Main.init ()
+        CurrentUrl = currentUrl
+        Main = main
         CreateBleet = CreateBleet.init ()
         Trending = Trending.init ()
         SearchBox = SearchBox.init ()
     },
-    Cmd.none
+    Cmd.batch [ (Cmd.map MainMsg mainCmd) ]
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | UrlChanged url ->
-        if (url |> List.contains "create") then
-            let create =
-                CreateBleet.update (CreateBleet.Msg.DisplayModal state.Main.BleeterProfile.Profile) state.CreateBleet
-
-            { state with CreateBleet = create }, Cmd.none
-        else
+        match url with 
+        | "create" :: rest -> 
+            match state.Main.BleeterProfile.Profile with
+            | Resolved (Ok profile) ->
+                let create = CreateBleet.update (CreateBleet.Msg.DisplayModal profile) state.CreateBleet
+                { state with CreateBleet = create }, Cmd.none
+            | _ -> state, Cmd.none
+        | _ ->
             let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
-
             { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
     | MainMsg msg' ->
         let main, cmd = Main.update msg' state.Main
         { state with Main = main }, (Cmd.map MainMsg cmd)
     | CreateBleetMsg msg' ->
         Router.navigate (state.CurrentUrl |> List.toArray)
-
         let createBleet = CreateBleet.update msg' state.CreateBleet
-
         match createBleet.Bleet with
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
             let main, cmd = Main.update ((BleeterProfile.Msg.AddBleet >> Main.Msg.BleeterProfileMsg) bleet) state.Main
-
             let createBleet = CreateBleet.init ()
-
             { state with Main = main; CreateBleet = createBleet }, (Cmd.map MainMsg cmd)
     | TrendingMsg msg ->
         let trending, cmd = Trending.update msg state.Trending
