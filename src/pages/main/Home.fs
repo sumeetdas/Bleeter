@@ -4,55 +4,19 @@ module Home
 open Elmish
 open Feliz
 open Tailwind
+open Fable.SimpleHttp
 
-type State = { Count: int; BleetElems: BleetElem.State list }
-
-type Msg = BleetElemMsg of int * BleetElem.Msg
-
-
-let init () =
-    let bleets: Bleet list =
-        [
-            {
-                Id = 1
-                Name = "Bleeter Boi"
-                Content = "Hello Bleeter!"
-                ProfilePic = "/img/bleeter_profile_pic.png"
-                Handle = "BleeterBoi"
-                Time = ""
-                Rebleets = 123
-                Likes = 3000
-                Replies = 0
-            }
-            {
-                Id = 2
-                Name = "Sheeple"
-                Content = "We the Sheeple!"
-                ProfilePic = "/img/bleeter_profile_pic.png"
-                Handle = "Sheeple"
-                Time = ""
-                Rebleets = 1230
-                Likes = 40000
-                Replies = 1
-            }
-            {
-                Id = 3
-                Name = "John Xina"
-                Content = "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"
-                ProfilePic = "/img/john_xina.png"
-                Handle = "JohnXina"
-                Time = ""
-                Rebleets = 1230
-                Likes = 40000
-                Replies = 1
-            }
-        ]
-
+type State =
     {
-        Count = 0
-        BleetElems = (bleets |> List.map BleetElem.init)
+        Count: int
+        BleetElems: Result<BleetElem.State list, string> Deferred
     }
 
+type Msg =
+    | BleetElemMsg of int * BleetElem.Msg
+    | LoadBleets of Result<BleetElem.State list, string> AsyncOperationStatus
+
+let init () = { Count = 0; BleetElems = HasNotStartedYet }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
@@ -62,29 +26,65 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             printf "Report"
             state, Cmd.none
         | _ ->
-            state.BleetElems
-            |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
-            |> (fun bleetElemOpt ->
-                match bleetElemOpt with
-                | None -> state, Cmd.none
-                | Some bleetElem ->
-                    let newBleetElem, cmd = BleetElem.update msg bleetElem
+            match state.BleetElems with
+            | Resolved (Ok bleets) ->
+                bleets
+                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+                |> (fun bleetElemOpt ->
+                    match bleetElemOpt with
+                    | None -> state, Cmd.none
+                    | Some bleetElem ->
+                        let newBleetElem, cmd = BleetElem.update msg bleetElem
 
-                    let newBleetElems =
-                        state.BleetElems
-                        |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
+                        let newBleetElems =
+                            bleets
+                            |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
 
-                    { state with BleetElems = newBleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
+                        { state with BleetElems = Resolved(Ok newBleetElems) },
+                        (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
+            | _ -> state, Cmd.none
+    | LoadBleets asyncOpStatus ->
+        match asyncOpStatus with
+        | Started ->
+            let nextState = { state with BleetElems = InProgress }
+
+            let loadProfileCmd =
+                async {
+                    let! (statusCode, bleets) = "/data/HomeBleets.json" |> Http.get
+
+                    if statusCode = 200 then
+                        return
+                            LoadBleets(
+                                Finished(
+                                    bleets
+                                    |> Bleet.decodeListResult
+                                    |> (fun result ->
+                                        match result with
+                                        | Ok bleetList -> bleetList |> List.map BleetElem.init |> Ok
+                                        | Error error -> Error error)
+                                )
+                            )
+                    else
+                        return LoadBleets(Finished(Error "error while fetching profile"))
+                }
+
+            nextState, Cmd.fromAsync loadProfileCmd
+        | Finished bleets ->
+            let nextState = { state with BleetElems = Resolved bleets }
+            nextState, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =
-        state.BleetElems
-        |> List.map
-            (fun bleetElem ->
-                BleetElem.render
-                    bleetElem
-                    ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
-                     >> dispatch))
+        match state.BleetElems with
+        | Resolved (Ok bleets) ->
+            bleets
+            |> List.map
+                (fun bleetElem ->
+                    BleetElem.render
+                        bleetElem
+                        ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                         >> dispatch))
+        | _ -> []
 
     Html.div [
         prop.classes [

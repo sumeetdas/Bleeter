@@ -1,18 +1,22 @@
 [<RequireQualifiedAccess>]
-module Trending
+module Distraction
 
 open Elmish
 open Feliz
 open Tailwind
 
 type Msg =
-    | TrendOptionMsg of Msg EllipsisOption.Msg
-    | ReportTrend
+    | DistractionOptionMsg of Msg EllipsisOption.Msg
+    | ReportDistraction
 
-type State = { TrendOption: Msg EllipsisOption.State }
+type State = { DistractionOption: Msg EllipsisOption.State }
 
 let init () =
-    let options: Msg EllipsisOption.Option list = [ { Name = "Report"; Command = Cmd.ofMsg ReportTrend } ]
+    let options: Msg EllipsisOption.Option list =
+        [
+            { Name = "Report"; Command = Cmd.ofMsg ReportDistraction }
+        ]
+
     let size = 12
 
     let cssClasses =
@@ -26,23 +30,23 @@ let init () =
     let offset = { X = -100.0; Y = 15.0 }
 
     {
-        TrendOption = EllipsisOption.init options size cssClasses offset
+        DistractionOption = EllipsisOption.init options size cssClasses offset
     }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | TrendOptionMsg msg ->
-        let trendOption, cmd = EllipsisOption.update msg state.TrendOption
-        { state with TrendOption = trendOption }, cmd
-    | ReportTrend ->
-        printf "Report trend"
+    | DistractionOptionMsg msg ->
+        let distractionOption, cmd = EllipsisOption.update msg state.DistractionOption
+        { state with DistractionOption = distractionOption }, cmd
+    | ReportDistraction ->
+        printf "Report distraction"
         state, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
-    let trendList =
+    let distractionList =
         [
-            ("Trending in SheepLand", "#SheepCare", "100K Tweets")
-            ("Trending in WonderLand", "#AliceRocks", "150K Tweets")
+            ("Distracting in SheepLand", "#SheepCare", "100K Tweets")
+            ("Technology", "#Xiowei", "150K Tweets")
         ]
 
     let elem (description: string, name: string, numTweets: string) =
@@ -84,7 +88,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                         ]
                     ]
                 ]
-                EllipsisOption.render state.TrendOption (TrendOptionMsg >> dispatch)
+                EllipsisOption.render state.DistractionOption (DistractionOptionMsg >> dispatch)
             ]
         ]
 
@@ -107,10 +111,10 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``w-48``
                     tw.``font-semibold``
                 ]
-                prop.text "Trending"
+                prop.text "Distraction"
             ]
             Html.div [
-                prop.children (trendList |> List.map elem)
+                prop.children (distractionList |> List.map elem)
             ]
         ]
     ]

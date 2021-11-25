@@ -49,7 +49,7 @@ let menuHtml =
         [
             ("ant-design:home-outlined", "Home", "#/home")
             ("bx:bx-user-circle", "Profile", "#/Bleeter")
-            ("codicon:github", "Github", "https://www.github.com/sumeetdas")
+            ("codicon:github", "Github", "https://www.github.com/sumeetdas/Bleeter")
             ("akar-icons:info", "Bleeter", "#/bleeter-info")
         ]
 

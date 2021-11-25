@@ -6,6 +6,7 @@
     <Compile Include="src\models\*.fs" />
     <Compile Include="src\extension\*.fs" />
     <Compile Include="src\helper\*.fs" />
+    <Compile Include="src\components\common\*.fs" />
     <Compile Include="src\components\*.fs" />
     <Compile Include="src\pages\main\*.fs" />
     <Compile Include="src\pages\*.fs" />

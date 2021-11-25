@@ -15,7 +15,7 @@ type State =
         CurrentUrl: string list
         Main: Main.State
         CreateBleet: CreateBleet.State
-        Trending: Trending.State
+        Distraction: Distraction.State
         SearchBox: SearchBox.State
     }
 
@@ -24,18 +24,19 @@ type Msg =
     | UrlChanged of string list
     | MainMsg of Main.Msg
     | CreateBleetMsg of CreateBleet.Msg
-    | TrendingMsg of Trending.Msg
+    | DistractionMsg of Distraction.Msg
     | SearchBoxMsg of SearchBox.Msg
 
 // need parentheses for indicating that init is a function
 let init () =
     let currentUrl = Router.currentUrl ()
     let main, mainCmd = Main.init currentUrl
+
     {
         CurrentUrl = currentUrl
         Main = main
         CreateBleet = CreateBleet.init ()
-        Trending = Trending.init ()
+        Distraction = Distraction.init ()
         SearchBox = SearchBox.init ()
     },
     Cmd.batch [ (Cmd.map MainMsg mainCmd) ]
@@ -43,8 +44,8 @@ let init () =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | UrlChanged url ->
-        match url with 
-        | "create" :: rest -> 
+        match url with
+        | "create" :: rest ->
             match state.Main.BleeterProfile.Profile with
             | Resolved (Ok profile) ->
                 let create = CreateBleet.update (CreateBleet.Msg.DisplayModal profile) state.CreateBleet
@@ -59,15 +60,16 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | CreateBleetMsg msg' ->
         Router.navigate (state.CurrentUrl |> List.toArray)
         let createBleet = CreateBleet.update msg' state.CreateBleet
+
         match createBleet.Bleet with
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
             let main, cmd = Main.update ((BleeterProfile.Msg.AddBleet >> Main.Msg.BleeterProfileMsg) bleet) state.Main
             let createBleet = CreateBleet.init ()
             { state with Main = main; CreateBleet = createBleet }, (Cmd.map MainMsg cmd)
-    | TrendingMsg msg ->
-        let trending, cmd = Trending.update msg state.Trending
-        { state with Trending = trending }, (Cmd.map TrendingMsg cmd)
+    | DistractionMsg msg ->
+        let distraction, cmd = Distraction.update msg state.Distraction
+        { state with Distraction = distraction }, (Cmd.map DistractionMsg cmd)
     | SearchBoxMsg msg ->
         let searchBox = SearchBox.update msg state.SearchBox
         { state with SearchBox = searchBox }, Cmd.none
@@ -90,7 +92,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                     prop.classes [ tw.``flex-grow-1`` ]
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
-                        Trending.render state.Trending (TrendingMsg >> dispatch)
+                        Distraction.render state.Distraction (DistractionMsg >> dispatch)
                     ]
                 ]
                 (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))

@@ -65,3 +65,5 @@ module Bleet =
             Likes = 0
             Replies = 0
         }
+
+    let decodeListResult (json: string) : Result<Bleet list, string> = Decode.Auto.fromString<Bleet list> (json)

@@ -62,19 +62,6 @@ let bleets: Bleet list =
         }
     ]
 
-let profile: Profile =
-    {
-        Name = "Bleeter"
-        ProfilePic = "/img/bleeter_profile_pic.png"
-        Banner = "/img/bleeter_banner.jpg"
-        Handle = "bleeter"
-        Following = 30
-        Followers = 24
-        Url = "https://sumeetdas.me/bleeter"
-        Location = "Hill"
-        IsFollow = Some false
-    }
-
 let init () =
 
     let profileOption: Msg EllipsisOption.State =
@@ -112,7 +99,7 @@ let init () =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | UrlChanged handle ->
-        let newState = {state with Handle = handle}
+        let newState = { state with Handle = handle }
         newState, Cmd.ofMsg (LoadProfile Started)
     | AddBleet bleet ->
         let bleets = (bleet |> BleetElem.init) :: state.BleetElems
@@ -171,11 +158,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             let loadProfileCmd =
                 async {
                     let! (statusCode, profile) = sprintf "/data/profile/%s.json" nextState.Handle |> Http.get
+
                     if statusCode = 200 then
                         return LoadProfile(Finished(profile |> Profile.decodeResult))
                     else
                         return LoadProfile(Finished(Error "error while fetching profile"))
                 }
+
             nextState, Cmd.fromAsync loadProfileCmd
 
         | Finished result ->
@@ -409,10 +398,6 @@ let render (state: State) (dispatch: Msg -> unit) =
                                  >> dispatch))
 
                 Html.div [ prop.children bleetList ]
-
-                Html.div [
-                    prop.text (Encode.toString 4 profile)
-                ]
             ]
         ]
 
