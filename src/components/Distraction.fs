@@ -46,7 +46,6 @@ let render (state: State) (dispatch: Msg -> unit) =
     let distractionList =
         [
             ("Distracting in SheepLand", "#SheepCare")
-            ("Technology", "#Xiowei")
         ]
 
     let elem (description: string, name: string) =

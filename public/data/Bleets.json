@@ -8,21 +8,11 @@
       "Time": "",
       "Rebleets": 123,
       "Likes": 4000,
-      "Replies": 0
+      "Replies": 0,
+      "RepliesType": "boring"
     },
     {
-      "Id": 2,
-      "Name": "Wifebeater TV Show",
-      "Content": "Gay marriage gets hot as two ripped wives take domestic violence to the next level!",
-      "ProfilePic": "/img/bleeter_profile_pic.png",
-      "Handle": "WifebeaterTVShow",
-      "Time": "",
-      "Rebleets": 1230,
-      "Likes": 40000,
-      "Replies": 1
-    },
-    {
-      "Id": 2,
+      "Id": 33,
       "Name": "Bleeter Music",
       "Content": "{card:https://www.youtube.com/watch?v=8PMJNUjaivw}",
       "ProfilePic": "/img/bleeter_profile_pic.png",
@@ -30,7 +20,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 3,
@@ -41,7 +32,20 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
+    },
+    {
+      "Id": 2,
+      "Name": "Wifebeater TV Show",
+      "Content": "Gay marriage gets hot as two ripped wives take domestic violence to the next level!",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "WifebeaterTVShow",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 4,
@@ -52,7 +56,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 5,
@@ -63,7 +68,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 6,
@@ -74,7 +80,20 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
+    },
+    {
+      "Id": 34,
+      "Name": "Phil Gaga",
+      "Content": "How do I feel after using my #Xiowei product for over a month? Can't complain.",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "gagaphilpot",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 7,
@@ -85,7 +104,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 8,
@@ -96,7 +116,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 9,
@@ -107,7 +128,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 10,
@@ -118,7 +140,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 11,
@@ -129,7 +152,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 12,
@@ -140,7 +164,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 13,
@@ -151,7 +176,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 14,
@@ -162,7 +188,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 15,
@@ -173,7 +200,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 16,
@@ -184,7 +212,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 17,
@@ -195,7 +224,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 18,
@@ -206,7 +236,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 19,
@@ -217,7 +248,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 20,
@@ -228,7 +260,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 21,
@@ -239,7 +272,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 22,
@@ -250,7 +284,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 23,
@@ -261,18 +296,20 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 24,
-      "Name": "MitchDexter",
+      "Name": "Mitch Dexter",
       "Content": "In my day there was none of this obsession with ethnic diversity. Actors got roles on merit. We just happened to all be white.",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "MitchDexter",
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 25,
@@ -283,7 +320,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 26,
@@ -294,7 +332,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 27,
@@ -305,7 +344,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 28,
@@ -316,7 +356,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 29,
@@ -327,7 +368,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 30,
@@ -338,7 +380,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 31,
@@ -349,7 +392,8 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     },
     {
       "Id": 32,
@@ -360,6 +404,7 @@
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
-      "Replies": 1
+      "Replies": 1,
+      "RepliesType": "boring"
     }
 ]
