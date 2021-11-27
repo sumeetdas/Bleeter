@@ -2,5 +2,41 @@
     {
         "Category": "Technology", 
         "Hashtag": "#Xiowei"
+    },
+    {
+        "Category": "Well Being", 
+        "Hashtag": "#StrippersWhoCare"
+    },
+    {
+        "Category": "Education", 
+        "Hashtag": "#liberalartsgraduate"
+    },
+    {
+        "Category": "Medicine", 
+        "Hashtag": "#thinkimdying"
+    },
+    {
+        "Category": "Enlightenment", 
+        "Hashtag": "#speakthetruth"
+    },
+    {
+        "Category": "Entertainment", 
+        "Hashtag": "#turnedon"
+    },
+    {
+        "Category": "Stock market", 
+        "Hashtag": "#BAWSAQ"
+    },
+    {
+        "Category": "Politics", 
+        "Hashtag": "#cranleyforgovernor"
+    },
+    {
+        "Category": "Food", 
+        "Hashtag": "#CluckinBellCruelty"
+    },
+    {
+        "Category": "Crazy", 
+        "Hashtag": "#recessiongonemad"
     }
 ]

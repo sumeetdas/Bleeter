@@ -76,7 +76,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
 
             let bleet =
                 {
-                    Id = System.Random().Next(1000, 10_000)
+                    Id = Random().Next(1000, 10_000)
                     Name = profile.Name
                     Content = bleetText
                     ProfilePic = profile.ProfilePic
@@ -85,6 +85,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
                     Rebleets = 0
                     Likes = 0
                     Replies = 0
+                    RepliesType = Some Boring
                 }
 
             dispatch (AddBleet bleet)

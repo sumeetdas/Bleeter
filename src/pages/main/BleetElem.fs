@@ -84,7 +84,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.classes [
                     tw.flex
                     tw.``flex-col``
-                    tw.``flex-grow-1``
+                    tw.``flex-1``
                     tw.``pl-2``
                 ]
                 prop.children [
@@ -108,13 +108,14 @@ let render (state: State) (dispatch: Msg -> unit) =
                                         prop.classes [ tw.``ml-1`` ]
                                         prop.text ("@" + bleet.Handle)
                                     ]
-                                    Html.span [
-                                        prop.classes [ tw.``p-1`` ]
-                                        prop.children [
-                                            Bleeter.icon "bi:dot" "16"
-                                        ]
+                                    // date will be implemented later
+                                    // Html.span [
+                                    //     prop.classes [ tw.``p-1`` ]
+                                    //     prop.children [
+                                    //         Bleeter.icon "bi:dot" "16"
+                                    //     ]
+                                    // ]
                                     ]
-                                ]
                             ]
                             EllipsisOption.render state.BleetOption (BleetOptionMsg >> dispatch)
                         ]

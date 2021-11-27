@@ -4,7 +4,6 @@ module BleeterProfile
 open Elmish
 open Feliz
 open Tailwind
-open Thoth.Json
 open Fable.SimpleHttp
 
 type Msg =
@@ -15,52 +14,19 @@ type Msg =
     | Woof
     | BleetElemMsg of BleetId * BleetElem.Msg
     | LoadProfile of Result<Profile, string> AsyncOperationStatus
+    | LoadBleets of Result<Bleet list, string> AsyncOperationStatus
     | UrlChanged of string
 
 type State =
     {
         BleetElems: BleetElem.State list
+        Bleets: Result<Bleet list, string> Deferred
         Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
         Handle: string
     }
 
-let bleets: Bleet list =
-    [
-        {
-            Id = 1
-            Name = "Bleeter Boi"
-            Content = "Hello Bleeter!"
-            ProfilePic = "/img/bleeter_profile_pic.png"
-            Handle = "BleeterBoi"
-            Time = ""
-            Rebleets = 123
-            Likes = 3000
-            Replies = 0
-        }
-        {
-            Id = 2
-            Name = "Sheeple"
-            Content = "We the Sheeple!"
-            ProfilePic = "/img/bleeter_profile_pic.png"
-            Handle = "Sheeple"
-            Time = ""
-            Rebleets = 1230
-            Likes = 40000
-            Replies = 1
-        }
-        {
-            Id = 3
-            Name = "John Xina"
-            Content = "“The enemy can’t hit what they can’t see.”- John Xina, the art of war"
-            ProfilePic = "/img/john_xina.png"
-            Handle = "JohnXina"
-            Time = ""
-            Rebleets = 1230
-            Likes = 40000
-            Replies = 1
-        }
-    ]
+let bleets: Bleet list = []
 
 let init () =
 
@@ -90,7 +56,8 @@ let init () =
         }
 
     {
-        BleetElems = (bleets |> List.map BleetElem.init)
+        BleetElems = []
+        Bleets = HasNotStartedYet
         Profile = HasNotStartedYet
         ProfileOption = profileOption
         Handle = "Bleeter"
@@ -102,9 +69,17 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let newState = { state with Handle = handle }
         newState, Cmd.ofMsg (LoadProfile Started)
     | AddBleet bleet ->
-        let bleets = (bleet |> BleetElem.init) :: state.BleetElems
+        match state.Bleets with
+        | Resolved (Ok bleets) ->
+            let bleets = bleet :: bleets
+            let bleetElems = bleets |> List.map BleetElem.init
 
-        { state with BleetElems = bleets }, Cmd.none
+            { state with
+                Bleets = Resolved(Ok bleets)
+                BleetElems = bleetElems
+            },
+            Cmd.none
+        | _ -> state, Cmd.none
     | Follow ->
         match state.Profile with
         | Resolved (Ok profile) ->
@@ -128,28 +103,32 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | BleetElemMsg (id: int, msg) ->
         match msg with
         | BleetElem.Msg.DeleteBleet ->
-            printf "delete bleet %d" id
+            match state.Bleets with
+            | Resolved (Ok bleets) ->
+                let bleets = bleets |> List.removeBy (fun bleet -> bleet.Id = id)
+                let bleetElems = bleets |> List.map BleetElem.init
 
-            let updatedBleetElems =
-                state.BleetElems
-                |> List.removeBy (fun bleetElem -> bleetElem.Bleet.Id = id)
-
-            { state with BleetElems = updatedBleetElems }, Cmd.none
+                { state with
+                    Bleets = Resolved(Ok bleets)
+                    BleetElems = bleetElems
+                },
+                Cmd.none
+            | _ -> state, Cmd.none
         | _ ->
-            state.BleetElems
-            |> List.tryFind (fun bleet -> bleet.Bleet.Id = id)
-            |> (fun bleetElemOpt ->
-                match bleetElemOpt with
-                | Some bleetElem ->
-                    let bleetElem, cmd = BleetElem.update msg bleetElem
+            let bleetElem =
+                state.BleetElems
+                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
 
-                    { state with
-                        BleetElems =
-                            (state.BleetElems
-                             |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) bleetElem)
-                    },
-                    (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
-                | None -> state, Cmd.none)
+            match bleetElem with
+            | Some bleetElem ->
+                let updatedBleetElem, cmd = BleetElem.update msg bleetElem
+
+                let bleetElems =
+                    state.BleetElems
+                    |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) updatedBleetElem
+
+                { state with BleetElems = bleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
+            | None -> state, Cmd.none
     | LoadProfile asyncOpStatus ->
         match asyncOpStatus with
         | Started ->
@@ -157,10 +136,17 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
             let loadProfileCmd =
                 async {
-                    let! (statusCode, profile) = sprintf "/data/profile/%s.json" nextState.Handle |> Http.get
+                    let! (statusCode, profileList) = "/data/Profiles.json" |> Http.get
 
                     if statusCode = 200 then
-                        return LoadProfile(Finished(profile |> Profile.decodeResult))
+                        return
+                            LoadProfile(
+                                Finished(
+                                    profileList
+                                    |> Profile.decodeListResult
+                                    |> Profile.findProfile nextState.Handle
+                                )
+                            )
                     else
                         return LoadProfile(Finished(Error "error while fetching profile"))
                 }
@@ -169,7 +155,43 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         | Finished result ->
             let nextState = { state with Profile = Resolved result }
-            nextState, Cmd.none
+            nextState, Cmd.ofMsg (LoadBleets(Started))
+    | LoadBleets asyncOpStatus ->
+        match asyncOpStatus with
+        | Started ->
+            let nextState = { state with Profile = InProgress }
+
+            let loadBleetsCmd =
+                async {
+                    let! (statusCode, bleetList) = "/data/Bleets.json" |> Http.get
+
+                    if statusCode = 200 then
+                        return
+                            LoadBleets(
+                                Finished(
+                                    bleetList
+                                    |> Bleet.decodeListResult
+                                    |> Bleet.findBleets nextState.Handle
+                                )
+                            )
+                    else
+                        return LoadBleets(Finished(Error "error while fetching profile"))
+                }
+
+            nextState, Cmd.fromAsync loadBleetsCmd
+        | Finished result ->
+            match result with
+            | Ok bleets ->
+                let bleetElems = bleets |> List.map BleetElem.init
+
+                let nextState =
+                    { state with
+                        Bleets = Resolved(Ok bleets)
+                        BleetElems = bleetElems
+                    }
+
+                nextState, Cmd.none
+            | Error _ -> state, Cmd.none
 
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
     let followBtn =
@@ -206,13 +228,23 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
         ]
 
     Html.div [
-        Html.img [
-            prop.classes [
-                tw.``w-full``
-                tw.``bg-cover``
-            ]
-            prop.src profile.Banner
-        ]
+        (match profile.Banner with
+         | Some url ->
+             Html.img [
+                 prop.classes [
+                     tw.``w-full``
+                     tw.``bg-cover``
+                 ]
+                 prop.src url
+             ]
+         | None ->
+             Html.div [
+                 prop.classes [
+                     tw.``w-full``
+                     tw.``border-none``
+                     tw.``bg-transparent``
+                 ]
+             ])
         Html.div [
             prop.classes [
                 tw.flex
@@ -265,57 +297,63 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
         Html.div [
             prop.classes [ tw.block; tw.``m-2`` ]
             prop.children [
-                Html.div [
-                    prop.classes [ tw.``inline-flex`` ]
-                    prop.children [
-                        Html.div [
-                            prop.classes [
-                                tw.``flex-1``
-                                tw.``pt-1``
-                            ]
-                            prop.children [
-                                Bleeter.icon "akar-icons:location" "16"
-                            ]
-                        ]
-                        Html.div [
-                            prop.classes [ tw.``flex-1`` ]
-                            prop.children [
-                                Html.span [ prop.text profile.Location ]
-                            ]
-                        ]
-                    ]
-                ]
-                Html.div [
-                    prop.classes [
-                        tw.``inline-flex``
-                        tw.``ml-2``
-                    ]
-                    prop.children [
-                        Html.div [
-                            prop.classes [
-                                tw.``flex-1``
-                                tw.``pt-1``
-                            ]
-                            prop.children [
-                                Bleeter.icon "il:url" "12"
-                            ]
-                        ]
-                        Html.a [
-                            prop.href profile.Url
-                            prop.target "_blank"
-                            prop.classes [
-                                tw.``flex-1``
-                                tw.underline
-                                tw.``text-green-600``
-                            ]
-                            prop.children [
-                                Html.span [
-                                    prop.text (Bleeter.getUrl profile.Url)
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                (match profile.Location with
+                 | Some location ->
+                     Html.div [
+                         prop.classes [ tw.``inline-flex`` ]
+                         prop.children [
+                             Html.div [
+                                 prop.classes [
+                                     tw.``flex-1``
+                                     tw.``pt-1``
+                                 ]
+                                 prop.children [
+                                     Bleeter.icon "akar-icons:location" "16"
+                                 ]
+                             ]
+                             Html.div [
+                                 prop.classes [ tw.``flex-1`` ]
+                                 prop.children [
+                                     Html.span [ prop.text location ]
+                                 ]
+                             ]
+                         ]
+                     ]
+                 | None -> Html.div [])
+                (match profile.Url with
+                 | Some url ->
+                     Html.div [
+                         prop.classes [
+                             tw.``inline-flex``
+                             tw.``ml-2``
+                         ]
+                         prop.children [
+                             Html.div [
+                                 prop.classes [
+                                     tw.``flex-1``
+                                     tw.``pt-1``
+                                 ]
+                                 prop.children [
+                                     Bleeter.icon "il:url" "12"
+                                 ]
+                             ]
+                             Html.a [
+                                 prop.href url
+                                 prop.target "_blank"
+                                 prop.classes [
+                                     tw.``flex-1``
+                                     tw.underline
+                                     tw.``text-green-600``
+                                 ]
+                                 prop.children [
+                                     Html.span [
+                                         prop.text (Bleeter.getUrl url)
+                                     ]
+                                 ]
+                             ]
+                         ]
+                     ]
+                 | None -> Html.div [])
             ]
         ]
         Html.div [
@@ -403,4 +441,7 @@ let render (state: State) (dispatch: Msg -> unit) =
 
     match state.Profile with
     | Resolved (Ok profile) -> renderedElem profile state.ProfileOption state.BleetElems
+    | Resolved (Error err) ->
+        printf "%A" err
+        Html.none
     | _ -> Html.none

@@ -50,7 +50,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
 
             let loadProfileCmd =
                 async {
-                    let! (statusCode, bleets) = "/data/HomeBleets.json" |> Http.get
+                    let! (statusCode, bleets) = "/data/Bleets.json" |> Http.get
 
                     if statusCode = 200 then
                         return
@@ -84,6 +84,9 @@ let render (state: State) (dispatch: Msg -> unit) =
                         bleetElem
                         ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
                          >> dispatch))
+        | Resolved (Error err) ->
+            printf "%A" err
+            []
         | _ -> []
 
     Html.div [

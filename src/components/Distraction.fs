@@ -43,12 +43,9 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         state, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
-    let distractionList =
-        [
-            ("Distracting in SheepLand", "#SheepCare")
-        ]
+    let distractionList: Distraction list = []
 
-    let elem (description: string, name: string) =
+    let elem (distraction: Distraction) =
         Html.div [
             prop.classes [ tw.flex; tw.``m-4`` ]
             prop.children [
@@ -66,7 +63,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 tw.``text-xs``
                                 tw.``text-gray-600``
                             ]
-                            prop.text description
+                            prop.text distraction.Category
                         ]
                         Html.h2 [
                             prop.classes [
@@ -74,7 +71,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 tw.``w-48``
                                 tw.``font-bold``
                             ]
-                            prop.text name
+                            prop.text distraction.HashTag
                         ]
                         // will be implemented later
                         // Html.p [
@@ -86,7 +83,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                         //     ]
                         //     prop.text numBleets
                         // ]
-                    ]
+                        ]
                 ]
                 EllipsisOption.render state.DistractionOption (DistractionOptionMsg >> dispatch)
             ]
