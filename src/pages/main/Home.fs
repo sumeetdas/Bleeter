@@ -7,9 +7,9 @@ open Tailwind
 
 type State =
     {
+        Data: Data.State
         Count: int
-        BleetElems: Result<BleetElem.State list, string> Deferred
-        BleetElems1: BleetElem.State list
+        BleetElems: BleetElem.State list
     }
 
 type Msg =
@@ -17,58 +17,67 @@ type Msg =
     | GetMoreBleets of int * int
     | LoadMoreBleets of Bleet list
     | BleetElemMsg of int * BleetElem.Msg
+    | DataUpdate of Data.State
 
-let init () = { Count = 0; BleetElems = HasNotStartedYet; BleetElems1 = [] }
+let init (data: Data.State) = { Data = data; Count = 0; BleetElems = [] }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | ClearHomeState -> 
-        init(), Cmd.ofMsg (GetMoreBleets (0, 10))
-    | LoadMoreBleets bleets -> 
+    | DataUpdate data -> 
+        match data.Bleets with 
+        | Resolved (Ok bleets) -> 
+            let newBleetElems = bleets |> List.map BleetElem.init 
+            { state with Data = data; BleetElems = newBleetElems }, Cmd.none
+        | _ -> { state with Data = data }, Cmd.none
+    | ClearHomeState -> init state.Data, Cmd.ofMsg (GetMoreBleets(0, 10))
+    | GetMoreBleets (offset, numBleets) ->
+        match state.Data.Bleets with
+        | Resolved (Ok bleets) ->
+            if offset > bleets.Length then
+                state, Cmd.none
+            else
+                let newBleets =
+                    bleets
+                    |> List.skip offset
+                    |> List.take numBleets
+                    |> List.map BleetElem.init
+
+                let newBleets = [ state.BleetElems; newBleets ] |> List.concat
+                { state with BleetElems = newBleets }, Cmd.none
+        | _ -> state, Cmd.none
+    | LoadMoreBleets bleets ->
         let newBleetElems = bleets |> List.map BleetElem.init
-        let bleetElems = [ state.BleetElems1; newBleetElems ] |> List.concat
-        { state with BleetElems1 = bleetElems }, Cmd.none
+        let bleetElems = [ state.BleetElems; newBleetElems ] |> List.concat
+        { state with BleetElems = bleetElems }, Cmd.none
     | BleetElemMsg (id, msg) ->
         match msg with
         | BleetElem.Msg.ReportBleet ->
             printf "Report"
             state, Cmd.none
         | _ ->
-            match state.BleetElems with
-            | Resolved (Ok bleets) ->
-                bleets
-                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
-                |> (fun bleetElemOpt ->
-                    match bleetElemOpt with
-                    | None -> state, Cmd.none
-                    | Some bleetElem ->
-                        let newBleetElem, cmd = BleetElem.update msg bleetElem
+            state.BleetElems
+            |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+            |> (fun bleetElemOpt ->
+                match bleetElemOpt with
+                | None -> state, Cmd.none
+                | Some bleetElem ->
+                    let newBleetElem, cmd = BleetElem.update msg bleetElem
 
-                        let newBleetElems =
-                            bleets
-                            |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
+                    let newBleetElems =
+                        state.BleetElems
+                        |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
 
-                        { state with BleetElems = Resolved(Ok newBleetElems) },
-                        (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
-            | _ -> state, Cmd.none
-    | _ -> 
-        state, Cmd.none
-        
+                    { state with BleetElems = newBleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
+
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =
-        match state.BleetElems with
-        | Resolved (Ok bleets) ->
-            bleets
-            |> List.map
-                (fun bleetElem ->
-                    BleetElem.render
-                        bleetElem
-                        ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
-                         >> dispatch))
-        | Resolved (Error err) ->
-            printf "%A" err
-            []
-        | _ -> []
+        state.BleetElems
+        |> List.map
+            (fun bleetElem ->
+                BleetElem.render
+                    bleetElem
+                    ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                     >> dispatch))
 
     Html.div [
         prop.classes [

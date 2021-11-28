@@ -3,7 +3,6 @@ module Main
 
 open Elmish
 open Feliz
-open Feliz.Router
 open Tailwind
 
 type State =
@@ -19,23 +18,27 @@ type Msg =
     | AppHeight of int
     | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
+    | DataUpdate of Data.State
 
-let init (currentUrl: string list) : State * Msg Cmd =
+let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
         CurrentUrl = currentUrl
         Height = 0
         ProfileElem = ProfileElem.init ()
-        Home = Home.init ()
+        Home = Home.init data
     },
     Cmd.ofMsg (UrlChanged currentUrl)
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | DataUpdate data ->
+        let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
+        { state with Home = home }, (Cmd.map HomeMsg homeCmd)
     | UrlChanged url ->
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
-            let home, homeCmd = Home.update (Home.Msg.LoadBleets Started) state.Home
+            let home, homeCmd = Home.update Home.Msg.ClearHomeState state.Home
             { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem

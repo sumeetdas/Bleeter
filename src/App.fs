@@ -32,8 +32,8 @@ type Msg =
 // need parentheses for indicating that init is a function
 let init () =
     let currentUrl = Router.currentUrl ()
-    let main, mainCmd = Main.init currentUrl
     let data, dataCmd = Data.init ()
+    let main, mainCmd = Main.init currentUrl data
 
     {
         Data = data
@@ -43,16 +43,21 @@ let init () =
         Distraction = Distraction.init ()
         SearchBox = SearchBox.init ()
     },
-    Cmd.batch [ 
-        (Cmd.map MainMsg mainCmd) 
-        (Cmd.map DataMsg dataCmd) 
+    Cmd.batch [
+        (Cmd.map MainMsg mainCmd)
+        (Cmd.map DataMsg dataCmd)
     ]
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
-        { state with Data = data }, (Cmd.map DataMsg dataCmd)
+        let main, mainCmd = Main.update (Main.Msg.DataUpdate data) state.Main
+        { state with Data = data; Main = main },
+        Cmd.batch [
+            (Cmd.map DataMsg dataCmd)
+            (Cmd.map MainMsg mainCmd)
+        ]
     | UrlChanged url ->
         match url with
         | "create" :: rest ->
@@ -186,9 +191,12 @@ let appOnResizeHeight initial =
 //     Cmd.ofSub sub
 
 let subscribers initial =
+    let currentUrl = Router.currentUrl ()
+
     Cmd.batch [
         appOnLoadHeight initial
         appOnResizeHeight initial
+        Cmd.ofMsg (UrlChanged(if currentUrl.Length = 0 then [ "home" ] else currentUrl))
     ]
 
 Program.mkProgram init update render
