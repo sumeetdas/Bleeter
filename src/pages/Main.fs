@@ -10,21 +10,21 @@ type State =
     {
         CurrentUrl: string list
         Height: int
-        BleeterProfile: BleeterProfile.State
+        ProfileElem: ProfileElem.State
         Home: Home.State
     }
 
 type Msg =
     | UrlChanged of string list
     | AppHeight of int
-    | BleeterProfileMsg of BleeterProfile.Msg
+    | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
 
 let init (currentUrl: string list) : State * Msg Cmd =
     {
         CurrentUrl = currentUrl
         Height = 0
-        BleeterProfile = BleeterProfile.init ()
+        ProfileElem = ProfileElem.init ()
         Home = Home.init ()
     },
     Cmd.ofMsg (UrlChanged currentUrl)
@@ -38,18 +38,18 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             let home, homeCmd = Home.update (Home.Msg.LoadBleets Started) state.Home
             { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
         | [ (handle: string) ] ->
-            let bleeterProfile, cmd = BleeterProfile.update (BleeterProfile.Msg.UrlChanged handle) state.BleeterProfile
+            let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
             { state with
-                BleeterProfile = bleeterProfile
+                ProfileElem = profileElem
                 CurrentUrl = [ handle ]
             },
-            Cmd.map BleeterProfileMsg cmd
+            Cmd.map ProfileElemMsg cmd
         | _ -> state, Cmd.none
     | AppHeight height -> { state with Height = height }, Cmd.none
-    | BleeterProfileMsg msg' ->
-        let bleeterProfile, cmd = BleeterProfile.update msg' state.BleeterProfile
-        { state with BleeterProfile = bleeterProfile }, (Cmd.map BleeterProfileMsg cmd)
+    | ProfileElemMsg msg' ->
+        let profileElem, cmd = ProfileElem.update msg' state.ProfileElem
+        { state with ProfileElem = profileElem }, (Cmd.map ProfileElemMsg cmd)
     | HomeMsg msg' ->
         let newHome, cmd = Home.update msg' state.Home
         { state with Home = newHome }, (Cmd.map HomeMsg cmd)
@@ -70,7 +70,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
-            | [ (_: string) ] -> BleeterProfile.render state.BleeterProfile (BleeterProfileMsg >> dispatch)
+            | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
             | _ -> Html.none
         ]
     ]

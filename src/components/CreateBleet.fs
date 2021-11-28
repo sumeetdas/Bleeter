@@ -16,12 +16,13 @@ type State =
         Profile: Profile option
         Bleet: Bleet option
         BleetContent: string
+        PreviousUrl: string list
     }
 
 type Msg =
-    | DisplayWeb of Profile
-    | DisplayModal of Profile
-    | Close
+    | DisplayPage of Profile * string list
+    | DisplayModal of Profile * string list
+    | ModalBtnClickClose
     | AddBleet of Bleet
     | UpdateBleetContent of string
     | OutsideModalClickClose of string
@@ -33,23 +34,32 @@ let init () =
         Profile = None
         Bleet = None
         BleetContent = ""
+        PreviousUrl = []
     }
 
 let update (msg: Msg) (state: State) : State =
     match msg with
-    | DisplayWeb profile ->
+    | DisplayPage (profile, previousUrl) ->
+        printf "DisplayWeb %A" previousUrl
+
         { state with
             Display = true
             IsModal = false
             Profile = Some profile
+            PreviousUrl = previousUrl
         }
-    | DisplayModal profile ->
+    | DisplayModal (profile, previousUrl) ->
+        printf "DisplayModal %A" previousUrl
+
         { state with
             Display = true
             IsModal = true
             Profile = Some profile
+            PreviousUrl = previousUrl
         }
-    | Close -> init ()
+    | ModalBtnClickClose ->
+        let initState = init ()
+        { initState with PreviousUrl = state.PreviousUrl }
     | AddBleet bleet ->
         let bleet = if state.Profile.IsNone then None else Some bleet
 
@@ -59,7 +69,8 @@ let update (msg: Msg) (state: State) : State =
         if (state.Display
             && id = "CreateBleetModal"
             && state.BleetContent.Length = 0) then
-            init ()
+            let initState = init ()
+            { initState with PreviousUrl = state.PreviousUrl }
         else
             state
 
@@ -115,6 +126,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
         prop.classes classes
         prop.children [
             Html.div [
+                prop.id "CreateBleetModalMain"
                 prop.classes [
                     tw.border
                     tw.``border-blue-500``
@@ -142,7 +154,7 @@ let mainElem (state: State) (dispatch: Msg -> unit) =
                         prop.children [
                             Bleeter.icon "akar-icons:cross" "12"
                         ]
-                        prop.onClick (fun _ -> dispatch (Close))
+                        prop.onClick (fun _ -> dispatch (ModalBtnClickClose))
                     ]
                     Html.div [
                         prop.classes [

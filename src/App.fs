@@ -46,9 +46,11 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | UrlChanged url ->
         match url with
         | "create" :: rest ->
-            match state.Main.BleeterProfile.Profile with
+            match state.Main.ProfileElem.Profile with
             | Resolved (Ok profile) ->
-                let create = CreateBleet.update (CreateBleet.Msg.DisplayModal profile) state.CreateBleet
+                let create =
+                    CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
+
                 { state with CreateBleet = create }, Cmd.none
             | _ -> state, Cmd.none
         | _ ->
@@ -58,15 +60,27 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let main, cmd = Main.update msg' state.Main
         { state with Main = main }, (Cmd.map MainMsg cmd)
     | CreateBleetMsg msg' ->
-        Router.navigate (state.CurrentUrl |> List.toArray)
         let createBleet = CreateBleet.update msg' state.CreateBleet
+
+        if not createBleet.Display then
+            printf "CreateBleetMsg current url %A" createBleet.PreviousUrl
+            Router.navigate (createBleet.PreviousUrl |> List.toArray)
+        else
+            1 |> ignore
 
         match createBleet.Bleet with
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
-            let main, cmd = Main.update ((BleeterProfile.Msg.AddBleet >> Main.Msg.BleeterProfileMsg) bleet) state.Main
-            let createBleet = CreateBleet.init ()
-            { state with Main = main; CreateBleet = createBleet }, (Cmd.map MainMsg cmd)
+            let main, cmd = Main.update ((ProfileElem.Msg.AddBleet >> Main.Msg.ProfileElemMsg) bleet) state.Main
+
+            { state with
+                Main = main
+                CreateBleet = CreateBleet.init ()
+            },
+            (Cmd.batch [
+                Cmd.ofMsg (UrlChanged createBleet.PreviousUrl)
+                Cmd.map MainMsg cmd
+             ])
     | DistractionMsg msg ->
         let distraction, cmd = Distraction.update msg state.Distraction
         { state with Distraction = distraction }, (Cmd.map DistractionMsg cmd)
