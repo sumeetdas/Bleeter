@@ -10,8 +10,7 @@ type Msg =
     | AddBleet of Bleet
     | Follow
     | ProfileOptionMsg of Msg EllipsisOption.Msg
-    | Meow
-    | Woof
+    | ReportProfile
     | BleetElemMsg of BleetId * BleetElem.Msg
     | LoadProfile of Result<Profile, string> AsyncOperationStatus
     | LoadBleets of Result<Bleet list, string> AsyncOperationStatus
@@ -19,22 +18,17 @@ type Msg =
 
 type State =
     {
-        BleetElems: BleetElem.State list
-        Bleets: Result<Bleet list, string> Deferred
+        BleetElems: Result<BleetElem.State list, string> Deferred
         Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
         Handle: string
     }
 
-let bleets: Bleet list = []
-
 let init () =
-
     let profileOption: Msg EllipsisOption.State =
         let optionList: Msg EllipsisOption.Option list =
             [
-                { Name = "Meow"; Command = Cmd.ofMsg Meow }
-                { Name = "Woof"; Command = Cmd.ofMsg Woof }
+                { Name = "ReportProfile"; Command = Cmd.ofMsg ReportProfile }
             ]
 
         {
@@ -56,8 +50,7 @@ let init () =
         }
 
     {
-        BleetElems = []
-        Bleets = HasNotStartedYet
+        BleetElems = HasNotStartedYet
         Profile = HasNotStartedYet
         ProfileOption = profileOption
         Handle = "Bleeter"
@@ -67,16 +60,17 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | UrlChanged handle ->
         let newState = { state with Handle = handle }
-        newState, Cmd.ofMsg (LoadProfile Started)
+        newState, Cmd.batch [
+            Cmd.ofMsg (LoadProfile Started) 
+            Cmd.ofMsg (LoadBleets Started)
+        ]
     | AddBleet bleet ->
-        match state.Bleets with
-        | Resolved (Ok bleets) ->
-            let bleets = bleet :: bleets
-            let bleetElems = bleets |> List.map BleetElem.init
+        match state.BleetElems with
+        | Resolved (Ok bleetElems) ->
+            let bleetElems = (bleet |> BleetElem.init) :: bleetElems
 
             { state with
-                Bleets = Resolved(Ok bleets)
-                BleetElems = bleetElems
+                BleetElems = Resolved(Ok bleetElems)
             },
             Cmd.none
         | _ -> state, Cmd.none
@@ -94,41 +88,38 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let profileOption, cmd = EllipsisOption.update msg state.ProfileOption
 
         { state with ProfileOption = profileOption }, cmd
-    | Meow ->
-        printf "Meow"
-        state, Cmd.none
-    | Woof ->
-        printf "Woof"
+    | ReportProfile ->
+        printf "ReportProfile"
         state, Cmd.none
     | BleetElemMsg (id: int, msg) ->
         match msg with
         | BleetElem.Msg.DeleteBleet ->
-            match state.Bleets with
-            | Resolved (Ok bleets) ->
-                let bleets = bleets |> List.removeBy (fun bleet -> bleet.Id = id)
-                let bleetElems = bleets |> List.map BleetElem.init
-
+            match state.BleetElems with
+            | Resolved (Ok bleetElems) ->
+                let bleetElems = bleetElems |> List.removeBy (fun bleetElem -> bleetElem.Bleet.Id = id)
+                
                 { state with
-                    Bleets = Resolved(Ok bleets)
-                    BleetElems = bleetElems
+                    BleetElems = Resolved(Ok bleetElems)
                 },
                 Cmd.none
             | _ -> state, Cmd.none
         | _ ->
-            let bleetElem =
-                state.BleetElems
-                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+            match state.BleetElems with
+            | Resolved (Ok bleetElems) ->
+                let bleetElem =
+                    bleetElems
+                    |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+                match bleetElem with
+                | Some bleetElem ->
+                    let updatedBleetElem, cmd = BleetElem.update msg bleetElem
 
-            match bleetElem with
-            | Some bleetElem ->
-                let updatedBleetElem, cmd = BleetElem.update msg bleetElem
+                    let bleetElems =
+                        bleetElems
+                        |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) updatedBleetElem
 
-                let bleetElems =
-                    state.BleetElems
-                    |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) updatedBleetElem
-
-                { state with BleetElems = bleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
-            | None -> state, Cmd.none
+                    { state with BleetElems = Resolved(Ok bleetElems) }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
+                | None -> state, Cmd.none
+            | _ -> state, Cmd.none
     | LoadProfile asyncOpStatus ->
         match asyncOpStatus with
         | Started ->
@@ -155,7 +146,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         | Finished result ->
             let nextState = { state with Profile = Resolved result }
-            nextState, Cmd.ofMsg (LoadBleets(Started))
+            nextState, Cmd.none
     | LoadBleets asyncOpStatus ->
         match asyncOpStatus with
         | Started ->
@@ -186,12 +177,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
                 let nextState =
                     { state with
-                        Bleets = Resolved(Ok bleets)
-                        BleetElems = bleetElems
+                        BleetElems = Resolved(Ok bleetElems)
                     }
-
                 nextState, Cmd.none
-            | Error _ -> state, Cmd.none
+            | Error err -> 
+                printf "%A" err
+                state, Cmd.none
 
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
     let followBtn =
@@ -278,8 +269,6 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                 ]
             ]
         ]
-
-
         Html.div [
             prop.classes [ tw.flex; tw.``ml-2`` ]
             prop.children [
@@ -394,53 +383,58 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
         ]
     ]
 
-let render (state: State) (dispatch: Msg -> unit) =
-    let renderedElem
-        (profile: Profile)
-        (profileOption: Msg EllipsisOption.State)
-        (bleetElems: BleetElem.State list)
-        : ReactElement =
-        Html.div [
-            prop.classes [
-                tw.flex
-                tw.``flex-col``
-                tw.``flex-grow-1``
-            ]
-            prop.children [
-                bleetProfileElem profile profileOption dispatch
+let renderedElem
+    (profile: Profile)
+    (profileOption: Msg EllipsisOption.State)
+    (bleetElems: BleetElem.State list)
+    (dispatch: Msg -> unit)
+    : ReactElement =
+    Html.div [
+        prop.classes [
+            tw.flex
+            tw.``flex-col``
+            tw.``flex-grow-1``
+        ]
+        prop.children [
+            bleetProfileElem profile profileOption dispatch
 
-                Html.div [
-                    prop.classes [
-                        tw.``text-2xl``
-                        tw.``h-12``
-                        tw.``border-b``
-                        tw.``border-gray-300``
-                        tw.``text-green-600``
-                    ]
-                    prop.children [
-                        Html.span [
-                            prop.classes [ tw.``m-6`` ]
-                            prop.text "Latest Bleets"
-                        ]
+            Html.div [
+                prop.classes [
+                    tw.``text-2xl``
+                    tw.``h-12``
+                    tw.``border-b``
+                    tw.``border-gray-300``
+                    tw.``text-green-600``
+                ]
+                prop.children [
+                    Html.span [
+                        prop.classes [ tw.``m-6`` ]
+                        prop.text "Latest Bleets"
                     ]
                 ]
-
-                // let bleetList = [1..100] |> List.collect (fun x -> bleets |> (List.map bleetElem))
-                let bleetList =
-                    bleetElems
-                    |> List.map
-                        (fun bleetElem ->
-                            BleetElem.render
-                                bleetElem
-                                ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
-                                 >> dispatch))
-
-                Html.div [ prop.children bleetList ]
             ]
+            let bleetList =
+                bleetElems
+                |> List.map
+                    (fun bleetElem ->
+                        BleetElem.render
+                            bleetElem
+                            ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
+                            >> dispatch))
+            Html.div [ prop.children bleetList ]
         ]
+    ]
 
+let render (state: State) (dispatch: Msg -> unit) =
     match state.Profile with
-    | Resolved (Ok profile) -> renderedElem profile state.ProfileOption state.BleetElems
+    | Resolved (Ok profile) -> 
+        match state.BleetElems with 
+        | Resolved (Ok bleetElems) ->  
+            renderedElem profile state.ProfileOption bleetElems dispatch
+        | Resolved (Error err) ->
+            printf "%A" err
+            Html.none
+        | _ -> Html.none
     | Resolved (Error err) ->
         printf "%A" err
         Html.none
