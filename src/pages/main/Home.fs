@@ -4,22 +4,30 @@ module Home
 open Elmish
 open Feliz
 open Tailwind
-open Fable.SimpleHttp
 
 type State =
     {
         Count: int
         BleetElems: Result<BleetElem.State list, string> Deferred
+        BleetElems1: BleetElem.State list
     }
 
 type Msg =
+    | ClearHomeState
+    | GetMoreBleets of int * int
+    | LoadMoreBleets of Bleet list
     | BleetElemMsg of int * BleetElem.Msg
-    | LoadBleets of Result<BleetElem.State list, string> AsyncOperationStatus
 
-let init () = { Count = 0; BleetElems = HasNotStartedYet }
+let init () = { Count = 0; BleetElems = HasNotStartedYet; BleetElems1 = [] }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | ClearHomeState -> 
+        init(), Cmd.ofMsg (GetMoreBleets (0, 10))
+    | LoadMoreBleets bleets -> 
+        let newBleetElems = bleets |> List.map BleetElem.init
+        let bleetElems = [ state.BleetElems1; newBleetElems ] |> List.concat
+        { state with BleetElems1 = bleetElems }, Cmd.none
     | BleetElemMsg (id, msg) ->
         match msg with
         | BleetElem.Msg.ReportBleet ->
@@ -43,36 +51,9 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                         { state with BleetElems = Resolved(Ok newBleetElems) },
                         (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
             | _ -> state, Cmd.none
-    | LoadBleets asyncOpStatus ->
-        match asyncOpStatus with
-        | Started ->
-            let nextState = { state with BleetElems = InProgress }
-
-            let loadProfileCmd =
-                async {
-                    let! (statusCode, bleets) = "/data/Bleets.json" |> Http.get
-
-                    if statusCode = 200 then
-                        return
-                            LoadBleets(
-                                Finished(
-                                    bleets
-                                    |> Bleet.decodeListResult
-                                    |> (fun result ->
-                                        match result with
-                                        | Ok bleetList -> bleetList |> List.map BleetElem.init |> Ok
-                                        | Error error -> Error error)
-                                )
-                            )
-                    else
-                        return LoadBleets(Finished(Error "error while fetching profile"))
-                }
-
-            nextState, Cmd.fromAsync loadProfileCmd
-        | Finished bleets ->
-            let nextState = { state with BleetElems = Resolved bleets }
-            nextState, Cmd.none
-
+    | _ -> 
+        state, Cmd.none
+        
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =
         match state.BleetElems with

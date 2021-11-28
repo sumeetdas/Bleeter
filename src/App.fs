@@ -12,6 +12,7 @@ open Fable.Core.JsInterop
 // data model
 type State =
     {
+        Data: Data.State
         CurrentUrl: string list
         Main: Main.State
         CreateBleet: CreateBleet.State
@@ -21,6 +22,7 @@ type State =
 
 // events
 type Msg =
+    | DataMsg of Data.Msg
     | UrlChanged of string list
     | MainMsg of Main.Msg
     | CreateBleetMsg of CreateBleet.Msg
@@ -31,18 +33,26 @@ type Msg =
 let init () =
     let currentUrl = Router.currentUrl ()
     let main, mainCmd = Main.init currentUrl
+    let data, dataCmd = Data.init ()
 
     {
+        Data = data
         CurrentUrl = currentUrl
         Main = main
         CreateBleet = CreateBleet.init ()
         Distraction = Distraction.init ()
         SearchBox = SearchBox.init ()
     },
-    Cmd.batch [ (Cmd.map MainMsg mainCmd) ]
+    Cmd.batch [ 
+        (Cmd.map MainMsg mainCmd) 
+        (Cmd.map DataMsg dataCmd) 
+    ]
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | DataMsg msg' ->
+        let data, dataCmd = Data.update msg' state.Data
+        { state with Data = data }, (Cmd.map DataMsg dataCmd)
     | UrlChanged url ->
         match url with
         | "create" :: rest ->
