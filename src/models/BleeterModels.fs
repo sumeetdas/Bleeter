@@ -101,11 +101,11 @@ module Bleet =
 
             Ok bleetList
 
-type Distraction = { Category: string; HashTag: string }
+type Distraction = { Category: string; Hashtag: string }
 
 [<RequireQualifiedAccess>]
 module Distraction =
-    let init () = { Category = ""; HashTag = "" }
+    let init () = { Category = ""; Hashtag = "" }
 
     let decodeListResult (json: string) : Result<Distraction list, string> =
         Decode.Auto.fromString<Distraction list> (json)

@@ -22,7 +22,6 @@ type State =
         Handle: string
         DeleteBleet: Bleet option
         Profile: Profile option
-        Bleets: Bleet list option
         BleetElems: BleetElem.State list
     }
 
@@ -60,7 +59,6 @@ let init (data: Data.State) =
         Handle = "Bleeter"
         DeleteBleet = None
         Profile = None
-        Bleets = None
         BleetElems = []
     }
 
@@ -116,15 +114,24 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             else
                 { state with BleetElems = bleetElems }, bleetElemCmd
         | None -> state, Cmd.none
-    | LoadProfile -> { state with Profile = state.Data.MyProfile }, Cmd.none
+    | LoadProfile -> 
+        match state.Data.Profiles with
+        | Resolved (Ok profiles) ->
+            let profileOpt =
+                profiles
+                |> List.tryFind (fun profile -> profile.Handle = "bleeter")
+
+            { state with Profile = profileOpt }, Cmd.none
+        | _ -> state, Cmd.none
     | LoadBleets ->
         match state.Data.Bleets with
         | Resolved (Ok bleets) ->
-            let bleets =
+            let bleetElems =
                 bleets
                 |> List.filter (fun bleet -> bleet.Handle = "bleeter")
+                |> List.map BleetElem.init
 
-            { state with Bleets = Some bleets }, Cmd.none
+            { state with BleetElems = bleetElems }, Cmd.none
         | _ -> state, Cmd.none
 
 

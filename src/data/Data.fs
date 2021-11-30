@@ -2,7 +2,6 @@
 module Data
 
 open Elmish
-open Fable.SimpleHttp
 
 type State =
     {

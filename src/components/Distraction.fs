@@ -41,20 +41,21 @@ let init (data: Data.State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | DataUpdate data -> 
+        { state with Data = data }, Cmd.none
     | DistractionOptionMsg msg ->
         let distractionOption, cmd = EllipsisOption.update msg state.DistractionOption
         { state with DistractionOption = distractionOption }, cmd
     | ReportDistraction ->
         printf "Report distraction"
-        state, Cmd.none
-    | DataUpdate data -> { state with Data = data }, Cmd.none
+        state, Cmd.none    
+
+let distractionList (state: State) : Distraction list =
+    match state.Data.Distractions with
+    | Resolved (Ok distractions) -> distractions |> List.truncate 4
+    | _ -> []
 
 let render (state: State) (dispatch: Msg -> unit) =
-    let distractionList: Distraction list =
-        match state.Data.Distractions with
-        | Resolved (Ok distractions) -> distractions
-        | _ -> []
-
     let elem (distraction: Distraction) =
         Html.div [
             prop.classes [ tw.flex; tw.``m-4`` ]
@@ -81,7 +82,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 tw.``w-48``
                                 tw.``font-bold``
                             ]
-                            prop.text distraction.HashTag
+                            prop.text distraction.Hashtag
                         ]
                         // will be implemented later
                         // Html.p [
@@ -118,10 +119,10 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``w-48``
                     tw.``font-semibold``
                 ]
-                prop.text "Distraction"
+                prop.text "Distractions"
             ]
             Html.div [
-                prop.children (distractionList |> List.map elem)
+                prop.children ((distractionList state) |> List.map elem)
             ]
         ]
     ]
