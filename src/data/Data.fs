@@ -32,35 +32,6 @@ let init () : State * Cmd<Msg> =
         Cmd.ofMsg (LoadDistractions Started)
     ]
 
-let loadData
-    (state: State)
-    (asyncOpStatus: Result<'b list, string> AsyncOperationStatus)
-    (jsonUrl: string)
-    (jsonToList: string -> Result<'b list, string>)
-    (resultToMsg: Result<'b list, string> -> Msg)
-    (toInProgressState: State -> State)
-    (toResolvedState: State * Result<'b list, string> -> State)
-    : State * Cmd<Msg> =
-
-    match asyncOpStatus with
-    | Started ->
-        let nextState = toInProgressState state
-
-        let loadCmd =
-            async {
-                let! (statusCode, json) = jsonUrl |> Http.get
-
-                if statusCode = 200 then
-                    return json |> jsonToList |> resultToMsg
-                else
-                    return Error "error while fetching profile" |> resultToMsg
-            }
-
-        nextState, Cmd.fromAsync loadCmd
-    | Finished result ->
-        let nextState = toResolvedState (state, result)
-        nextState, Cmd.none
-
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | AddBleet bleet ->
@@ -79,7 +50,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { state with MyProfile = bleeterProfileOpt }, Cmd.none
         | _ -> state, Cmd.none
     | LoadProfiles asyncOpStatus ->
-        loadData
+        AsyncOperationStatus.loadData
             state
             asyncOpStatus
             "/data/Profiles.json"
@@ -88,7 +59,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (fun state -> { state with Profiles = InProgress })
             (fun (state, profiles) -> { state with Profiles = Resolved profiles })
     | LoadBleets asyncOpStatus ->
-        loadData
+        AsyncOperationStatus.loadData
             state
             asyncOpStatus
             "/data/Bleets.json"
@@ -97,7 +68,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (fun state -> { state with Bleets = InProgress })
             (fun (state, bleets) -> { state with Bleets = Resolved bleets })
     | LoadDistractions asyncOpStatus ->
-        loadData
+        AsyncOperationStatus.loadData
             state
             asyncOpStatus
             "/data/Distractions.json"

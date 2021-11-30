@@ -37,7 +37,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with Home = home }, Cmd.map HomeMsg homeCmd
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
-        { state with Home = home }, (Cmd.map HomeMsg homeCmd)
+        let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
+
+        { state with Home = home; ProfileElem = profileElem },
+        Cmd.batch [
+            Cmd.map HomeMsg homeCmd
+            Cmd.map ProfileElemMsg profileElemCmd
+        ]
     | UrlChanged url ->
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none

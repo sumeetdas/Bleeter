@@ -67,14 +67,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         ]
     | UrlChanged url ->
         match url with
-        | "create" :: rest ->
-            match state.Main.ProfileElem.Profile with
-            | Resolved (Ok profile) ->
+        | [ "create"; "bleet" ] ->
+            match state.Data.MyProfile with
+            | Some profile ->
                 let createBleet, createBleetCmd =
                     CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
 
                 { state with CreateBleet = createBleet }, Cmd.map CreateBleetMsg createBleetCmd
-            | _ -> state, Cmd.none
+            | None -> state, Cmd.none
         | _ ->
             let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
             { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)

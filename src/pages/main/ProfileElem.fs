@@ -4,26 +4,26 @@ module ProfileElem
 open Elmish
 open Feliz
 open Tailwind
-open Fable.SimpleHttp
 
 type Msg =
-    | AddBleet of Bleet
+    | DataUpdate of Data.State
     | Follow
     | ProfileOptionMsg of Msg EllipsisOption.Msg
     | ReportProfile
     | BleetElemMsg of BleetId * BleetElem.Msg
-    | LoadProfile of Result<Profile, string> AsyncOperationStatus
-    | LoadBleets of Result<Bleet list, string> AsyncOperationStatus
     | UrlChanged of string
+    | LoadProfile
+    | LoadBleets
 
 type State =
     {
         Data: Data.State
-        BleetElems: Result<BleetElem.State list, string> Deferred
-        Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
         Handle: string
         DeleteBleet: Bleet option
+        Profile: Profile option
+        Bleets: Bleet list option
+        BleetElems: BleetElem.State list
     }
 
 let init (data: Data.State) =
@@ -56,133 +56,77 @@ let init (data: Data.State) =
 
     {
         Data = data
-        BleetElems = HasNotStartedYet
-        Profile = HasNotStartedYet
         ProfileOption = profileOption
         Handle = "Bleeter"
         DeleteBleet = None
+        Profile = None
+        Bleets = None
+        BleetElems = []
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | DataUpdate data ->
+        { state with Data = data },
+        Cmd.batch [
+            Cmd.ofMsg LoadProfile
+            Cmd.ofMsg LoadBleets
+        ]
     | UrlChanged handle ->
         let newState = { state with Handle = handle }
 
-        newState,
-        Cmd.batch [
-            Cmd.ofMsg (LoadProfile Started)
-            Cmd.ofMsg (LoadBleets Started)
-        ]
-    | AddBleet bleet ->
-        match state.BleetElems with
-        | Resolved (Ok bleetElems) ->
-            let bleetElems = (bleet |> BleetElem.init) :: bleetElems
-
-            { state with BleetElems = Resolved(Ok bleetElems) }, Cmd.none
-        | _ -> state, Cmd.none
+        newState, Cmd.none
     | Follow ->
         match state.Profile with
-        | Resolved (Ok profile) ->
+        | Some profile ->
             match profile.IsFollow with
             | None -> state, Cmd.none
             | Some isFollow ->
                 let profile = { profile with IsFollow = Some(not isFollow) }
 
-                { state with Profile = Resolved(Ok profile) }, Cmd.none
-        | _ -> state, Cmd.none
+                { state with Profile = Some profile }, Cmd.none
+        | None -> state, Cmd.none
     | ProfileOptionMsg msg ->
         let profileOption, cmd = EllipsisOption.update msg state.ProfileOption
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
-        printf "ReportProfile"
+        printf "Report Profile"
         state, Cmd.none
     | BleetElemMsg (id: int, msg') ->
-        match state.BleetElems with
-        | Resolved (Ok bleetElems) ->
-            let bleetElemOpt =
-                bleetElems
-                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+        let bleetElemOpt =
+            state.BleetElems
+            |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
 
-            match bleetElemOpt with
-            | Some bleetElem ->
-                let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
-                let bleetElemCmd = Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemCmd
+        match bleetElemOpt with
+        | Some bleetElem ->
+            let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
+            let bleetElemCmd = Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemCmd
 
-                let bleetElems =
-                    bleetElems
-                    |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) nextBleetElem
+            let bleetElems =
+                state.BleetElems
+                |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) nextBleetElem
 
-                if nextBleetElem.IsDeleted then
-                    { state with
-                        BleetElems = Resolved(Ok bleetElems)
-                        DeleteBleet = Some bleetElem.Bleet
-                    },
-                    bleetElemCmd
-                else
-                    { state with BleetElems = Resolved(Ok bleetElems) }, bleetElemCmd
-            | None -> state, Cmd.none
+            if nextBleetElem.IsDeleted then
+                { state with
+                    BleetElems = bleetElems
+                    DeleteBleet = Some bleetElem.Bleet
+                },
+                bleetElemCmd
+            else
+                { state with BleetElems = bleetElems }, bleetElemCmd
+        | None -> state, Cmd.none
+    | LoadProfile -> { state with Profile = state.Data.MyProfile }, Cmd.none
+    | LoadBleets ->
+        match state.Data.Bleets with
+        | Resolved (Ok bleets) ->
+            let bleets =
+                bleets
+                |> List.filter (fun bleet -> bleet.Handle = "bleeter")
+
+            { state with Bleets = Some bleets }, Cmd.none
         | _ -> state, Cmd.none
-    | LoadProfile asyncOpStatus ->
-        match asyncOpStatus with
-        | Started ->
-            let nextState = { state with Profile = InProgress }
 
-            let loadProfileCmd =
-                async {
-                    let! (statusCode, profileList) = "/data/Profiles.json" |> Http.get
-
-                    if statusCode = 200 then
-                        return
-                            LoadProfile(
-                                Finished(
-                                    profileList
-                                    |> Profile.decodeListResult
-                                    |> Profile.findProfile nextState.Handle
-                                )
-                            )
-                    else
-                        return LoadProfile(Finished(Error "error while fetching profile"))
-                }
-
-            nextState, Cmd.fromAsync loadProfileCmd
-
-        | Finished result ->
-            let nextState = { state with Profile = Resolved result }
-            nextState, Cmd.none
-    | LoadBleets asyncOpStatus ->
-        match asyncOpStatus with
-        | Started ->
-            let nextState = { state with Profile = InProgress }
-
-            let loadBleetsCmd =
-                async {
-                    let! (statusCode, bleetList) = "/data/Bleets.json" |> Http.get
-
-                    if statusCode = 200 then
-                        return
-                            LoadBleets(
-                                Finished(
-                                    bleetList
-                                    |> Bleet.decodeListResult
-                                    |> Bleet.findBleets nextState.Handle
-                                )
-                            )
-                    else
-                        return LoadBleets(Finished(Error "error while fetching profile"))
-                }
-
-            nextState, Cmd.fromAsync loadBleetsCmd
-        | Finished result ->
-            match result with
-            | Ok bleets ->
-                let bleetElems = bleets |> List.map BleetElem.init
-
-                let nextState = { state with BleetElems = Resolved(Ok bleetElems) }
-                nextState, Cmd.none
-            | Error err ->
-                printf "%A" err
-                state, Cmd.none
 
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
     let followBtn =
@@ -428,14 +372,5 @@ let renderedElem
 
 let render (state: State) (dispatch: Msg -> unit) =
     match state.Profile with
-    | Resolved (Ok profile) ->
-        match state.BleetElems with
-        | Resolved (Ok bleetElems) -> renderedElem profile state.ProfileOption bleetElems dispatch
-        | Resolved (Error err) ->
-            printf "%A" err
-            Html.none
-        | _ -> Html.none
-    | Resolved (Error err) ->
-        printf "%A" err
-        Html.none
-    | _ -> Html.none
+    | Some profile -> renderedElem profile state.ProfileOption state.BleetElems dispatch
+    | None -> Html.none

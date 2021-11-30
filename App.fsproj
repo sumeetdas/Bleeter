@@ -3,8 +3,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\models\*.fs" />
     <Compile Include="src\extension\*.fs" />
+    <Compile Include="src\models\*.fs" />
     <Compile Include="src\data\*.fs" />
     <Compile Include="src\helper\*.fs" />
     <Compile Include="src\components\common\*.fs" />
