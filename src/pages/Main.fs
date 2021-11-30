@@ -19,6 +19,7 @@ type Msg =
     | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
     | DataUpdate of Data.State
+    | AddBleet of Bleet
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -31,6 +32,9 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | AddBleet bleet ->
+        let home, homeCmd = Home.update (Home.Msg.AddBleet bleet) state.Home
+        { state with Home = home }, Cmd.map HomeMsg homeCmd
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         { state with Home = home }, (Cmd.map HomeMsg homeCmd)

@@ -10,45 +10,61 @@ type State =
         Data: Data.State
         Count: int
         BleetElems: BleetElem.State list
+        ShowLoadMore: bool
+        Offset: int
     }
 
 type Msg =
+    | AddBleet of Bleet
     | ClearHomeState
-    | GetMoreBleets of int * int
-    | LoadMoreBleets of Bleet list
+    | LoadMoreBleets of int * int
     | BleetElemMsg of int * BleetElem.Msg
     | DataUpdate of Data.State
 
-let init (data: Data.State) = { Data = data; Count = 0; BleetElems = [] }
+let FETCH_NUM_BLEETS = 10
+
+let init (data: Data.State) =
+    {
+        Data = data
+        Count = 0
+        BleetElems = []
+        ShowLoadMore = false
+        Offset = 0
+    }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | DataUpdate data -> 
-        match data.Bleets with 
-        | Resolved (Ok bleets) -> 
-            let newBleetElems = bleets |> List.map BleetElem.init 
-            { state with Data = data; BleetElems = newBleetElems }, Cmd.none
-        | _ -> { state with Data = data }, Cmd.none
-    | ClearHomeState -> init state.Data, Cmd.ofMsg (GetMoreBleets(0, 10))
-    | GetMoreBleets (offset, numBleets) ->
+    | AddBleet bleet ->
+        let newBleetElems =
+            [ [ (bleet |> BleetElem.init) ]; state.BleetElems ]
+            |> List.concat
+
+        { state with BleetElems = newBleetElems }, Cmd.none
+    | DataUpdate data -> { state with Data = data }, Cmd.ofMsg ClearHomeState
+    | ClearHomeState -> init state.Data, Cmd.ofMsg (LoadMoreBleets(0, FETCH_NUM_BLEETS))
+    | LoadMoreBleets (offset, numBleets) ->
+        printf "offset %d" offset
+
         match state.Data.Bleets with
         | Resolved (Ok bleets) ->
             if offset > bleets.Length then
-                state, Cmd.none
+                { state with ShowLoadMore = false }, Cmd.none
             else
                 let newBleets =
                     bleets
                     |> List.skip offset
-                    |> List.take numBleets
+                    |> List.truncate numBleets
                     |> List.map BleetElem.init
 
                 let newBleets = [ state.BleetElems; newBleets ] |> List.concat
-                { state with BleetElems = newBleets }, Cmd.none
+
+                { state with
+                    BleetElems = newBleets
+                    ShowLoadMore = true
+                    Offset = offset + FETCH_NUM_BLEETS
+                },
+                Cmd.none
         | _ -> state, Cmd.none
-    | LoadMoreBleets bleets ->
-        let newBleetElems = bleets |> List.map BleetElem.init
-        let bleetElems = [ state.BleetElems; newBleetElems ] |> List.concat
-        { state with BleetElems = bleetElems }, Cmd.none
     | BleetElemMsg (id, msg) ->
         match msg with
         | BleetElem.Msg.ReportBleet ->
@@ -79,6 +95,15 @@ let render (state: State) (dispatch: Msg -> unit) =
                     ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
                      >> dispatch))
 
+    let loadMore =
+        Html.div [
+            prop.classes [
+                tw.``text-3xl``
+                tw.``m-auto``
+            ]
+            prop.text "Load more"
+        ]
+
     Html.div [
         prop.classes [
             tw.flex
@@ -91,11 +116,18 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.text "Home"
             ]
             Html.div [
+                prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.Offset, FETCH_NUM_BLEETS)))
                 prop.classes [
                     tw.flex
                     tw.``flex-col``
                 ]
-                prop.children bleetElemList
+                prop.children (
+                    [
+                        bleetElemList
+                        [ (if state.ShowLoadMore then loadMore else Html.none) ]
+                    ]
+                    |> List.concat
+                )
             ]
         ]
     ]
