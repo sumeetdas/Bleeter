@@ -25,7 +25,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
         CurrentUrl = currentUrl
         Height = 0
-        ProfileElem = ProfileElem.init ()
+        ProfileElem = ProfileElem.init data
         Home = Home.init data
     },
     Cmd.ofMsg (UrlChanged currentUrl)

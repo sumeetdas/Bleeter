@@ -8,10 +8,15 @@ open Tailwind
 type Msg =
     | DistractionOptionMsg of Msg EllipsisOption.Msg
     | ReportDistraction
+    | DataUpdate of Data.State
 
-type State = { DistractionOption: Msg EllipsisOption.State }
+type State =
+    {
+        DistractionOption: Msg EllipsisOption.State
+        Data: Data.State
+    }
 
-let init () =
+let init (data: Data.State) =
     let options: Msg EllipsisOption.Option list =
         [
             { Name = "Report"; Command = Cmd.ofMsg ReportDistraction }
@@ -31,6 +36,7 @@ let init () =
 
     {
         DistractionOption = EllipsisOption.init options size cssClasses offset
+        Data = data
     }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
@@ -41,9 +47,13 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | ReportDistraction ->
         printf "Report distraction"
         state, Cmd.none
+    | DataUpdate data -> { state with Data = data }, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
-    let distractionList: Distraction list = []
+    let distractionList: Distraction list =
+        match state.Data.Distractions with
+        | Resolved (Ok distractions) -> distractions
+        | _ -> []
 
     let elem (distraction: Distraction) =
         Html.div [

@@ -43,8 +43,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | DataUpdate data -> { state with Data = data }, Cmd.ofMsg ClearHomeState
     | ClearHomeState -> init state.Data, Cmd.ofMsg (LoadMoreBleets(0, FETCH_NUM_BLEETS))
     | LoadMoreBleets (offset, numBleets) ->
-        printf "offset %d" offset
-
         match state.Data.Bleets with
         | Resolved (Ok bleets) ->
             if offset > bleets.Length then

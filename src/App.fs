@@ -40,7 +40,7 @@ let init () =
         CurrentUrl = currentUrl
         Main = main
         CreateBleet = CreateBleet.init ()
-        Distraction = Distraction.init ()
+        Distraction = Distraction.init data
         SearchBox = SearchBox.init ()
     },
     Cmd.batch [
@@ -53,21 +53,27 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let main, mainCmd = Main.update (Main.Msg.DataUpdate data) state.Main
+        let distraction, distractionCmd = Distraction.update (Distraction.Msg.DataUpdate data) state.Distraction
 
-        { state with Data = data; Main = main },
+        { state with
+            Data = data
+            Main = main
+            Distraction = distraction
+        },
         Cmd.batch [
             (Cmd.map DataMsg dataCmd)
             (Cmd.map MainMsg mainCmd)
+            (Cmd.map DistractionMsg distractionCmd)
         ]
     | UrlChanged url ->
         match url with
         | "create" :: rest ->
             match state.Main.ProfileElem.Profile with
             | Resolved (Ok profile) ->
-                let create, createBleetCmd =
+                let createBleet, createBleetCmd =
                     CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
 
-                { state with CreateBleet = create }, Cmd.map CreateBleetMsg createBleetCmd
+                { state with CreateBleet = createBleet }, Cmd.map CreateBleetMsg createBleetCmd
             | _ -> state, Cmd.none
         | _ ->
             let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
@@ -77,11 +83,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         { state with Main = main }, (Cmd.map MainMsg cmd)
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
-
-        if not createBleet.Display then
-            Router.navigate (createBleet.PreviousUrl |> List.toArray)
-        else
-            1 |> ignore
 
         match createBleet.Bleet with
         | None -> { state with CreateBleet = createBleet }, Cmd.none

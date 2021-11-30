@@ -9,6 +9,7 @@ open Browser.Types
 // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
 open Fable.Core.JsInterop
 open System
+open Feliz.Router
 
 type State =
     {
@@ -62,6 +63,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         Cmd.none
     | CloseModal ->
         let initState = init ()
+        Router.navigate (state.PreviousUrl |> List.toArray)
         { initState with PreviousUrl = state.PreviousUrl }, Cmd.none
     | UpdateBleetContent content -> { state with BleetContent = content }, Cmd.none
     | OutsideModalClickClose id ->

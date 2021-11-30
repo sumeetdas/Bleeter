@@ -10,7 +10,12 @@ type Msg =
     | DeleteBleet
     | ReportBleet
 
-type State = { Bleet: Bleet; BleetOption: Msg EllipsisOption.State }
+type State =
+    {
+        Bleet: Bleet
+        BleetOption: Msg EllipsisOption.State
+        IsDeleted: bool
+    }
 
 let init bleet =
     let options: Msg EllipsisOption.Option list =
@@ -33,11 +38,12 @@ let init bleet =
     {
         Bleet = bleet
         BleetOption = EllipsisOption.init options 16 cssClasses offset
+        IsDeleted = false
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | DeleteBleet -> state, Cmd.none
+    | DeleteBleet -> { state with IsDeleted = true }, Cmd.none
     | ReportBleet ->
         printf "report bleet"
         state, Cmd.none

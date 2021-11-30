@@ -18,13 +18,15 @@ type Msg =
 
 type State =
     {
+        Data: Data.State
         BleetElems: Result<BleetElem.State list, string> Deferred
         Profile: Result<Profile, string> Deferred
         ProfileOption: Msg EllipsisOption.State
         Handle: string
+        DeleteBleet: Bleet option
     }
 
-let init () =
+let init (data: Data.State) =
     let profileOption: Msg EllipsisOption.State =
         let optionList: Msg EllipsisOption.Option list =
             [
@@ -53,10 +55,12 @@ let init () =
         }
 
     {
+        Data = data
         BleetElems = HasNotStartedYet
         Profile = HasNotStartedYet
         ProfileOption = profileOption
         Handle = "Bleeter"
+        DeleteBleet = None
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
@@ -93,36 +97,32 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | ReportProfile ->
         printf "ReportProfile"
         state, Cmd.none
-    | BleetElemMsg (id: int, msg) ->
-        match msg with
-        | BleetElem.Msg.DeleteBleet ->
-            match state.BleetElems with
-            | Resolved (Ok bleetElems) ->
+    | BleetElemMsg (id: int, msg') ->
+        match state.BleetElems with
+        | Resolved (Ok bleetElems) ->
+            let bleetElemOpt =
+                bleetElems
+                |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+
+            match bleetElemOpt with
+            | Some bleetElem ->
+                let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
+                let bleetElemCmd = Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemCmd
+
                 let bleetElems =
                     bleetElems
-                    |> List.removeBy (fun bleetElem -> bleetElem.Bleet.Id = id)
+                    |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) nextBleetElem
 
-                { state with BleetElems = Resolved(Ok bleetElems) }, Cmd.none
-            | _ -> state, Cmd.none
-        | _ ->
-            match state.BleetElems with
-            | Resolved (Ok bleetElems) ->
-                let bleetElem =
-                    bleetElems
-                    |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
-
-                match bleetElem with
-                | Some bleetElem ->
-                    let updatedBleetElem, cmd = BleetElem.update msg bleetElem
-
-                    let bleetElems =
-                        bleetElems
-                        |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) updatedBleetElem
-
-                    { state with BleetElems = Resolved(Ok bleetElems) },
-                    (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd)
-                | None -> state, Cmd.none
-            | _ -> state, Cmd.none
+                if nextBleetElem.IsDeleted then
+                    { state with
+                        BleetElems = Resolved(Ok bleetElems)
+                        DeleteBleet = Some bleetElem.Bleet
+                    },
+                    bleetElemCmd
+                else
+                    { state with BleetElems = Resolved(Ok bleetElems) }, bleetElemCmd
+            | None -> state, Cmd.none
+        | _ -> state, Cmd.none
     | LoadProfile asyncOpStatus ->
         match asyncOpStatus with
         | Started ->
