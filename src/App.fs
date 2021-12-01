@@ -66,6 +66,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (Cmd.map DistractionMsg distractionCmd)
         ]
     | UrlChanged url ->
+        printf "app url change %A" url
         match url with
         | [ "create"; "bleet" ] ->
             match state.Data.MyProfile with
@@ -79,6 +80,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
             { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
     | MainMsg msg' ->
+        printf "MainMsg"
         let main, cmd = Main.update msg' state.Main
         { state with Main = main }, (Cmd.map MainMsg cmd)
     | CreateBleetMsg msg' ->

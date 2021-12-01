@@ -28,7 +28,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         ProfileElem = ProfileElem.init data
         Home = Home.init data
     },
-    Cmd.ofMsg (UrlChanged currentUrl)
+    Cmd.none
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
@@ -42,6 +42,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map ProfileElemMsg profileElemCmd
         ]
     | UrlChanged url ->
+        printf "main url change %A" url
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
