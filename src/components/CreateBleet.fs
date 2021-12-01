@@ -100,6 +100,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                     Likes = 0
                     Replies = 0
                     RepliesType = Some Boring
+                    IsMyBleet = true
                 }
 
             dispatch (AddBleet bleet)

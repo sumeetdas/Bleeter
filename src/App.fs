@@ -80,7 +80,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
     | MainMsg msg' ->
         let main, cmd = Main.update msg' state.Main
-        { state with Main = main }, (Cmd.map MainMsg cmd)
+        { state with Main = main }, 
+        Cmd.batch [
+            Cmd.map MainMsg cmd
+            (
+                match main.DeletedBleet with 
+                | Some bleet -> Cmd.ofMsg ((Data.Msg.DeleteBleet >> DataMsg) bleet)
+                | None -> Cmd.none
+            )
+        ]
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
 

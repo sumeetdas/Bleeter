@@ -12,6 +12,7 @@ type State =
         Height: int
         ProfileElem: ProfileElem.State
         Home: Home.State
+        DeletedBleet: Bleet option
     }
 
 type Msg =
@@ -27,6 +28,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         Height = 0
         ProfileElem = ProfileElem.init data
         Home = Home.init data
+        DeletedBleet = None
     },
     Cmd.none
 
@@ -65,8 +67,11 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let profileElem, cmd = ProfileElem.update msg' state.ProfileElem
         { state with ProfileElem = profileElem }, (Cmd.map ProfileElemMsg cmd)
     | HomeMsg msg' ->
-        let newHome, cmd = Home.update msg' state.Home
-        { state with Home = newHome }, (Cmd.map HomeMsg cmd)
+        let nextHome, homeCmd = Home.update msg' state.Home
+
+        if nextHome.DeletedBleet.IsSome 
+        then { state with Home = nextHome; DeletedBleet = nextHome.DeletedBleet }, Cmd.map HomeMsg homeCmd
+        else { state with Home = nextHome }, Cmd.map HomeMsg homeCmd
 
 let notFoundElem = 
     Html.div [

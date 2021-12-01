@@ -66,6 +66,7 @@ type Bleet =
         Likes: int
         Replies: int
         RepliesType: RepliesType option
+        IsMyBleet: bool
     }
 
 [<RequireQualifiedAccess>]
@@ -82,6 +83,7 @@ module Bleet =
             Likes = 0
             Replies = 0
             RepliesType = None
+            IsMyBleet = false
         }
 
     let decodeListResult (json: string) : Result<Bleet list, string> = Decode.Auto.fromString<Bleet list> (json)

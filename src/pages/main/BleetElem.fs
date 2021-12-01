@@ -24,6 +24,10 @@ let init bleet =
             { Name = "Report"; Command = Cmd.ofMsg ReportBleet }
         ]
 
+    let options = 
+        options 
+        |> List.removeBy (fun opt -> opt.Name = "Delete" && (not bleet.IsMyBleet))
+
     let cssClasses =
         [
             tw.``rounded-full``
@@ -43,7 +47,10 @@ let init bleet =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | DeleteBleet -> { state with IsDeleted = true }, Cmd.none
+    | DeleteBleet -> 
+        if state.Bleet.IsMyBleet 
+        then { state with IsDeleted = true }, Cmd.none
+        else state, Cmd.none
     | ReportBleet ->
         printf "report bleet"
         state, Cmd.none

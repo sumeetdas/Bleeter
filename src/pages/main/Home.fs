@@ -10,6 +10,7 @@ type State =
         Data: Data.State
         BleetElems: BleetElem.State list
         ShowLoadMore: bool
+        DeletedBleet: Bleet option
     }
 
 type Msg =
@@ -25,6 +26,7 @@ let init (data: Data.State) =
         Data = data
         BleetElems = []
         ShowLoadMore = false
+        DeletedBleet = None
     }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
@@ -59,8 +61,10 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 let newBleetElems =
                     state.BleetElems
                     |> List.updateAt (fun elem -> elem.Bleet.Id = id) nextBleetElem
-
-                { state with BleetElems = newBleetElems }, bleetElemCmd
+                
+                if nextBleetElem.IsDeleted 
+                then { state with BleetElems = newBleetElems; DeletedBleet = Some nextBleetElem.Bleet }, bleetElemCmd
+                else { state with BleetElems = newBleetElems }, bleetElemCmd
         )
 
 let render (state: State) (dispatch: Msg -> unit) =

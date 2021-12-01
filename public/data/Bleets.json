@@ -9,7 +9,8 @@
       "Rebleets": 123,
       "Likes": 4000,
       "Replies": 0,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 33,
@@ -21,7 +22,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 3,
@@ -33,7 +35,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 2,
@@ -45,7 +48,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 4,
@@ -57,7 +61,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 5,
@@ -69,7 +74,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 6,
@@ -81,7 +87,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 37,
@@ -93,7 +100,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 34,
@@ -105,7 +113,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 7,
@@ -117,7 +126,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 8,
@@ -129,7 +139,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 9,
@@ -141,7 +152,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 10,
@@ -153,7 +165,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 11,
@@ -165,7 +178,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 12,
@@ -177,7 +191,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 13,
@@ -189,7 +204,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 14,
@@ -201,7 +217,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 15,
@@ -213,7 +230,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 16,
@@ -225,7 +243,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 17,
@@ -237,7 +256,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 18,
@@ -249,7 +269,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 19,
@@ -261,7 +282,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 20,
@@ -273,7 +295,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 21,
@@ -285,7 +308,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 22,
@@ -297,7 +321,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 23,
@@ -309,7 +334,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 36,
@@ -321,7 +347,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 24,
@@ -333,7 +360,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 25,
@@ -345,7 +373,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 26,
@@ -357,7 +386,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 27,
@@ -369,7 +399,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 28,
@@ -381,7 +412,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 29,
@@ -393,7 +425,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 30,
@@ -405,7 +438,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 31,
@@ -417,7 +451,8 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 32,
@@ -429,18 +464,20 @@
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": false
     },
     {
       "Id": 35,
       "Name": "Bleeter",
       "Content": "Hello Bleeter!",
-      "ProfilePic": "/img/john_xina.png",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "bleeter",
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
       "Replies": 1,
-      "RepliesType": "Boring"
+      "RepliesType": "Boring",
+      "IsMyBleet": true
     }
 ]

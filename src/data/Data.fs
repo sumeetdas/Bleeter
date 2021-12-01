@@ -14,6 +14,7 @@ type State =
 type Msg =
     | RefreshData
     | AddBleet of Bleet
+    | DeleteBleet of Bleet
     | LoadMyProfile
     | LoadProfiles of Result<Profile list, string> AsyncOperationStatus
     | LoadBleets of Result<Bleet list, string> AsyncOperationStatus
@@ -35,6 +36,14 @@ let init () : State * Cmd<Msg> =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | RefreshData -> state, Cmd.none
+    | DeleteBleet bleet ->
+        match state.Bleets with
+        | Resolved (Ok bleets) ->
+            let bleets = 
+                bleets 
+                |> List.removeBy (fun bleet -> bleet.IsMyBleet && bleet.Id = bleet.Id)
+            { state with Bleets = Resolved(Ok bleets) }, Cmd.ofMsg RefreshData
+        | _ -> state, Cmd.none
     | AddBleet bleet ->
         match state.Bleets with
         | Resolved (Ok bleets) ->
