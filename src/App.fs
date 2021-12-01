@@ -48,59 +48,83 @@ let init () =
         (Cmd.map DataMsg dataCmd)
     ]
 
+let changeUrl (url: string list, state: State) =
+    match url with
+    | [ "create"; "bleet" ] ->
+        match state.Data.MyProfile with
+        | Some profile ->
+            let createBleet, createBleetCmd =
+                CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
+
+            { state with CreateBleet = createBleet }, Cmd.map CreateBleetMsg createBleetCmd
+        | None -> state, Cmd.none
+    | _ ->
+        let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
+        { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
+
+let updateData (state: State) =
+    if state.Data.DoSyncData then
+        let nextData, dataCmd = Data.update (Data.Msg.DoneSyncData) state.Data
+        let nextMain, mainCmd = Main.update (Main.Msg.DataUpdate state.Data) state.Main
+
+        let nextDistraction, distractionCmd =
+            Distraction.update (Distraction.Msg.DataUpdate state.Data) state.Distraction
+
+        { state with
+            Data = nextData
+            Main = nextMain
+            Distraction = nextDistraction
+        },
+        Cmd.batch [
+            Cmd.map MainMsg mainCmd
+            Cmd.map DistractionMsg distractionCmd
+            Cmd.map DataMsg dataCmd
+        ]
+    else
+        { state with Data = state.Data }, Cmd.none
+
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
-        let main, mainCmd = Main.update (Main.Msg.DataUpdate data) state.Main
-        let distraction, distractionCmd = Distraction.update (Distraction.Msg.DataUpdate data) state.Distraction
+        let nextState = { state with Data = data }
+        let nextState, newCmd = updateData nextState
 
-        { state with
-            Data = data
-            Main = main
-            Distraction = distraction
-        },
+        nextState,
         Cmd.batch [
             (Cmd.map DataMsg dataCmd)
-            (Cmd.map MainMsg mainCmd)
-            (Cmd.map DistractionMsg distractionCmd)
+            newCmd
         ]
-    | UrlChanged url ->
-        match url with
-        | [ "create"; "bleet" ] ->
-            match state.Data.MyProfile with
-            | Some profile ->
-                let createBleet, createBleetCmd =
-                    CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
-
-                { state with CreateBleet = createBleet }, Cmd.map CreateBleetMsg createBleetCmd
-            | None -> state, Cmd.none
-        | _ ->
-            let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
-            { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
+    | UrlChanged url -> changeUrl (url, state)
     | MainMsg msg' ->
-        let main, cmd = Main.update msg' state.Main
+        let nextMain, mainCmd = Main.update msg' state.Main
 
-        { state with Main = main },
-        Cmd.batch [
-            Cmd.map MainMsg cmd
-            (match main.DeletedBleet with
-             | Some bleet -> Cmd.ofMsg ((Data.Msg.DeleteBleet >> DataMsg) bleet)
-             | None -> Cmd.none)
-        ]
+        match nextMain.DeletedBleet with
+        | Some bleet ->
+            let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) state.Data
+
+            { state with Main = nextMain; Data = nextData }, Cmd.batch [ Cmd.map DataMsg dataCmd ]
+        | None -> { state with Main = nextMain }, Cmd.map MainMsg mainCmd
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
+        let nextState = { state with CreateBleet = createBleet }
 
-        match createBleet.Bleet with
-        | None -> { state with CreateBleet = createBleet }, Cmd.none
+        match nextState.CreateBleet.Bleet with
+        | None -> nextState, Cmd.map CreateBleetMsg createBleetCmd
         | Some bleet ->
-            let data, dataCmd = Data.update (Data.Msg.AddBleet bleet) state.Data
+            let nextCreateBleet, _ = CreateBleet.update CreateBleet.Msg.CloseModal nextState.CreateBleet
+            let nextState = { nextState with CreateBleet = nextCreateBleet }
+            let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
+            let nextState = { nextState with Data = nextData }
+            let nextState, updateDataCmd = updateData nextState
+            let nextState, urlChangeCmd = changeUrl (createBleet.PreviousUrl, nextState)
 
-            { state with Data = data; CreateBleet = createBleet },
+            nextState,
             (Cmd.batch [
-                Cmd.map DataMsg dataCmd
                 Cmd.map CreateBleetMsg createBleetCmd
-                Cmd.ofMsg (UrlChanged createBleet.PreviousUrl)
+                Cmd.map DataMsg dataCmd
+                updateDataCmd
+                urlChangeCmd
              ])
     | DistractionMsg msg ->
         let distraction, cmd = Distraction.update msg state.Distraction

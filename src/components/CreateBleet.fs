@@ -27,7 +27,7 @@ type Msg =
     | CloseModal
     | UpdateBleetContent of string
     | OutsideModalClickClose of string
-    | AddBleet of Bleet
+    | AddBleet
 
 let init () =
     {
@@ -39,7 +39,14 @@ let init () =
         PreviousUrl = []
     }
 
+let closeModal (state: State) =
+    let initState = init ()
+    Router.navigate (state.PreviousUrl |> List.toArray)
+    { initState with PreviousUrl = state.PreviousUrl }
+
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    printf "CreateBleet %A" msg
+
     match msg with
     | DisplayPage (profile, previousUrl) ->
         { state with
@@ -57,42 +64,27 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             PreviousUrl = previousUrl
         },
         Cmd.none
-    | CloseModal ->
-        let initState = init ()
-        Router.navigate (state.PreviousUrl |> List.toArray)
-        { initState with PreviousUrl = state.PreviousUrl }, Cmd.none
+    | CloseModal -> closeModal state, Cmd.none
     | UpdateBleetContent content -> { state with BleetContent = content }, Cmd.none
     | OutsideModalClickClose id ->
         if (state.Display
             && id = "CreateBleetModal"
             && state.BleetContent.Length = 0) then
-
-            state, Cmd.ofMsg CloseModal
+            let state = closeModal state
+            state, Cmd.none
         else
             state, Cmd.none
-    | AddBleet bleet ->
-        let bleet = if state.Profile.IsNone then None else Some bleet
+    | AddBleet ->
+        let bleet =
+            match state.Profile with
+            | None -> None
+            | Some profile ->
+                let randomId = Random().Next(1000, 10_000_000)
 
-        { state with Bleet = bleet; Profile = None }, Cmd.ofMsg CloseModal
-
-
-let render (state: State) (dispatch: Msg -> unit) =
-    let profile = state.Profile
-    let randomId = Random().Next(1000, 10_000_000)
-
-    let bleetBtnClick =
-        fun _ ->
-            let bleetText =
-                ((document.getElementById "create-bleet-text") :?> HTMLTextAreaElement)
-                    .value
-
-            let profile = profile |> Option.defaultWith (fun () -> Profile.init ())
-
-            let bleet =
                 {
                     Id = randomId
                     Name = profile.Name
-                    Content = bleetText
+                    Content = state.BleetContent
                     ProfilePic = profile.ProfilePic
                     Handle = profile.Handle
                     Time = ""
@@ -102,8 +94,12 @@ let render (state: State) (dispatch: Msg -> unit) =
                     RepliesType = Some Boring
                     IsMyBleet = true
                 }
+                |> Some
 
-            dispatch (AddBleet bleet)
+        { state with Bleet = bleet }, Cmd.none
+
+let render (state: State) (dispatch: Msg -> unit) =
+    let profile = state.Profile
 
     let modalClasses =
         [
@@ -226,7 +222,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                                         tw.``focus:ring-2``
                                                         tw.``focus:ring-green-300``
                                                     ]
-                                                    prop.onClick bleetBtnClick
+                                                    prop.onClick (fun _ -> dispatch AddBleet)
                                                     prop.text "Bleet"
                                                 ]
                                             ]

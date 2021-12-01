@@ -29,26 +29,34 @@ let init (data: Data.State) =
         DeletedBleet = None
     }
 
+let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: int) =
+    match state.Data.Bleets with
+    | Resolved (Ok bleets) ->
+        let newBleetElemCount = currentBleetElemCount + numBleetsToLoad
+
+        let newBleetElems =
+            bleets
+            |> List.truncate newBleetElemCount
+            |> List.map BleetElem.init
+
+        { state with
+            BleetElems = newBleetElems
+            ShowLoadMore = newBleetElems.Length < bleets.Length
+        }
+    | _ -> state
+
+let clearHomeState (state: State) =
+    let state = loadMoreBleets (state, 0, FETCH_NUM_BLEETS)
+    { state with DeletedBleet = None }
+
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | DataUpdate data -> { state with Data = data }, Cmd.ofMsg ClearHomeState
-    | ClearHomeState -> init state.Data, Cmd.ofMsg (LoadMoreBleets(0, FETCH_NUM_BLEETS))
+    | DataUpdate data ->
+        let nextState = clearHomeState { state with Data = data }
+        nextState, Cmd.none
+    | ClearHomeState -> clearHomeState state, Cmd.none
     | LoadMoreBleets (currentBleetElemCount, numBleetsToLoad) ->
-        match state.Data.Bleets with
-        | Resolved (Ok bleets) ->
-            let newBleetElemCount = currentBleetElemCount + numBleetsToLoad
-
-            let newBleetElems =
-                bleets
-                |> List.truncate newBleetElemCount
-                |> List.map BleetElem.init
-
-            { state with
-                BleetElems = newBleetElems
-                ShowLoadMore = newBleetElems.Length < bleets.Length
-            },
-            Cmd.none
-        | _ -> state, Cmd.none
+        loadMoreBleets (state, currentBleetElemCount, numBleetsToLoad), Cmd.none
     | BleetElemMsg (id, msg') ->
         state.BleetElems
         |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)

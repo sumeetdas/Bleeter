@@ -12,8 +12,6 @@ type Msg =
     | ReportProfile
     | BleetElemMsg of BleetId * BleetElem.Msg
     | UrlChanged of string
-    | LoadProfile
-    | LoadBleets
 
 type State =
     {
@@ -30,7 +28,7 @@ let init (data: Data.State) =
         let optionList: Msg EllipsisOption.Option list =
             [
                 {
-                    Name = "ReportProfile"
+                    Name = "Report Profile"
                     Command = Cmd.ofMsg ReportProfile
                 }
             ]
@@ -62,17 +60,33 @@ let init (data: Data.State) =
         BleetElems = []
     }
 
+let updateData (state: State) =
+    // update profile
+    let profileOpt =
+        match state.Data.Profiles with
+        | Resolved (Ok profiles) ->
+            profiles
+            |> List.tryFind (fun profile -> profile.Handle = "bleeter")
+        | _ -> None
+
+    // update bleets
+    let bleetElems =
+        match state.Data.Bleets with
+        | Resolved (Ok bleets) ->
+            bleets
+            |> List.filter (fun bleet -> bleet.Handle = "bleeter")
+            |> List.map BleetElem.init
+        | _ -> []
+
+    { state with Profile = profileOpt; BleetElems = bleetElems }
+
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DataUpdate data ->
-        { state with Data = data },
-        Cmd.batch [
-            Cmd.ofMsg LoadProfile
-            Cmd.ofMsg LoadBleets
-        ]
+        let nextState = updateData { state with Data = data }
+        nextState, Cmd.none
     | UrlChanged handle ->
         let newState = { state with Handle = handle }
-
         newState, Cmd.none
     | Follow ->
         match state.Profile with
@@ -114,25 +128,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             else
                 { state with BleetElems = bleetElems }, bleetElemCmd
         | None -> state, Cmd.none
-    | LoadProfile ->
-        match state.Data.Profiles with
-        | Resolved (Ok profiles) ->
-            let profileOpt =
-                profiles
-                |> List.tryFind (fun profile -> profile.Handle = "bleeter")
-
-            { state with Profile = profileOpt }, Cmd.none
-        | _ -> state, Cmd.none
-    | LoadBleets ->
-        match state.Data.Bleets with
-        | Resolved (Ok bleets) ->
-            let bleetElems =
-                bleets
-                |> List.filter (fun bleet -> bleet.Handle = "bleeter")
-                |> List.map BleetElem.init
-
-            { state with BleetElems = bleetElems }, Cmd.none
-        | _ -> state, Cmd.none
 
 
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
