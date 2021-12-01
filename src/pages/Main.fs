@@ -4,6 +4,7 @@ module Main
 open Elmish
 open Feliz
 open Tailwind
+open Feliz.Router
 
 type State =
     {
@@ -31,9 +32,6 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    // | AddBleet bleet ->
-    //     let home, homeCmd = Home.update (Home.Msg.AddBleet bleet) state.Home
-    //     { state with Home = home }, Cmd.map HomeMsg homeCmd
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
@@ -49,6 +47,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.ClearHomeState state.Home
             { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
+        | [ "not-found" ] -> 
+            { state with CurrentUrl = [ "not-found" ] }, Cmd.none
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
@@ -57,7 +57,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 CurrentUrl = [ handle ]
             },
             Cmd.map ProfileElemMsg cmd
-        | _ -> state, Cmd.none
+        | _ -> 
+            Router.navigate( "not-found" )
+            state, Cmd.none
     | AppHeight height -> { state with Height = height }, Cmd.none
     | ProfileElemMsg msg' ->
         let profileElem, cmd = ProfileElem.update msg' state.ProfileElem
@@ -65,6 +67,17 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | HomeMsg msg' ->
         let newHome, cmd = Home.update msg' state.Home
         { state with Home = newHome }, (Cmd.map HomeMsg cmd)
+
+let notFoundElem = 
+    Html.div [
+        prop.classes [
+            tw.flex
+            tw.``flex-col``
+            tw.``flex-grow-1``
+            tw.``text-3xl``
+        ]
+        prop.text "Page not found"
+    ]
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
@@ -82,6 +95,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
+            | [ "not-found" ] -> notFoundElem
             | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
             | _ -> Html.none
         ]

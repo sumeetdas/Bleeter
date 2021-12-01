@@ -84,6 +84,18 @@
       "RepliesType": "Boring"
     },
     {
+      "Id": 37,
+      "Name": "Bleeter Music",
+      "Content": "{card:https://www.youtube.com/watch?v=8PMJNUjaivw}",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "BleeterMusic",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1,
+      "RepliesType": "Boring"
+    },
+    {
       "Id": 34,
       "Name": "Phil Gaga",
       "Content": "How do I feel after using my #Xiowei product for over a month? Can't complain.",
@@ -293,6 +305,18 @@
       "Content": "The American economy is doomed! You've got two options - invest in the Binder New World Wealth System or learn Chinese fast.",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "BillBinder",
+      "Time": "",
+      "Rebleets": 1230,
+      "Likes": 40000,
+      "Replies": 1,
+      "RepliesType": "Boring"
+    },
+    {
+      "Id": 36,
+      "Name": "Bleeter Music",
+      "Content": "{card:https://www.youtube.com/watch?v=4MKvsXA94Zk}",
+      "ProfilePic": "/img/bleeter_profile_pic.png",
+      "Handle": "BleeterMusic",
       "Time": "",
       "Rebleets": 1230,
       "Likes": 40000,
