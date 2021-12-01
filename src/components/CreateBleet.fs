@@ -42,8 +42,6 @@ let init () =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DisplayPage (profile, previousUrl) ->
-        printf "DisplayWeb %A" previousUrl
-
         { state with
             Display = true
             IsModal = false
@@ -52,8 +50,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         },
         Cmd.none
     | DisplayModal (profile, previousUrl) ->
-        printf "DisplayModal %A" previousUrl
-
         { state with
             Display = true
             IsModal = true

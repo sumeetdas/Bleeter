@@ -8,7 +8,6 @@ open Tailwind
 type State =
     {
         Data: Data.State
-        Count: int
         BleetElems: BleetElem.State list
         ShowLoadMore: bool
     }
@@ -24,7 +23,6 @@ let FETCH_NUM_BLEETS = 10
 let init (data: Data.State) =
     {
         Data = data
-        Count = 0
         BleetElems = []
         ShowLoadMore = false
     }
@@ -49,24 +47,19 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             Cmd.none
         | _ -> state, Cmd.none
     | BleetElemMsg (id, msg) ->
-        match msg with
-        | BleetElem.Msg.ReportBleet ->
-            printf "Report"
-            state, Cmd.none
-        | _ ->
-            state.BleetElems
-            |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
-            |> (fun bleetElemOpt ->
-                match bleetElemOpt with
-                | None -> state, Cmd.none
-                | Some bleetElem ->
-                    let newBleetElem, cmd = BleetElem.update msg bleetElem
+        state.BleetElems
+        |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
+        |> (fun bleetElemOpt ->
+            match bleetElemOpt with
+            | None -> state, Cmd.none
+            | Some bleetElem ->
+                let newBleetElem, bleetElemcmd = BleetElem.update msg bleetElem
 
-                    let newBleetElems =
-                        state.BleetElems
-                        |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
+                let newBleetElems =
+                    state.BleetElems
+                    |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
 
-                    { state with BleetElems = newBleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) cmd))
+                { state with BleetElems = newBleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemcmd))
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =

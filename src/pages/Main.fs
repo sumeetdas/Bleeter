@@ -42,7 +42,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map ProfileElemMsg profileElemCmd
         ]
     | UrlChanged url ->
-        printf "main url change %A" url
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
