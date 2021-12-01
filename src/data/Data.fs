@@ -39,9 +39,10 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | DeleteBleet bleet ->
         match state.Bleets with
         | Resolved (Ok bleets) ->
-            let bleets = 
-                bleets 
+            let bleets =
+                bleets
                 |> List.removeBy (fun bleet -> bleet.IsMyBleet && bleet.Id = bleet.Id)
+
             { state with Bleets = Resolved(Ok bleets) }, Cmd.ofMsg RefreshData
         | _ -> state, Cmd.none
     | AddBleet bleet ->

@@ -49,8 +49,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.ClearHomeState state.Home
             { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
-        | [ "not-found" ] -> 
-            { state with CurrentUrl = [ "not-found" ] }, Cmd.none
+        | [ "not-found" ] -> { state with CurrentUrl = [ "not-found" ] }, Cmd.none
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
@@ -59,8 +58,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 CurrentUrl = [ handle ]
             },
             Cmd.map ProfileElemMsg cmd
-        | _ -> 
-            Router.navigate( "not-found" )
+        | _ ->
+            Router.navigate ("not-found")
             state, Cmd.none
     | AppHeight height -> { state with Height = height }, Cmd.none
     | ProfileElemMsg msg' ->
@@ -69,11 +68,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
-        if nextHome.DeletedBleet.IsSome 
-        then { state with Home = nextHome; DeletedBleet = nextHome.DeletedBleet }, Cmd.map HomeMsg homeCmd
-        else { state with Home = nextHome }, Cmd.map HomeMsg homeCmd
+        if nextHome.DeletedBleet.IsSome then
+            { state with
+                Home = nextHome
+                DeletedBleet = nextHome.DeletedBleet
+            },
+            Cmd.map HomeMsg homeCmd
+        else
+            { state with Home = nextHome }, Cmd.map HomeMsg homeCmd
 
-let notFoundElem = 
+let notFoundElem =
     Html.div [
         prop.classes [
             tw.flex

@@ -32,11 +32,12 @@ let init (data: Data.State) =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | DataUpdate data -> { state with Data = data }, Cmd.ofMsg ClearHomeState
-    | ClearHomeState -> init state.Data, Cmd.ofMsg (LoadMoreBleets (0, FETCH_NUM_BLEETS))
+    | ClearHomeState -> init state.Data, Cmd.ofMsg (LoadMoreBleets(0, FETCH_NUM_BLEETS))
     | LoadMoreBleets (currentBleetElemCount, numBleetsToLoad) ->
         match state.Data.Bleets with
         | Resolved (Ok bleets) ->
             let newBleetElemCount = currentBleetElemCount + numBleetsToLoad
+
             let newBleetElems =
                 bleets
                 |> List.truncate newBleetElemCount
@@ -61,11 +62,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 let newBleetElems =
                     state.BleetElems
                     |> List.updateAt (fun elem -> elem.Bleet.Id = id) nextBleetElem
-                
-                if nextBleetElem.IsDeleted 
-                then { state with BleetElems = newBleetElems; DeletedBleet = Some nextBleetElem.Bleet }, bleetElemCmd
-                else { state with BleetElems = newBleetElems }, bleetElemCmd
-        )
+
+                if nextBleetElem.IsDeleted then
+                    { state with
+                        BleetElems = newBleetElems
+                        DeletedBleet = Some nextBleetElem.Bleet
+                    },
+                    bleetElemCmd
+                else
+                    { state with BleetElems = newBleetElems }, bleetElemCmd)
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =

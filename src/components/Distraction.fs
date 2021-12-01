@@ -41,14 +41,13 @@ let init (data: Data.State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | DataUpdate data -> 
-        { state with Data = data }, Cmd.none
+    | DataUpdate data -> { state with Data = data }, Cmd.none
     | DistractionOptionMsg msg ->
         let distractionOption, cmd = EllipsisOption.update msg state.DistractionOption
         { state with DistractionOption = distractionOption }, cmd
     | ReportDistraction ->
         printf "Report distraction"
-        state, Cmd.none    
+        state, Cmd.none
 
 let distractionList (state: State) : Distraction list =
     match state.Data.Distractions with

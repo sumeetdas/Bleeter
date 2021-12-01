@@ -114,7 +114,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             else
                 { state with BleetElems = bleetElems }, bleetElemCmd
         | None -> state, Cmd.none
-    | LoadProfile -> 
+    | LoadProfile ->
         match state.Data.Profiles with
         | Resolved (Ok profiles) ->
             let profileOpt =
