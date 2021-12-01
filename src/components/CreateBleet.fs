@@ -82,6 +82,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
 let render (state: State) (dispatch: Msg -> unit) =
     let profile = state.Profile
+    let randomId = Random().Next(1000, 10_000_000)
 
     let bleetBtnClick =
         fun _ ->
@@ -93,7 +94,7 @@ let render (state: State) (dispatch: Msg -> unit) =
 
             let bleet =
                 {
-                    Id = Random().Next(1000, 10_000)
+                    Id = randomId
                     Name = profile.Name
                     Content = bleetText
                     ProfilePic = profile.ProfilePic

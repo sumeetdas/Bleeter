@@ -17,12 +17,13 @@ type 't AsyncOperationStatus =
 module AsyncOperationStatus =
     let loadData
         (state: 'state)
-        (asyncOpStatus: Result<'b list, string> AsyncOperationStatus)
+        (asyncOpStatus: Result<'b, string> AsyncOperationStatus)
         (jsonUrl: string)
-        (jsonToList: string -> Result<'b list, string>)
-        (resultToMsg: Result<'b list, string> -> 'msg)
+        (parseJson: string -> Result<'b, string>)
+        (resultToFinishedMsg: Result<'b, string> -> 'msg)
         (toInProgressState: 'state -> 'state)
-        (toResolvedState: 'state * Result<'b list, string> -> 'state)
+        (toResolvedState: 'state * Result<'b, string> -> 'state)
+        (commandAfterFinished: 'msg Cmd)
         : 'state * 'msg Cmd =
 
         match asyncOpStatus with
@@ -34,12 +35,12 @@ module AsyncOperationStatus =
                     let! (statusCode, json) = jsonUrl |> Http.get
 
                     if statusCode = 200 then
-                        return json |> jsonToList |> resultToMsg
+                        return json |> parseJson |> resultToFinishedMsg
                     else
-                        return Error "error while fetching profile" |> resultToMsg
+                        return Error "error while fetching profile" |> resultToFinishedMsg
                 }
 
             nextState, Cmd.fromAsync loadCmd
         | Finished result ->
             let nextState = toResolvedState (state, result)
-            nextState, Cmd.none
+            nextState, commandAfterFinished

@@ -88,7 +88,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         | None -> { state with CreateBleet = createBleet }, Cmd.none
         | Some bleet ->
             let data, dataCmd = Data.update (Data.Msg.AddBleet bleet) state.Data
-
             { state with Data = data; CreateBleet = createBleet },
             (Cmd.batch [
                 Cmd.map DataMsg dataCmd

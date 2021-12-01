@@ -12,6 +12,7 @@ type State =
     }
 
 type Msg =
+    | RefreshData
     | AddBleet of Bleet
     | LoadMyProfile
     | LoadProfiles of Result<Profile list, string> AsyncOperationStatus
@@ -33,11 +34,12 @@ let init () : State * Cmd<Msg> =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | RefreshData -> state, Cmd.none
     | AddBleet bleet ->
         match state.Bleets with
         | Resolved (Ok bleets) ->
             let bleets = [ bleet ] @ bleets
-            { state with Bleets = Resolved(Ok bleets) }, Cmd.none
+            { state with Bleets = Resolved(Ok bleets) }, Cmd.ofMsg RefreshData
         | _ -> state, Cmd.none
     | LoadMyProfile ->
         match state.Profiles with
@@ -57,6 +59,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (fun result -> LoadProfiles(Finished result))
             (fun state -> { state with Profiles = InProgress })
             (fun (state, profiles) -> { state with Profiles = Resolved profiles })
+            (Cmd.ofMsg LoadMyProfile)
     | LoadBleets asyncOpStatus ->
         AsyncOperationStatus.loadData
             state
@@ -66,6 +69,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (fun result -> LoadBleets(Finished result))
             (fun state -> { state with Bleets = InProgress })
             (fun (state, bleets) -> { state with Bleets = Resolved bleets })
+            Cmd.none
     | LoadDistractions asyncOpStatus ->
         AsyncOperationStatus.loadData
             state
@@ -75,3 +79,4 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (fun result -> LoadDistractions(Finished result))
             (fun state -> { state with Distractions = InProgress })
             (fun (state, distractions) -> { state with Distractions = Resolved distractions })
+            Cmd.none
