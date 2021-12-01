@@ -46,20 +46,22 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             },
             Cmd.none
         | _ -> state, Cmd.none
-    | BleetElemMsg (id, msg) ->
+    | BleetElemMsg (id, msg') ->
         state.BleetElems
         |> List.tryFind (fun bleetElem -> bleetElem.Bleet.Id = id)
         |> (fun bleetElemOpt ->
             match bleetElemOpt with
             | None -> state, Cmd.none
             | Some bleetElem ->
-                let newBleetElem, bleetElemcmd = BleetElem.update msg bleetElem
+                let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
+                let bleetElemCmd = Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemCmd
 
                 let newBleetElems =
                     state.BleetElems
-                    |> (List.updateAt (fun elem -> elem.Bleet.Id = id) newBleetElem)
+                    |> List.updateAt (fun elem -> elem.Bleet.Id = id) nextBleetElem
 
-                { state with BleetElems = newBleetElems }, (Cmd.map (fun msg -> BleetElemMsg(id, msg)) bleetElemcmd))
+                { state with BleetElems = newBleetElems }, bleetElemCmd
+        )
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =
@@ -73,6 +75,7 @@ let render (state: State) (dispatch: Msg -> unit) =
 
     let loadMore =
         Html.div [
+            prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.BleetElems.Length, FETCH_NUM_BLEETS)))
             prop.classes [
                 tw.``text-3xl``
                 tw.``m-auto``
@@ -92,7 +95,6 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.text "Home"
             ]
             Html.div [
-                prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.BleetElems.Length, FETCH_NUM_BLEETS)))
                 prop.classes [
                     tw.flex
                     tw.``flex-col``

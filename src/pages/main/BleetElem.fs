@@ -48,8 +48,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         printf "report bleet"
         state, Cmd.none
     | BleetOptionMsg msg ->
-        let bleetOption, cmd = EllipsisOption.update msg state.BleetOption
-        { state with BleetOption = bleetOption }, cmd
+        let bleetOption, bleetOptionCmd = EllipsisOption.update msg state.BleetOption
+        { state with BleetOption = bleetOption }, bleetOptionCmd
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet

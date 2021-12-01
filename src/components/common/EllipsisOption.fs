@@ -73,8 +73,6 @@ let update (msg: 'a Msg) (state: 'a State) : 'a State * 'a Cmd =
     | CommandMsg cmd -> state, cmd
     | Close -> { state with IsOptionOpen = false }, Cmd.none
     | Open coordinates ->
-        printf "Bleet option open %A" coordinates
-        
         { state with
             IsOptionOpen = true
             Coordinates = coordinates
