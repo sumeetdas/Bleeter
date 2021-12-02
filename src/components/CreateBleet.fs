@@ -45,8 +45,6 @@ let closeModal (state: State) =
     { initState with PreviousUrl = state.PreviousUrl }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
-    printf "CreateBleet %A" msg
-
     match msg with
     | DisplayPage (profile, previousUrl) ->
         { state with

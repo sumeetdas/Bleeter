@@ -78,7 +78,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     },
                     bleetElemCmd
                 else
-                    { state with BleetElems = newBleetElems }, bleetElemCmd)
+                    { state with BleetElems = newBleetElems; DeletedBleet = None }, bleetElemCmd)
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =

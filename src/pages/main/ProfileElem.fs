@@ -18,7 +18,7 @@ type State =
         Data: Data.State
         ProfileOption: Msg EllipsisOption.State
         Handle: string
-        DeleteBleet: Bleet option
+        DeletedBleet: Bleet option
         Profile: Profile option
         BleetElems: BleetElem.State list
     }
@@ -55,7 +55,7 @@ let init (data: Data.State) =
         Data = data
         ProfileOption = profileOption
         Handle = "Bleeter"
-        DeleteBleet = None
+        DeletedBleet = None
         Profile = None
         BleetElems = []
     }
@@ -117,16 +117,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
             let bleetElems =
                 state.BleetElems
-                |> List.updateAt (fun bleetElem -> bleetElem.Bleet.Id = id) nextBleetElem
+                |> List.updateAt (fun elem -> elem.Bleet.Id = id) nextBleetElem
 
             if nextBleetElem.IsDeleted then
                 { state with
                     BleetElems = bleetElems
-                    DeleteBleet = Some bleetElem.Bleet
+                    DeletedBleet = Some bleetElem.Bleet
                 },
                 bleetElemCmd
             else
-                { state with BleetElems = bleetElems }, bleetElemCmd
+                { state with BleetElems = bleetElems; DeletedBleet = None }, bleetElemCmd
         | None -> state, Cmd.none
 
 

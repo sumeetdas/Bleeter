@@ -98,13 +98,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | UrlChanged url -> changeUrl (url, state)
     | MainMsg msg' ->
         let nextMain, mainCmd = Main.update msg' state.Main
-
+        let nextState = { state with Main = nextMain }
+        
         match nextMain.DeletedBleet with
         | Some bleet ->
-            let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) state.Data
-
-            { state with Main = nextMain; Data = nextData }, Cmd.batch [ Cmd.map DataMsg dataCmd ]
-        | None -> { state with Main = nextMain }, Cmd.map MainMsg mainCmd
+            let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) nextState.Data
+            let nextState = { nextState with Data = nextData }
+            let nextState, updateDataCmd = updateData nextState
+            nextState, Cmd.batch [ Cmd.map MainMsg mainCmd; Cmd.map DataMsg dataCmd; updateDataCmd ]
+        | None -> nextState, Cmd.map MainMsg mainCmd
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
         let nextState = { state with CreateBleet = createBleet }

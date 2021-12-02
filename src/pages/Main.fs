@@ -63,8 +63,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             state, Cmd.none
     | AppHeight height -> { state with Height = height }, Cmd.none
     | ProfileElemMsg msg' ->
-        let profileElem, cmd = ProfileElem.update msg' state.ProfileElem
-        { state with ProfileElem = profileElem }, (Cmd.map ProfileElemMsg cmd)
+        let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
+
+        if nextProfileElem.DeletedBleet.IsSome then
+            { state with
+                ProfileElem = nextProfileElem
+                DeletedBleet = nextProfileElem.DeletedBleet
+            },
+            Cmd.map ProfileElemMsg profileCmd
+        else
+            { state with ProfileElem = nextProfileElem; DeletedBleet = None }, Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
@@ -75,7 +83,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             },
             Cmd.map HomeMsg homeCmd
         else
-            { state with Home = nextHome }, Cmd.map HomeMsg homeCmd
+            { state with Home = nextHome; DeletedBleet = None }, Cmd.map HomeMsg homeCmd
 
 let notFoundElem =
     Html.div [

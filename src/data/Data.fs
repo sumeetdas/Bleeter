@@ -55,7 +55,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         match state.Bleets with
         | Resolved (Ok bleets) ->
             let bleets = [ bleet ] @ bleets
-            printf "add %d" bleets.Length
 
             { state with
                 Bleets = Resolved(Ok bleets)
