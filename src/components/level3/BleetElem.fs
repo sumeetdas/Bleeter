@@ -114,14 +114,20 @@ let render (state: State) (dispatch: Msg -> unit) =
                                     tw.``flex-grow-1``
                                 ]
                                 prop.children [
-                                    Html.span [
-                                        prop.classes [ tw.``hover:underline`` ]
-                                        prop.text bleet.Name
+                                    Html.a [
+                                        prop.href (sprintf "#/%s" bleet.Handle)
+                                        prop.children [
+                                            Html.span [
+                                                prop.classes [ tw.``hover:underline`` ]
+                                                prop.text bleet.Name
+                                            ]
+                                            Html.span [
+                                                prop.classes [ tw.``ml-1`` ]
+                                                prop.text ("@" + bleet.Handle)
+                                            ]
+                                        ]
                                     ]
-                                    Html.span [
-                                        prop.classes [ tw.``ml-1`` ]
-                                        prop.text ("@" + bleet.Handle)
-                                    ]
+
                                     // date will be implemented later
                                     // Html.span [
                                     //     prop.classes [ tw.``p-1`` ]

@@ -14,6 +14,7 @@ type State =
         Home: Home.State
         DeletedBleet: Bleet option
         SearchBleets: SearchBleets.State
+        DistractionBleets: DistractionBleets.State
     }
 
 type Msg =
@@ -23,6 +24,7 @@ type Msg =
     | HomeMsg of Home.Msg
     | DataUpdate of Data.State
     | SearchBleetsMsg of SearchBleets.Msg
+    | DistractionBleetsMsg of DistractionBleets.Msg
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -32,6 +34,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         Home = Home.init data
         DeletedBleet = None
         SearchBleets = SearchBleets.init data
+        DistractionBleets = DistractionBleets.init data
     },
     Cmd.none
 
@@ -42,11 +45,20 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
         let searchBleets, searchBleetCmd = SearchBleets.update (SearchBleets.Msg.DataUpdate data) state.SearchBleets
 
-        { state with Home = home; ProfileElem = profileElem; SearchBleets = searchBleets },
+        let distractionBleets, distractionBleetsCmd =
+            DistractionBleets.update (DistractionBleets.Msg.DataUpdate data) state.DistractionBleets
+
+        { state with
+            Home = home
+            ProfileElem = profileElem
+            SearchBleets = searchBleets
+            DistractionBleets = distractionBleets
+        },
         Cmd.batch [
             Cmd.map HomeMsg homeCmd
             Cmd.map ProfileElemMsg profileElemCmd
             Cmd.map SearchBleetsMsg searchBleetCmd
+            Cmd.map DistractionBleetsMsg distractionBleetsCmd
         ]
     | UrlChanged url ->
         match url with
@@ -54,18 +66,23 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
             { state with CurrentUrl = url; Home = home }, (Cmd.map HomeMsg homeCmd)
-        | [ "search"; (query: string) ] -> 
+        | [ "search"; (query: string) ] ->
             let searchBleets, searchCmd = SearchBleets.update (SearchBleets.Msg.Search query) state.SearchBleets
             { state with SearchBleets = searchBleets; CurrentUrl = url }, Cmd.map SearchBleetsMsg searchCmd
+        | [ "tags"; (tag: string) ] ->
+            let distractionBleets, distractionBleetsCmd =
+                DistractionBleets.update (DistractionBleets.Msg.LoadTaggedBleets tag) state.DistractionBleets
+
+            { state with
+                DistractionBleets = distractionBleets
+                CurrentUrl = url
+            },
+            Cmd.map DistractionBleetsMsg distractionBleetsCmd
         | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
-            { state with
-                ProfileElem = profileElem
-                CurrentUrl = url
-            },
-            Cmd.map ProfileElemMsg cmd
+            { state with ProfileElem = profileElem; CurrentUrl = url }, Cmd.map ProfileElemMsg cmd
         | _ ->
             Router.navigate ("not-found")
             state, Cmd.none
@@ -96,9 +113,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map HomeMsg homeCmd
         else
             { state with Home = nextHome; DeletedBleet = None }, Cmd.map HomeMsg homeCmd
-    | SearchBleetsMsg msg' -> 
+    | SearchBleetsMsg msg' ->
         let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
         { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd
+    | DistractionBleetsMsg msg' ->
+        let nextDistractionBleets, distractionBleetsCmd = DistractionBleets.update msg' state.DistractionBleets
+        { state with DistractionBleets = nextDistractionBleets }, Cmd.map DistractionBleetsMsg distractionBleetsCmd
 
 let notFoundElem =
     Html.div [
@@ -127,8 +147,9 @@ let render (state: State) (dispatch: Msg -> unit) =
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
-            | [ "search"; (_: string) ] -> 
-                SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
+            | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
+            | [ "tags"; (_: string) ] ->
+                DistractionBleets.render state.DistractionBleets (DistractionBleetsMsg >> dispatch)
             | [ "not-found" ] -> notFoundElem
             | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
             | _ -> Html.none

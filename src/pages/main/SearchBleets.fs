@@ -33,19 +33,25 @@ let init (data: Data.State) =
         DeletedBleet = None
     }
 
-let filterBleets (state: State, query: string) = 
+let filterBleets (state: State, query: string) =
     state.Bleets
-    |> List.filter (fun bleet -> 
-        let content = bleet.Content.ToLower()
-        content.Contains (query.ToLower()))
-        
+    |> List.filter
+        (fun bleet ->
+            let content = bleet.Content.ToLower()
+            content.Contains(query.ToLower()))
+
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Msg> =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    { state with BleetListElem = nextBleetListElem; DeletedBleet = nextBleetListElem.DeletedBleet }, Cmd.map BleetListElemMsg bleetListElemCmd
+
+    { state with
+        BleetListElem = nextBleetListElem
+        DeletedBleet = nextBleetListElem.DeletedBleet
+    },
+    Cmd.map BleetListElemMsg bleetListElemCmd
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | Search query -> 
+    | Search query ->
         let filteredBleets = filterBleets (state, query)
         updateBleetListElem (BleetListElem.Msg.DataUpdate filteredBleets) { state with Query = query }
     | DataUpdate data ->

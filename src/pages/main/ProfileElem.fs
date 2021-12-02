@@ -59,7 +59,7 @@ let init (data: Data.State) =
     {
         Data = data
         ProfileOption = profileOption
-        Handle = "Bleeter"
+        Handle = ""
         DeletedBleet = None
         Profile = None
         BleetListElem = BleetListElem.init bleets
@@ -67,7 +67,12 @@ let init (data: Data.State) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    { state with BleetListElem = nextBleetListElem; DeletedBleet = nextBleetListElem.DeletedBleet }, Cmd.map BleetListElemMsg bleetListElemCmd
+
+    { state with
+        BleetListElem = nextBleetListElem
+        DeletedBleet = nextBleetListElem.DeletedBleet
+    },
+    Cmd.map BleetListElemMsg bleetListElemCmd
 
 let updateData (state: State) : State * Msg Cmd =
     // update profile
@@ -75,7 +80,7 @@ let updateData (state: State) : State * Msg Cmd =
         match state.Data.Profiles with
         | Resolved (Ok profiles) ->
             profiles
-            |> List.tryFind (fun profile -> profile.Handle = "bleeter")
+            |> List.tryFind (fun profile -> profile.Handle = state.Handle)
         | _ -> None
 
     // update bleets
@@ -83,7 +88,7 @@ let updateData (state: State) : State * Msg Cmd =
         match state.Data.Bleets with
         | Resolved (Ok bleets) ->
             bleets
-            |> List.filter (fun bleet -> bleet.Handle = "bleeter")
+            |> List.filter (fun bleet -> bleet.Handle = state.Handle)
         | _ -> []
 
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
@@ -91,9 +96,7 @@ let updateData (state: State) : State * Msg Cmd =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
-    | UrlChanged handle ->
-        let newState = { state with Handle = handle }
-        newState, Cmd.none
+    | UrlChanged handle -> updateData { state with Handle = handle }
     | Follow ->
         match state.Profile with
         | Some profile ->

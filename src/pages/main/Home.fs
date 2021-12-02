@@ -31,7 +31,12 @@ let init (data: Data.State) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Msg> =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    { state with BleetListElem = nextBleetListElem; DeletedBleet = nextBleetListElem.DeletedBleet }, Cmd.map BleetListElemMsg bleetListElemCmd
+
+    { state with
+        BleetListElem = nextBleetListElem
+        DeletedBleet = nextBleetListElem.DeletedBleet
+    },
+    Cmd.map BleetListElemMsg bleetListElemCmd
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with

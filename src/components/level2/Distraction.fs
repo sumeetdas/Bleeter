@@ -76,7 +76,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                             prop.text distraction.Category
                         ]
                         Html.a [
-                            prop.href (sprintf "#/distractions/%s" (distraction.Hashtag.Substring 1))
+                            prop.href (sprintf "#/tags/%s" (distraction.Hashtag.Substring 1))
                             prop.children [
                                 Html.h2 [
                                     prop.classes [
