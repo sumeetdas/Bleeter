@@ -75,13 +75,18 @@ let render (state: State) (dispatch: Msg -> unit) =
                             ]
                             prop.text distraction.Category
                         ]
-                        Html.h2 [
-                            prop.classes [
-                                tw.``px-4``
-                                tw.``w-48``
-                                tw.``font-bold``
+                        Html.a [
+                            prop.href (sprintf "#/distractions/%s" (distraction.Hashtag.Substring 1))
+                            prop.children [
+                                Html.h2 [
+                                    prop.classes [
+                                        tw.``px-4``
+                                        tw.``w-48``
+                                        tw.``font-bold``
+                                    ]
+                                    prop.text distraction.Hashtag
+                                ]
                             ]
-                            prop.text distraction.Hashtag
                         ]
                         // will be implemented later
                         // Html.p [

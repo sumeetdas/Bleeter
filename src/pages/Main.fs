@@ -13,6 +13,7 @@ type State =
         ProfileElem: ProfileElem.State
         Home: Home.State
         DeletedBleet: Bleet option
+        SearchBleets: SearchBleets.State
     }
 
 type Msg =
@@ -21,6 +22,7 @@ type Msg =
     | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
     | DataUpdate of Data.State
+    | SearchBleetsMsg of SearchBleets.Msg
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -29,6 +31,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         ProfileElem = ProfileElem.init data
         Home = Home.init data
         DeletedBleet = None
+        SearchBleets = SearchBleets.init data
     },
     Cmd.none
 
@@ -37,25 +40,30 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
+        let searchBleets, searchBleetCmd = SearchBleets.update (SearchBleets.Msg.DataUpdate data) state.SearchBleets
 
-        { state with Home = home; ProfileElem = profileElem },
+        { state with Home = home; ProfileElem = profileElem; SearchBleets = searchBleets },
         Cmd.batch [
             Cmd.map HomeMsg homeCmd
             Cmd.map ProfileElemMsg profileElemCmd
+            Cmd.map SearchBleetsMsg searchBleetCmd
         ]
     | UrlChanged url ->
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
-            { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
-        | [ "not-found" ] -> { state with CurrentUrl = [ "not-found" ] }, Cmd.none
+            { state with CurrentUrl = url; Home = home }, (Cmd.map HomeMsg homeCmd)
+        | [ "search"; (query: string) ] -> 
+            let searchBleets, searchCmd = SearchBleets.update (SearchBleets.Msg.Search query) state.SearchBleets
+            { state with SearchBleets = searchBleets; CurrentUrl = url }, Cmd.map SearchBleetsMsg searchCmd
+        | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
             { state with
                 ProfileElem = profileElem
-                CurrentUrl = [ handle ]
+                CurrentUrl = url
             },
             Cmd.map ProfileElemMsg cmd
         | _ ->
@@ -88,6 +96,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map HomeMsg homeCmd
         else
             { state with Home = nextHome; DeletedBleet = None }, Cmd.map HomeMsg homeCmd
+    | SearchBleetsMsg msg' -> 
+        let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
+        { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd
 
 let notFoundElem =
     Html.div [
@@ -116,6 +127,8 @@ let render (state: State) (dispatch: Msg -> unit) =
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
+            | [ "search"; (_: string) ] -> 
+                SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
             | [ "not-found" ] -> notFoundElem
             | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
             | _ -> Html.none

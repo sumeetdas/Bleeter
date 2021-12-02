@@ -67,7 +67,7 @@ let init (data: Data.State) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    { state with BleetListElem = nextBleetListElem }, Cmd.map BleetListElemMsg bleetListElemCmd
+    { state with BleetListElem = nextBleetListElem; DeletedBleet = nextBleetListElem.DeletedBleet }, Cmd.map BleetListElemMsg bleetListElemCmd
 
 let updateData (state: State) : State * Msg Cmd =
     // update profile

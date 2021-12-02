@@ -26,6 +26,5 @@ let render (state: State) (dispatch: Msg -> unit) =
         ]
         prop.children [
             BleetElem.render state.BleetElem (BleetElemMsg >> dispatch)
-
-            ]
+        ]
     ]

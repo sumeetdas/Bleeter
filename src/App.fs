@@ -138,8 +138,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let distraction, cmd = Distraction.update msg state.Distraction
         { state with Distraction = distraction }, (Cmd.map DistractionMsg cmd)
     | SearchBoxMsg msg ->
-        let searchBox = SearchBox.update msg state.SearchBox
-        { state with SearchBox = searchBox }, Cmd.none
+        let nextSearchBox = SearchBox.update msg state.SearchBox
+        let nextState = { state with SearchBox = nextSearchBox }
+        if nextSearchBox.DoSearch 
+        then 
+            Router.navigate ( "search", nextSearchBox.Content )
+            let nextSearchBox = SearchBox.update SearchBox.Msg.Clear nextState.SearchBox
+            { nextState with SearchBox = nextSearchBox }, Cmd.none
+        else nextState, Cmd.none
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let page =

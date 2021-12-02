@@ -7,18 +7,21 @@ open Browser.Types
 // for `?` operator
 open Fable.Core.JsInterop
 
-type State = { Content: string }
+type State = { Content: string; DoSearch: bool }
 
 type Msg =
     | Clear
     | Update of string
+    | DoSearch
 
-let init () = { Content = "" }
+let init () = { Content = ""; DoSearch = false }
 
 let update (msg: Msg) (state: State) : State =
     match msg with
-    | Clear -> { Content = "" }
-    | Update content -> { Content = content }
+    | Clear -> init()
+    | Update content -> { state with Content = content }
+    | DoSearch -> 
+        if state.Content.Length > 0 then { state with DoSearch = true } else state
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
@@ -49,6 +52,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``border-0``
                     tw.``focus:outline-none``
                 ]
+                prop.onKeyPress(key.enter, fun _ -> if state.Content.Length > 0 then dispatch(DoSearch))
                 prop.placeholder "Search Bleeter"
                 prop.value state.Content
                 prop.onChange (fun (ev: Event) -> dispatch (Update(ev.target?value |> string)))
