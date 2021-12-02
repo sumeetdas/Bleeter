@@ -47,7 +47,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
-            let home, homeCmd = Home.update Home.Msg.ClearHomeState state.Home
+            let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
             { state with CurrentUrl = [ "home" ]; Home = home }, (Cmd.map HomeMsg homeCmd)
         | [ "not-found" ] -> { state with CurrentUrl = [ "not-found" ] }, Cmd.none
         | [ (handle: string) ] ->
@@ -72,7 +72,11 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             },
             Cmd.map ProfileElemMsg profileCmd
         else
-            { state with ProfileElem = nextProfileElem; DeletedBleet = None }, Cmd.map ProfileElemMsg profileCmd
+            { state with
+                ProfileElem = nextProfileElem
+                DeletedBleet = None
+            },
+            Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
