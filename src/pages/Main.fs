@@ -91,7 +91,11 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             let singleBleet, singleBleetCmd =
                 SingleBleetPage.update (SingleBleetPage.Msg.LoadBleet(handle, bleetId)) state.SingleBleetPage
 
-            { state with SingleBleetPage = singleBleet; CurrentUrl = url }, Cmd.map SingleBleetPageMsg singleBleetCmd
+            { state with
+                SingleBleetPage = singleBleet
+                CurrentUrl = url
+            },
+            Cmd.map SingleBleetPageMsg singleBleetCmd
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 

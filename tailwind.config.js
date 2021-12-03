@@ -6,10 +6,12 @@ module.exports = {
       "0": 0,
       "1": 1,
       "2": 2,
-      "3": 3,
-      "4": 4,
       default: 0
     },
+    backgroundColor: theme => ({
+      ...theme('colors'),
+      "bleeter-blue": "#1a8fc5"
+    }),
     extend: {},
   },
   variants: {
