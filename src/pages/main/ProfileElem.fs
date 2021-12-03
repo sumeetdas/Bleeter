@@ -48,7 +48,7 @@ let init (data: Data.State) =
                     tw.``hover:bg-green-400``
                     tw.``hover:text-gray-800``
                 ]
-            Offset = { X = -90.0; Y = 30.0 }
+            Offset = { X = -100.0; Y = 0.0 }
         }
 
     let bleets =
@@ -113,7 +113,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
         printf "Report Profile"
-        state, Cmd.none
+        let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) state.ProfileOption
+        { state with ProfileOption = profileOption }, cmd
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =

@@ -32,7 +32,7 @@ let init (data: Data.State) =
             tw.``hover:bg-green-400``
         ]
 
-    let offset = { X = -100.0; Y = 15.0 }
+    let offset = { X = -120.0; Y = 0.0 }
 
     {
         DistractionOption = EllipsisOption.init options size cssClasses offset
@@ -47,7 +47,8 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         { state with DistractionOption = distractionOption }, cmd
     | ReportDistraction ->
         printf "Report distraction"
-        state, Cmd.none
+        let distractionOption, distractionCmd = EllipsisOption.update (EllipsisOption.Msg.Close) state.DistractionOption
+        { state with DistractionOption = distractionOption }, distractionCmd
 
 let distractionList (state: State) : Distraction list =
     match state.Data.Distractions with

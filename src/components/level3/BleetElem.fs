@@ -37,7 +37,7 @@ let init bleet =
             tw.``float-right``
         ]
 
-    let offset: Coordinates = { X = -100.0; Y = 20.0 }
+    let offset: Coordinates = { X = -100.0; Y = 0.0 }
 
     {
         Bleet = bleet
@@ -54,7 +54,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             state, Cmd.none
     | ReportBleet ->
         printf "report bleet"
-        state, Cmd.none
+        let bleetOption, bleetOptionCmd = EllipsisOption.update (EllipsisOption.Close) state.BleetOption
+        { state with BleetOption = bleetOption }, bleetOptionCmd
     | BleetOptionMsg msg ->
         let bleetOption, bleetOptionCmd = EllipsisOption.update msg state.BleetOption
         { state with BleetOption = bleetOption }, bleetOptionCmd
