@@ -56,14 +56,19 @@ let menuHtml =
     let navList = navList |> List.map nav
 
     let bleeterIcon =
-        Html.div [
-            prop.classes [
-                tw.``py-2``
-                tw.``px-2``
-                tw.``mt-1``
-            ]
+        Html.a [
+            prop.href ""
             prop.children [
-                Bleeter.bigIcon "mdi:sheep"
+                Html.div [
+                    prop.classes [
+                        tw.``py-2``
+                        tw.``px-2``
+                        tw.``mt-1``
+                    ]
+                    prop.children [
+                        Bleeter.bigIcon "mdi:sheep"
+                    ]
+                ]
             ]
         ]
 

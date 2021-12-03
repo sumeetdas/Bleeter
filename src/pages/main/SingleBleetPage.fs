@@ -27,7 +27,6 @@ let updateData (state: State) : State * Msg Cmd =
         | _ -> []
         |> List.tryFind (fun bleet -> bleet.Handle = state.Handle && bleet.Id = state.BleetId)
         |> Option.bind (fun bleet -> Some(BleetElem.init bleet))
-    printf "bleetElem %A" bleetElem
     { state with BleetElem = bleetElem }, Cmd.none
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =

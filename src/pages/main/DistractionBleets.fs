@@ -53,7 +53,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | LoadTaggedBleets tag ->
         let bleets = filterBleets (state, tag)
-        printf "bleets size %d" state.Bleets.Length
         updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with HashTag = tag }
     | DataUpdate data ->
         let bleets = getBleets data
