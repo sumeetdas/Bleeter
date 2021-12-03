@@ -15,6 +15,7 @@ type State =
         DeletedBleet: Bleet option
         SearchBleets: SearchBleets.State
         DistractionBleets: DistractionBleets.State
+        SingleBleetPage: SingleBleetPage.State
     }
 
 type Msg =
@@ -25,6 +26,7 @@ type Msg =
     | DataUpdate of Data.State
     | SearchBleetsMsg of SearchBleets.Msg
     | DistractionBleetsMsg of DistractionBleets.Msg
+    | SingleBleetPageMsg of SingleBleetPage.Msg
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -35,6 +37,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         DeletedBleet = None
         SearchBleets = SearchBleets.init data
         DistractionBleets = DistractionBleets.init data
+        SingleBleetPage = SingleBleetPage.init data
     },
     Cmd.none
 
@@ -45,6 +48,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
         let searchBleets, searchBleetCmd = SearchBleets.update (SearchBleets.Msg.DataUpdate data) state.SearchBleets
 
+        let singleBleetPage, singleBleetPageCmd =
+            SingleBleetPage.update (SingleBleetPage.Msg.DataUpdate data) state.SingleBleetPage
+
         let distractionBleets, distractionBleetsCmd =
             DistractionBleets.update (DistractionBleets.Msg.DataUpdate data) state.DistractionBleets
 
@@ -53,12 +59,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             ProfileElem = profileElem
             SearchBleets = searchBleets
             DistractionBleets = distractionBleets
+            SingleBleetPage = singleBleetPage
         },
         Cmd.batch [
             Cmd.map HomeMsg homeCmd
             Cmd.map ProfileElemMsg profileElemCmd
             Cmd.map SearchBleetsMsg searchBleetCmd
             Cmd.map DistractionBleetsMsg distractionBleetsCmd
+            Cmd.map SingleBleetPageMsg singleBleetPageCmd
         ]
     | UrlChanged url ->
         match url with
@@ -79,6 +87,11 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             },
             Cmd.map DistractionBleetsMsg distractionBleetsCmd
         | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
+        | [ (handle: string); "bleets"; Route.Int (bleetId: int) ] ->
+            let singleBleet, singleBleetCmd =
+                SingleBleetPage.update (SingleBleetPage.Msg.LoadBleet(handle, bleetId)) state.SingleBleetPage
+
+            { state with SingleBleetPage = singleBleet; CurrentUrl = url }, Cmd.map SingleBleetPageMsg singleBleetCmd
         | [ (handle: string) ] ->
             let profileElem, cmd = ProfileElem.update (ProfileElem.Msg.UrlChanged handle) state.ProfileElem
 
@@ -119,6 +132,10 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | DistractionBleetsMsg msg' ->
         let nextDistractionBleets, distractionBleetsCmd = DistractionBleets.update msg' state.DistractionBleets
         { state with DistractionBleets = nextDistractionBleets }, Cmd.map DistractionBleetsMsg distractionBleetsCmd
+    | SingleBleetPageMsg msg' ->
+        let singleBleet, singleBleetCmd = SingleBleetPage.update msg' state.SingleBleetPage
+        { state with SingleBleetPage = singleBleet }, Cmd.map SingleBleetPageMsg singleBleetCmd
+
 
 let notFoundElem =
     Html.div [
@@ -151,6 +168,8 @@ let render (state: State) (dispatch: Msg -> unit) =
             | [ "tags"; (_: string) ] ->
                 DistractionBleets.render state.DistractionBleets (DistractionBleetsMsg >> dispatch)
             | [ "not-found" ] -> notFoundElem
+            | [ (_: string); "bleets"; Route.Int (_: int) ] ->
+                SingleBleetPage.render state.SingleBleetPage (SingleBleetPageMsg >> dispatch)
             | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
             | _ -> Html.none
         ]

@@ -149,8 +149,9 @@ let render (state: State) (dispatch: Msg -> unit) =
                     Html.div [
                         prop.classes [ tw.flex; tw.``py-4`` ]
                         prop.children [
-                            Html.div [
+                            Html.a [
                                 prop.classes [ tw.flex; tw.``flex-1`` ]
+                                prop.href (sprintf "#/%s/bleets/%d" bleet.Handle bleet.Id)
                                 prop.children [
                                     Bleeter.icon "ei:comment" "24"
                                     Html.text bleet.Replies
