@@ -74,6 +74,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
             { state with CurrentUrl = url; Home = home }, (Cmd.map HomeMsg homeCmd)
+        | [] ->
+            Router.navigate ("home")
+            state, Cmd.none
         | [ "search"; (query: string) ] ->
             let searchBleets, searchCmd = SearchBleets.update (SearchBleets.Msg.Search query) state.SearchBleets
             { state with SearchBleets = searchBleets; CurrentUrl = url }, Cmd.map SearchBleetsMsg searchCmd
@@ -158,8 +161,6 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.flex
             tw.``flex-grow-1``
             tw.``max-w-screen-sm``
-            tw.``border-l``
-            tw.``border-r``
             tw.``h-full``
             tw.``w-full``
         ]

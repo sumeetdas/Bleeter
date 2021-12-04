@@ -55,9 +55,42 @@ let render (state: State) (dispatch: Msg -> unit) =
         ]
         prop.children [
             Html.div [
-                prop.classes [ tw.flex; tw.``h-20`` ]
-                prop.text "Home"
+                prop.classes [
+                    tw.flex
+                    tw.``flex-col``
+                ]
+                prop.children [
+                    Html.div [
+                        prop.classes [
+                            tw.``h-40``
+                            tw.``w-full``
+                            tw.``bg-transparent``
+                        ]
+                    ]
+                    Html.div [
+                        prop.classes [
+                            tw.flex
+                            tw.``flex-row``
+                            tw.``h-16``
+                            tw.``bg-gray-100``
+                            tw.``w-full``
+                            tw.``text-2xl``
+                            tw.``text-green-600``
+                            tw.``items-center``
+                            tw.``border-b``
+                            tw.``border-gray-300``
+                        ]
+                        prop.children [
+                            Html.div [
+                                prop.classes [ tw.``ml-4`` ]
+                                prop.text "Home"
+                            ]
+                        ]
+                    ]
+                    BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
+                ]
             ]
-            BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
-        ]
+
+
+            ]
     ]

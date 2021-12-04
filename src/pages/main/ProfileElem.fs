@@ -120,8 +120,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
     let followBtn =
         let noShowBtnClasses = [ tw.hidden ]
-        let yesFollowClasses = [ tw.``w-36`` ]
-        let noFollowClasses = [ tw.``w-20`` ]
+        let yesFollowClasses = [ tw.``w-28``; tw.``bg-green-500``; tw.``text-white`` ]
+        let noFollowClasses = [ tw.``w-20``; tw.``text-green-500`` ]
 
         let classes =
             [
@@ -132,7 +132,6 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                     tw.``mt-3``
                     tw.``ml-2``
                     tw.``border-green-500``
-                    tw.``text-green-500``
                 ]
                 (match profile.IsFollow with
                  | None -> noShowBtnClasses
@@ -151,13 +150,14 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
             )
         ]
 
-    Html.div [
+    let profileBanner =
         (match profile.Banner with
          | Some url ->
              Html.img [
                  prop.classes [
                      tw.``w-full``
                      tw.``bg-cover``
+                     tw.``h-40``
                  ]
                  prop.src url
              ]
@@ -167,8 +167,11 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                      tw.``w-full``
                      tw.``border-none``
                      tw.``bg-transparent``
+                     tw.``h-40``
                  ]
              ])
+
+    let profilePic =
         Html.div [
             prop.classes [
                 tw.flex
@@ -202,12 +205,16 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                 ]
             ]
         ]
+
+    let profileName =
         Html.div [
             prop.classes [ tw.flex; tw.``ml-2`` ]
             prop.children [
                 Html.span [ prop.text profile.Name ]
             ]
         ]
+
+    let handle =
         Html.div [
             prop.classes [ tw.flex; tw.``ml-2`` ]
             prop.children [
@@ -216,6 +223,8 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                 ]
             ]
         ]
+
+    let otherProfileInfo =
         Html.div [
             prop.classes [ tw.block; tw.``m-2`` ]
             prop.children [
@@ -278,6 +287,8 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                  | None -> Html.div [])
             ]
         ]
+
+    let followersFollowing =
         Html.div [
             prop.classes [
                 tw.flex
@@ -314,6 +325,29 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
                 ]
             ]
         ]
+
+    Html.div [
+        prop.classes [
+            tw.flex
+            tw.``flex-col``
+        ]
+        prop.children [
+            profileBanner
+            Html.div [
+                prop.classes [
+                    tw.flex
+                    tw.``flex-col``
+                    tw.``bg-gray-100``
+                ]
+                prop.children [
+                    profilePic
+                    profileName
+                    handle
+                    otherProfileInfo
+                    followersFollowing
+                ]
+            ]
+        ]
     ]
 
 let renderedElem
@@ -338,6 +372,7 @@ let renderedElem
                     tw.``border-b``
                     tw.``border-gray-300``
                     tw.``text-green-600``
+                    tw.``bg-gray-100``
                 ]
                 prop.children [
                     Html.span [

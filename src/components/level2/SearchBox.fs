@@ -27,9 +27,19 @@ let update (msg: Msg) (state: State) : State =
             state
 
 let render (state: State) (dispatch: Msg -> unit) =
+    let searchIconClasses =
+        [
+            [ tw.``mx-3`` ]
+            (if not (state.Content.Length = 0) then
+                 [ tw.``text-green-500``; tw.``font-extrabold`` ]
+             else
+                 [ tw.``text-gray-500`` ])
+        ]
+        |> List.concat
+
     Html.div [
         prop.classes [
-            tw.``bg-bleet-dim``
+            tw.``bg-gray-100``
             tw.``text-gray-500``
             tw.``w-96``
             tw.``h-10``
@@ -41,14 +51,14 @@ let render (state: State) (dispatch: Msg -> unit) =
         ]
         prop.children [
             Html.button [
-                prop.classes [ tw.``mx-3`` ]
+                prop.classes searchIconClasses
                 prop.children [
                     Bleeter.icon "ant-design:search-outlined" "24"
                 ]
             ]
             Html.input [
                 prop.classes [
-                    tw.``bg-bleet-dim``
+                    tw.``bg-gray-100``
                     tw.``h-10``
                     tw.``w-72``
                     tw.``text-sm``

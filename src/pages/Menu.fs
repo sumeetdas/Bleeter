@@ -25,11 +25,11 @@ let nav (iconName: string, text: string, url: string) =
             tw.``px-2``
             tw.``py-2``
             tw.``text-base``
+            tw.``text-gray-100``
             tw.``leading-5``
             tw.``font-medium``
             tw.``rounded-full``
-            tw.``hover:bg-gray-300``
-            tw.``hover:text-green-800``
+            tw.``hover:bg-bleeter-blue-hover``
         ]
         prop.target (if (url |> String.contains "http") then "_blank" else "")
         prop.href url
@@ -64,6 +64,7 @@ let menuHtml =
                         tw.``py-2``
                         tw.``px-2``
                         tw.``mt-1``
+                        tw.``text-gray-100``
                     ]
                     prop.children [
                         Bleeter.bigIcon "mdi:sheep"

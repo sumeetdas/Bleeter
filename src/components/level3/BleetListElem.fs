@@ -105,6 +105,8 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.flex
             tw.``flex-col``
+            tw.``bg-gray-100``
+            tw.``h-full``
         ]
         prop.children (
             [

@@ -74,6 +74,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``pb-0``
             tw.``border-b``
             tw.``border-gray-300``
+            tw.``bg-gray-100``
         ]
         prop.children [
             Html.div [

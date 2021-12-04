@@ -10,7 +10,8 @@ module.exports = {
     },
     backgroundColor: theme => ({
       ...theme('colors'),
-      "bleeter-blue": "#1a8fc5"
+      "bleeter-blue": "#1a8fc5",
+      "bleeter-blue-hover": "#42b9f1"
     }),
     extend: {},
   },

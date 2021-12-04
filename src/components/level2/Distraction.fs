@@ -84,6 +84,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                         tw.``px-4``
                                         tw.``w-48``
                                         tw.``font-bold``
+                                        tw.``text-green-600``
                                     ]
                                     prop.text distraction.Hashtag
                                 ]
@@ -109,7 +110,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.``max-w-sm``
             tw.``rounded-lg``
-            tw.``bg-bleet-dim``
+            tw.``bg-gray-100``
             tw.``overflow-hidden``
             tw.``shadow-lg``
             tw.``m-4``
