@@ -9,6 +9,7 @@ type State =
     {
         BleetListElem: BleetListElem.State
         DeletedBleet: Bleet option
+        HeightUpdated: bool
     }
 
 type Msg =
@@ -27,6 +28,7 @@ let init (data: Data.State) =
     {
         BleetListElem = BleetListElem.init bleets
         DeletedBleet = None
+        HeightUpdated = false
     }
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Msg> =
@@ -35,6 +37,7 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
+        HeightUpdated = nextBleetListElem.HeightUpdated
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 

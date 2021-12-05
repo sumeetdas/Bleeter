@@ -21,6 +21,7 @@ type State =
         DeletedBleet: Bleet option
         Profile: Profile option
         BleetListElem: BleetListElem.State
+        HeightUpdated: bool
     }
 
 let init (data: Data.State) =
@@ -63,14 +64,16 @@ let init (data: Data.State) =
         DeletedBleet = None
         Profile = None
         BleetListElem = BleetListElem.init bleets
+        HeightUpdated = false
     }
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-
+    printf " nextBleetListElem %A" nextBleetListElem.HeightUpdated
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
+        HeightUpdated = nextBleetListElem.HeightUpdated
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 

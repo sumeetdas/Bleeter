@@ -78,6 +78,17 @@ let getWindowHeight() =
     else
         windowHeight
 
+let resizeCmd (dispatch: Msg -> unit) = 
+    let delayedHeightCheck = 
+        async {
+            do! Async.Sleep 1000
+            let finalHeight = getWindowHeight()
+            printf "Meow %d" finalHeight
+            dispatch (UpdateHeight finalHeight)
+        }
+
+    Async.StartImmediate delayedHeightCheck
+
 let updateData (state: State) =
     if state.Data.DoSyncData then
         let nextData, dataCmd = Data.update (Data.Msg.DoneSyncData) state.Data
@@ -86,17 +97,7 @@ let updateData (state: State) =
         let nextDistraction, distractionCmd =
             Distraction.update (Distraction.Msg.DataUpdate state.Data) state.Distraction
 
-        let resizeCmd (dispatch: Msg -> unit) = 
-            let delayedHeightCheck = 
-                async {
-                    do! Async.Sleep 1000
-                    let finalHeight = getWindowHeight()
-                    printf "Meow %d" finalHeight
-                    dispatch (UpdateHeight finalHeight)
-                }
-
-            Async.StartImmediate delayedHeightCheck
-
+        
         { state with
             Data = nextData
             Main = nextMain
@@ -143,7 +144,16 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 Cmd.map DataMsg dataCmd
                 updateDataCmd
             ]
-        | None -> nextState, Cmd.map MainMsg mainCmd
+        | None -> 
+            if nextMain.HeightUpdated 
+            then
+                printf "woof"
+                nextState, Cmd.batch [
+                    Cmd.map MainMsg mainCmd
+                    Cmd.ofSub resizeCmd
+                ] 
+            else
+                nextState, Cmd.map MainMsg mainCmd
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
         let nextState = { state with CreateBleet = createBleet }

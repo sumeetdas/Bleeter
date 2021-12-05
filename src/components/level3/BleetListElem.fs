@@ -11,6 +11,7 @@ type State =
         BleetElems: BleetElem.State list
         ShowLoadMore: bool
         DeletedBleet: Bleet option
+        HeightUpdated: bool
     }
 
 type Msg =
@@ -27,6 +28,7 @@ let init (bleets: Bleet list) =
         BleetElems = []
         ShowLoadMore = false
         DeletedBleet = None
+        HeightUpdated = false
     }
 
 let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: int) =
@@ -40,6 +42,7 @@ let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: i
     { state with
         BleetElems = newBleetElems
         ShowLoadMore = newBleetElems.Length < state.Bleets.Length
+        HeightUpdated = true
     }
 
 let refreshBleetList (state: State) =

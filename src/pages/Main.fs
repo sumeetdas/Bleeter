@@ -16,6 +16,7 @@ type State =
         SearchBleets: SearchBleets.State
         DistractionBleets: DistractionBleets.State
         SingleBleetPage: SingleBleetPage.State
+        HeightUpdated: bool
     }
 
 type Msg =
@@ -38,6 +39,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         SearchBleets = SearchBleets.init data
         DistractionBleets = DistractionBleets.init data
         SingleBleetPage = SingleBleetPage.init data
+        HeightUpdated = false
     },
     Cmd.none
 
@@ -114,12 +116,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             { state with
                 ProfileElem = nextProfileElem
                 DeletedBleet = nextProfileElem.DeletedBleet
+                HeightUpdated = nextProfileElem.HeightUpdated
             },
             Cmd.map ProfileElemMsg profileCmd
         else
             { state with
                 ProfileElem = nextProfileElem
                 DeletedBleet = None
+                HeightUpdated = nextProfileElem.HeightUpdated
             },
             Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
@@ -132,7 +136,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             },
             Cmd.map HomeMsg homeCmd
         else
-            { state with Home = nextHome; DeletedBleet = None }, Cmd.map HomeMsg homeCmd
+            { state with Home = nextHome; DeletedBleet = None; HeightUpdated = nextHome.HeightUpdated }, Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->
         let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
         { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd
