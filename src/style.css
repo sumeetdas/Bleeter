@@ -16,6 +16,8 @@
     .bleeter-body {
         @apply bg-bleeter-blue;
         @apply overflow-y-scroll;
-        @apply bleeter-scroll;        
+        @apply bleeter-scroll;   
+        background-image: url('/img/birds.png'), url('/img/clouds.png');
+        background-repeat: repeat, repeat;
     }
 }

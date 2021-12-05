@@ -85,4 +85,4 @@ let render (state: State) (dispatch: Msg -> unit) =
             BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
         ]
 
-    MainLayout.elem None coreComponents
+    MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents

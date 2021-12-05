@@ -117,7 +117,11 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with ProfileOption = profileOption }, cmd
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
-let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State) (dispatch: Msg -> unit) =
+let private profileElem 
+    (profile: Profile) 
+    (profileOption: Msg EllipsisOption.State) 
+    (bleetListElem: BleetListElem.State)
+    (dispatch: Msg -> unit) =
     let followBtn =
         let noShowBtnClasses = [ tw.hidden ]
         let yesFollowClasses = [ tw.``w-28``; tw.``bg-green-500``; tw.``text-white`` ]
@@ -305,6 +309,24 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
             ]
         ]
 
+    let latestBleets = 
+        Html.div [
+            prop.classes [
+                tw.``text-2xl``
+                tw.``h-12``
+                tw.``border-b``
+                tw.``border-gray-300``
+                tw.``text-green-600``
+                tw.``bg-gray-100``
+            ]
+            prop.children [
+                Html.span [
+                    prop.classes [ tw.``m-6`` ]
+                    prop.text "Latest Bleets"
+                ]
+            ]
+        ]
+
     let coreComponents =
         [
             profilePic
@@ -312,46 +334,18 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
             handle
             otherProfileInfo
             followersFollowing
+            latestBleets
+            (BleetListElem.render bleetListElem (BleetListElemMsg >> dispatch))
         ]
 
-    MainLayout.elem profile.Banner coreComponents
+    let bannerUrl = 
+        match profile.Banner with 
+        | Some url -> Some url
+        | None -> Some "/img/bleeter-logo.png"
 
-let renderedElem
-    (profile: Profile)
-    (profileOption: Msg EllipsisOption.State)
-    (bleetListElem: BleetListElem.State)
-    (dispatch: Msg -> unit)
-    : ReactElement =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
-            tw.``flex-grow-1``
-        ]
-        prop.children [
-            bleetProfileElem profile profileOption dispatch
-
-            Html.div [
-                prop.classes [
-                    tw.``text-2xl``
-                    tw.``h-12``
-                    tw.``border-b``
-                    tw.``border-gray-300``
-                    tw.``text-green-600``
-                    tw.``bg-gray-100``
-                ]
-                prop.children [
-                    Html.span [
-                        prop.classes [ tw.``m-6`` ]
-                        prop.text "Latest Bleets"
-                    ]
-                ]
-            ]
-            BleetListElem.render bleetListElem (BleetListElemMsg >> dispatch)
-        ]
-    ]
+    MainLayout.elem bannerUrl coreComponents
 
 let render (state: State) (dispatch: Msg -> unit) =
     match state.Profile with
-    | Some profile -> renderedElem profile state.ProfileOption state.BleetListElem dispatch
+    | Some profile -> profileElem profile state.ProfileOption state.BleetListElem dispatch
     | None -> Html.none
