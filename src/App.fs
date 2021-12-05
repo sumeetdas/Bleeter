@@ -18,6 +18,7 @@ type State =
         CreateBleet: CreateBleet.State
         Distraction: Distraction.State
         SearchBox: SearchBox.State
+        AppHeight: int
     }
 
 // events
@@ -28,6 +29,7 @@ type Msg =
     | CreateBleetMsg of CreateBleet.Msg
     | DistractionMsg of Distraction.Msg
     | SearchBoxMsg of SearchBox.Msg
+    | UpdateHeight of int
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -42,6 +44,7 @@ let init () =
         CreateBleet = CreateBleet.init ()
         Distraction = Distraction.init data
         SearchBox = SearchBox.init ()
+        AppHeight = 500
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -62,6 +65,19 @@ let changeUrl (url: string list, state: State) =
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
         { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
 
+let getWindowHeight() = 
+    let scrollHeight =
+        (document.getElementById "elmish-app")
+            .scrollHeight
+        |> int
+
+    let windowHeight = window.innerHeight |> int
+
+    if scrollHeight > windowHeight then
+        scrollHeight
+    else
+        windowHeight
+
 let updateData (state: State) =
     if state.Data.DoSyncData then
         let nextData, dataCmd = Data.update (Data.Msg.DoneSyncData) state.Data
@@ -69,6 +85,17 @@ let updateData (state: State) =
 
         let nextDistraction, distractionCmd =
             Distraction.update (Distraction.Msg.DataUpdate state.Data) state.Distraction
+
+        let resizeCmd (dispatch: Msg -> unit) = 
+            let delayedHeightCheck = 
+                async {
+                    do! Async.Sleep 1000
+                    let finalHeight = getWindowHeight()
+                    printf "Meow %d" finalHeight
+                    dispatch (UpdateHeight finalHeight)
+                }
+
+            Async.StartImmediate delayedHeightCheck
 
         { state with
             Data = nextData
@@ -79,12 +106,16 @@ let updateData (state: State) =
             Cmd.map MainMsg mainCmd
             Cmd.map DistractionMsg distractionCmd
             Cmd.map DataMsg dataCmd
+            Cmd.ofSub resizeCmd
         ]
     else
         { state with Data = state.Data }, Cmd.none
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | UpdateHeight height -> 
+        let nextMain, mainCmd = Main.update (Main.Msg.AppHeight height) state.Main
+        { state with Main = nextMain; AppHeight = height }, Cmd.map MainMsg mainCmd
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -157,13 +188,15 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 tw.``min-h-full``
                 tw.``h-full``
             ]
+            prop.style [ style.height state.AppHeight ]
             prop.children [
-                Menu.menuHtml
+                Menu.menuHtml state.AppHeight
 
                 (Main.render state.Main (MainMsg >> dispatch))
 
                 Html.div [
                     prop.classes [ tw.``flex-grow-1`` ]
+                    prop.style [ style.height state.AppHeight ]
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
                         Distraction.render state.Distraction (DistractionMsg >> dispatch)
@@ -178,48 +211,24 @@ let render (state: State) (dispatch: Msg -> Unit) =
         router.children page
     ]
 
-let appOnLoadHeight initial =
+let appOnLoadHeight _ =
     let sub dispatch =
         window.addEventListener (
             "load",
             fun _ ->
-                let scrollHeight =
-                    (document.getElementById "elmish-app")
-                        .scrollHeight
-                    |> int
-
-                let windowHeight = window.innerHeight |> int
-
-                let finalHeight =
-                    if scrollHeight > windowHeight then
-                        scrollHeight
-                    else
-                        windowHeight
-
-                (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
+                let finalHeight = getWindowHeight()
+                dispatch (UpdateHeight finalHeight)
         )
 
     Cmd.ofSub sub
 
-let appOnResizeHeight initial =
+let appOnResizeHeight _ =
     let sub dispatch =
         window.addEventListener (
             "resize",
             fun _ ->
-                let scrollHeight =
-                    (document.getElementById "elmish-app")
-                        .scrollHeight
-                    |> int
-
-                let windowHeight = window.innerHeight |> int
-
-                let finalHeight =
-                    if scrollHeight > windowHeight then
-                        scrollHeight
-                    else
-                        windowHeight
-
-                (Main.Msg.AppHeight >> MainMsg >> dispatch) finalHeight
+                let finalHeight = getWindowHeight()
+                dispatch (UpdateHeight finalHeight)
         )
 
     Cmd.ofSub sub

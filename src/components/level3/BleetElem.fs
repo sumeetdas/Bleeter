@@ -31,10 +31,12 @@ let init bleet =
     let cssClasses =
         [
             tw.``rounded-full``
-            tw.``cursor-pointer``
-            tw.``hover:bg-green-400``
+            tw.``bleeter-pointer``
+            tw.``hover:bg-green-500``
             tw.flex
             tw.``float-right``
+            tw.``hover:text-white``
+            tw.``text-xl``
         ]
 
     let offset: Coordinates = { X = -100.0; Y = 0.0 }

@@ -95,10 +95,21 @@ let render (state: State) (dispatch: Msg -> unit) =
         Html.div [
             prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.BleetElems.Length, FETCH_NUM_BLEETS)))
             prop.classes [
-                tw.``text-3xl``
-                tw.``m-auto``
+                tw.``flex``
+                tw.``flex-row``
+                tw.``text-2xl``
+                tw.``bg-gray-100`` 
+                tw.``w-full``
+                tw.``justify-center``
+                tw.``bleeter-pointer``
             ]
-            prop.text "Load more"
+            
+            prop.children [
+                Html.p [
+                    prop.classes [ tw.uppercase; tw.``bleeter-pointer``; tw.``select-none`` ]
+                    prop.text (if state.ShowLoadMore then "Load more" else "")
+                ]
+            ]
         ]
 
     Html.div [
@@ -111,7 +122,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.children (
             [
                 bleetElemList
-                [ (if state.ShowLoadMore then loadMore else Html.none) ]
+                [ loadMore ]
             ]
             |> List.concat
         )

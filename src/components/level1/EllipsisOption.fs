@@ -92,7 +92,7 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
                         tw.``items-center``
                         tw.``pl-4``
                         tw.``hover:bg-gray-300``
-                        tw.``cursor-pointer``
+                        tw.``bleeter-pointer``
                     ]
                     prop.text opt.Name
                     prop.onClick (fun _ -> dispatch (CommandMsg opt.Command))

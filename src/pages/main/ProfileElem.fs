@@ -44,7 +44,7 @@ let init (data: Data.State) =
                     tw.``rounded-full``
                     tw.``border-green-500``
                     tw.``text-green-500``
-                    tw.``cursor-pointer``
+                    tw.``bleeter-pointer``
                     tw.``hover:bg-green-400``
                     tw.``hover:text-gray-800``
                 ]

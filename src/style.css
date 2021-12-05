@@ -19,5 +19,18 @@
         @apply bleeter-scroll;   
         background-image: url('/img/birds.png'), url('/img/clouds.png');
         background-repeat: repeat, repeat;
+        cursor: url('/img/bleeter-arrow.png'), auto;
+    }
+
+    .bleeter-pointer {
+        cursor: url('/img/bleeter-pointer.png'), auto;
+    }
+
+    a {
+        @apply bleeter-pointer;
+    }
+
+    button {
+        @apply bleeter-pointer;
     }
 }

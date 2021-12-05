@@ -28,8 +28,10 @@ let init (data: Data.State) =
         [
             tw.``mt-3``
             tw.``rounded-full``
-            tw.``cursor-pointer``
-            tw.``hover:bg-green-400``
+            tw.``bleeter-pointer``
+            tw.``hover:bg-green-500``
+            tw.``hover:text-white``
+            tw.``text-xl``
         ]
 
     let offset = { X = -120.0; Y = 0.0 }

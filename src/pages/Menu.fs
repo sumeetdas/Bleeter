@@ -44,7 +44,7 @@ let nav (iconName: string, text: string, url: string) =
         ]
     ]
 
-let menuHtml =
+let menuHtml (height: int) =
     let navList =
         [
             ("ant-design:home-outlined", "Home", "#/home")
@@ -104,6 +104,7 @@ let menuHtml =
             tw.``w-max``
             tw.``mr-4``
         ]
+        prop.style [ style.height height ]
         prop.children [
             Html.div [
                 prop.classes [ tw.``float-right`` ]
