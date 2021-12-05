@@ -150,27 +150,6 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
             )
         ]
 
-    let profileBanner =
-        (match profile.Banner with
-         | Some url ->
-             Html.img [
-                 prop.classes [
-                     tw.``w-full``
-                     tw.``bg-cover``
-                     tw.``h-40``
-                 ]
-                 prop.src url
-             ]
-         | None ->
-             Html.div [
-                 prop.classes [
-                     tw.``w-full``
-                     tw.``border-none``
-                     tw.``bg-transparent``
-                     tw.``h-40``
-                 ]
-             ])
-
     let profilePic =
         Html.div [
             prop.classes [
@@ -326,29 +305,16 @@ let bleetProfileElem (profile: Profile) (profileOption: Msg EllipsisOption.State
             ]
         ]
 
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
+    let coreComponents =
+        [
+            profilePic
+            profileName
+            handle
+            otherProfileInfo
+            followersFollowing
         ]
-        prop.children [
-            profileBanner
-            Html.div [
-                prop.classes [
-                    tw.flex
-                    tw.``flex-col``
-                    tw.``bg-gray-100``
-                ]
-                prop.children [
-                    profilePic
-                    profileName
-                    handle
-                    otherProfileInfo
-                    followersFollowing
-                ]
-            ]
-        ]
-    ]
+
+    MainLayout.elem profile.Banner coreComponents
 
 let renderedElem
     (profile: Profile)

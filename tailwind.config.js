@@ -8,12 +8,14 @@ module.exports = {
       "2": 2,
       default: 0
     },
-    backgroundColor: theme => ({
-      ...theme('colors'),
-      "bleeter-blue": "#1a8fc5",
-      "bleeter-blue-hover": "#42b9f1"
-    }),
-    extend: {},
+    extend: {
+      colors: {
+        "bleeter-blue": "#1a8fc5",
+        "bleeter-blue-hover": "#42b9f1",
+        "scroll-track": "#2fa8e0",
+        "scroll-bar": "#45b9ee"
+      }
+    },
   },
   variants: {
     extend: {},

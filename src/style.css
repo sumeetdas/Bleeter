@@ -8,4 +8,14 @@
         --bg-opacity: 1;
         @apply bg-green-100;
     }
+
+    .bleeter-scroll {
+        scrollbar-color: theme('colors.scroll-bar') theme('colors.scroll-track');
+    }
+
+    .bleeter-body {
+        @apply bg-bleeter-blue;
+        @apply overflow-y-scroll;
+        @apply bleeter-scroll;        
+    }
 }

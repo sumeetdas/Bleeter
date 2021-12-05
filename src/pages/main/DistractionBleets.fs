@@ -62,17 +62,27 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
 let render (state: State) (dispatch: Msg -> unit) =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
-            tw.``flex-grow-1``
-        ]
-        prop.children [
+    let coreComponents =
+        [
             Html.div [
-                prop.classes [ tw.flex; tw.``h-20`` ]
-                prop.text (sprintf "#%s Bleets" state.HashTag)
+                prop.classes [
+                    tw.``h-16``
+                    tw.``bg-gray-100``
+                    tw.``w-full``
+                    tw.``text-2xl``
+                    tw.``text-green-600``
+                    tw.``items-center``
+                    tw.``border-b``
+                    tw.``border-gray-300``
+                ]
+                prop.children [
+                    Html.div [
+                        prop.classes [ tw.``ml-4`` ]
+                        prop.text (sprintf "#%s Bleets" state.HashTag)
+                    ]
+                ]
             ]
             BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
         ]
-    ]
+
+    MainLayout.elem None coreComponents

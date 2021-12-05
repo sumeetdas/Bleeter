@@ -62,17 +62,13 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
 let render (state: State) (dispatch: Msg -> unit) =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
-            tw.``flex-grow-1``
-        ]
-        prop.children [
+    let coreComponents =
+        [
             Html.div [
                 prop.classes [ tw.flex; tw.``h-20`` ]
                 prop.text (sprintf "Search \"%s\"" state.Query)
             ]
             BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
         ]
-    ]
+
+    MainLayout.elem None coreComponents

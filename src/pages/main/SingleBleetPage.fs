@@ -41,17 +41,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | None -> state, Cmd.none
     | DataUpdate data -> updateData { state with Data = data }
 
-
 let render (state: State) (dispatch: Msg -> unit) =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
-            tw.``flex-grow-1``
-        ]
-        prop.children [
+    let coreComponents =
+        [
             match state.BleetElem with
             | Some bleetElem -> BleetElem.render bleetElem (BleetElemMsg >> dispatch)
             | None -> Html.none
         ]
-    ]
+
+    MainLayout.elem None coreComponents
