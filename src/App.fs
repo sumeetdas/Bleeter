@@ -81,7 +81,7 @@ let getWindowHeight() =
 let resizeCmd (dispatch: Msg -> unit) = 
     let delayedHeightCheck = 
         async {
-            do! Async.Sleep 1000
+            do! Async.Sleep 250
             let finalHeight = getWindowHeight()
             printf "Meow %d" finalHeight
             dispatch (UpdateHeight finalHeight)

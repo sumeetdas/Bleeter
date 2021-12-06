@@ -313,22 +313,7 @@ let private profileElem
         ]
 
     let latestBleets = 
-        Html.div [
-            prop.classes [
-                tw.``text-2xl``
-                tw.``h-12``
-                tw.``border-b``
-                tw.``border-gray-300``
-                tw.``text-green-600``
-                tw.``bg-gray-100``
-            ]
-            prop.children [
-                Html.span [
-                    prop.classes [ tw.``m-6`` ]
-                    prop.text "Latest Bleets"
-                ]
-            ]
-        ]
+        MainLayout.heading "Latest Bleets"
 
     let coreComponents =
         [

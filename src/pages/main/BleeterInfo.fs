@@ -5,9 +5,9 @@ open Feliz
 open Tailwind
 
 let page =
-    Html.div [
-        prop.classes [ tw.``ml-3`` ]
-        prop.children [
-            Html.h1 "Bleeter Info!!!!"
+    let coreComponents = 
+        [
+            MainLayout.heading "Bleeter Info!!!!"
         ]
-    ]
+
+    MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents

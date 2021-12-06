@@ -105,6 +105,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                 tw.``w-full``
                 tw.``justify-center``
                 tw.``bleeter-pointer``
+                tw.``h-12``
+                (if state.ShowLoadMore then tw.``block`` else tw.``hidden``)
             ]
             
             prop.children [

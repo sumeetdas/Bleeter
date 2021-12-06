@@ -52,26 +52,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
 let render (state: State) (dispatch: Msg -> unit) =
     let coreComponents =
         [
-            Html.div [
-                prop.classes [
-                    tw.flex
-                    tw.``flex-row``
-                    tw.``h-16``
-                    tw.``bg-gray-100``
-                    tw.``w-full``
-                    tw.``text-2xl``
-                    tw.``text-green-600``
-                    tw.``items-center``
-                    tw.``border-b``
-                    tw.``border-gray-300``
-                ]
-                prop.children [
-                    Html.div [
-                        prop.classes [ tw.``ml-4`` ]
-                        prop.text "Home"
-                    ]
-                ]
-            ]
+            MainLayout.heading "Home"
             BleetListElem.render state.BleetListElem (BleetListElemMsg >> dispatch)
         ]
 
