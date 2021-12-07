@@ -62,6 +62,93 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let bleetOption, bleetOptionCmd = EllipsisOption.update msg state.BleetOption
         { state with BleetOption = bleetOption }, bleetOptionCmd
 
+let ytEmbed (src: string) =
+    Html.div [
+        prop.classes [ tw.``iframe-container`` ]
+        prop.children [
+            Html.iframe [
+                prop.custom ("data-src", src)
+                prop.src src
+                prop.custom ("frameBorder", "0")
+                prop.custom ("allow", "accelerometer; autoplay")
+                prop.custom ("allowFullScreen", true)
+            ]
+        ]
+    ]
+
+let getLink (url: string) (name: string) =
+    Html.a [
+        prop.classes [ tw.``text-green-500``; tw.``ml-1`` ]
+        prop.target "_blank"
+        prop.href url
+        prop.text name
+    ]
+
+let getTagLink (tag: string) = 
+    let tagName = tag.Replace("#", "")
+    Html.a [
+        prop.classes [ tw.``text-green-500``; tw.``ml-1`` ]
+        prop.href ("#/tags/" + tagName)
+        prop.text tag
+    ]
+
+let getBleetContent (content: string): ReactElement =
+    let words = content.Split [| ' ' |]
+    
+    words
+    |> Seq.indexed
+    |> Seq.fold (
+        fun (content: ReactElement list, accText: string, ytThumbUrl: string option) (pair: int * string) -> 
+            let index, word = pair
+            
+            if word.Contains "youtube"
+            then 
+                let ytThumbUrl = Some word
+                let content = content @ [ Html.span [ prop.text accText ] ]
+                let accText = ""
+                let content = if index < words.Length - 1 then content @ [ getLink word word ] else content
+                (content, accText, ytThumbUrl)
+            else 
+                if word.StartsWith "http" || word.StartsWith "www"
+                then 
+                    let content = content @ [ Html.span [ prop.text accText ] ]
+                    let content = content @ [ getLink word word ]
+                    let accText = ""
+                    (content, accText, ytThumbUrl)
+                else if word.StartsWith "#"
+                then 
+                    let content = content @ [ Html.span [ prop.text accText ] ]
+                    let content = content @ [ getTagLink word ]
+                    let accText = ""
+                    (content, accText, ytThumbUrl)
+                else 
+                    // decided to concat multiple whitespaces into one ¯\_(ツ)_/¯
+                    let accText = accText + " " + word
+                    let content = if index = words.Length - 1 then content @ [ Html.span [ prop.text accText ] ] else content
+                    (content, accText, ytThumbUrl)
+        ) ([], "", None)
+    |> (fun (content: ReactElement list, _: string, ytThumbUrl: string option) -> 
+        match ytThumbUrl with
+        | Some url -> 
+            Html.div [
+                prop.classes [ tw.flex; tw.``flex-col``; tw.``w-full`` ]
+                prop.children [
+                    Html.p [
+                        prop.classes [ tw.``flex-shrink`` ]
+                        prop.children content
+                    ]
+                    // Html.div [
+                    //     prop.classes [ tw.flex; tw.``flex-row`` ]
+                    //     prop.children (ytEmbed url)
+                    // ]
+                ]   
+            ]
+        | None -> 
+            Html.p [
+                prop.classes [ tw.``flex-shrink`` ]
+                prop.children content
+            ])
+
 let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet
 
@@ -145,10 +232,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                         ]
                     ]
                     Html.div [
-                        prop.classes [ tw.flex ]
-                        prop.children [
-                            Html.span [ prop.text bleet.Content ]
-                        ]
+                        prop.classes [ tw.flex; tw.``flex-row``; tw.``h-full``; tw.``w-full`` ]
+                        prop.children (getBleetContent bleet.Content)
                     ]
                     Html.div [
                         prop.classes [ tw.flex; tw.``py-4`` ]

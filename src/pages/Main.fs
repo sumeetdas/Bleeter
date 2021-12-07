@@ -136,7 +136,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             },
             Cmd.map HomeMsg homeCmd
         else
-            { state with Home = nextHome; DeletedBleet = None; HeightUpdated = nextHome.HeightUpdated }, Cmd.map HomeMsg homeCmd
+            { state with
+                Home = nextHome
+                DeletedBleet = None
+                HeightUpdated = nextHome.HeightUpdated
+            },
+            Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->
         let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
         { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd

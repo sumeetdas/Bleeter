@@ -5,17 +5,9 @@ open Elmish
 open Feliz
 open Tailwind
 
-type State = { Count: int }
+let nav (currentUrl: string) (iconName: string, text: string, url: string) =
+    let isSelected = currentUrl = (url.Replace("/", "").Replace("#", ""))
 
-type Msg = | In
-
-let init () = { Count = 0 }
-
-let update (msg: Msg) (state: State) : State * Cmd<Msg> =
-    match msg with
-    | In -> state, Cmd.none
-
-let nav (iconName: string, text: string, url: string) =
     Html.a [
         prop.classes [
             tw.``mt-1``
@@ -30,6 +22,7 @@ let nav (iconName: string, text: string, url: string) =
             tw.``font-medium``
             tw.``rounded-full``
             tw.``hover:bg-bleeter-blue-hover``
+            (if isSelected then tw.``font-black`` else tw.``font-normal``)
         ]
         prop.target (if (url |> String.contains "http") then "_blank" else "")
         prop.href url
@@ -44,7 +37,12 @@ let nav (iconName: string, text: string, url: string) =
         ]
     ]
 
-let menuHtml (height: int) =
+let menuHtml (height: int) (currentUrl: string list) =
+    let urlString =
+        currentUrl
+        |> Seq.map (fun elem -> elem.ToLower())
+        |> String.concat ","
+
     let navList =
         [
             ("ant-design:home-outlined", "Home", "#/home")
@@ -53,7 +51,7 @@ let menuHtml (height: int) =
             ("akar-icons:info", "Bleeter", "#/bleeter-info")
         ]
 
-    let navList = navList |> List.map nav
+    let navList = navList |> List.map (nav urlString)
 
     let bleeterIcon =
         Html.a [
@@ -117,13 +115,5 @@ let menuHtml (height: int) =
                     ]
                 )
             ]
-        ]
-    ]
-
-let render (state: State) (dispatch: Msg -> Unit) =
-    Html.div [
-        Bleeter.bigIcon "mdi:sheep"
-        Html.div [
-
         ]
     ]

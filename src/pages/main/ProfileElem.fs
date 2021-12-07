@@ -70,6 +70,7 @@ let init (data: Data.State) =
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
     printf " nextBleetListElem %A" nextBleetListElem.HeightUpdated
+
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
@@ -120,11 +121,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with ProfileOption = profileOption }, cmd
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
-let private profileElem 
-    (profile: Profile) 
-    (profileOption: Msg EllipsisOption.State) 
+let private profileElem
+    (profile: Profile)
+    (profileOption: Msg EllipsisOption.State)
     (bleetListElem: BleetListElem.State)
-    (dispatch: Msg -> unit) =
+    (dispatch: Msg -> unit)
+    =
     let followBtn =
         let noShowBtnClasses = [ tw.hidden ]
         let yesFollowClasses = [ tw.``w-28``; tw.``bg-green-500``; tw.``text-white`` ]
@@ -312,8 +314,7 @@ let private profileElem
             ]
         ]
 
-    let latestBleets = 
-        MainLayout.heading "Latest Bleets"
+    let latestBleets = MainLayout.heading "Latest Bleets"
 
     let coreComponents =
         [
@@ -326,8 +327,8 @@ let private profileElem
             (BleetListElem.render bleetListElem (BleetListElemMsg >> dispatch))
         ]
 
-    let bannerUrl = 
-        match profile.Banner with 
+    let bannerUrl =
+        match profile.Banner with
         | Some url -> Some url
         | None -> Some "/img/bleeter-logo.png"
 

@@ -4,7 +4,7 @@ module MainLayout
 open Feliz
 open Tailwind
 
-let heading (name: string) = 
+let heading (name: string) =
     Html.div [
         prop.classes [
             tw.flex

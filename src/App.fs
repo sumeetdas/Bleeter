@@ -51,6 +51,15 @@ let init () =
         (Cmd.map DataMsg dataCmd)
     ]
 
+let scrollToTop () = 
+    let delayedScrollToTop =
+        async {
+            do! Async.Sleep 250
+            window.scrollTo(0.0, 0.0)
+        }
+
+    Async.StartImmediate delayedScrollToTop
+
 let changeUrl (url: string list, state: State) =
     match url with
     | [ "create"; "bleet" ] ->
@@ -63,9 +72,10 @@ let changeUrl (url: string list, state: State) =
         | None -> state, Cmd.none
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
+        scrollToTop ()
         { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
 
-let getWindowHeight() = 
+let getWindowHeight () =
     let scrollHeight =
         (document.getElementById "elmish-app")
             .scrollHeight
@@ -78,12 +88,11 @@ let getWindowHeight() =
     else
         windowHeight
 
-let resizeCmd (dispatch: Msg -> unit) = 
-    let delayedHeightCheck = 
+let resizeCmd (dispatch: Msg -> unit) =
+    let delayedHeightCheck =
         async {
             do! Async.Sleep 250
-            let finalHeight = getWindowHeight()
-            printf "Meow %d" finalHeight
+            let finalHeight = getWindowHeight ()
             dispatch (UpdateHeight finalHeight)
         }
 
@@ -97,7 +106,7 @@ let updateData (state: State) =
         let nextDistraction, distractionCmd =
             Distraction.update (Distraction.Msg.DataUpdate state.Data) state.Distraction
 
-        
+
         { state with
             Data = nextData
             Main = nextMain
@@ -114,7 +123,7 @@ let updateData (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | UpdateHeight height -> 
+    | UpdateHeight height ->
         let nextMain, mainCmd = Main.update (Main.Msg.AppHeight height) state.Main
         { state with Main = nextMain; AppHeight = height }, Cmd.map MainMsg mainCmd
     | DataMsg msg' ->
@@ -144,14 +153,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 Cmd.map DataMsg dataCmd
                 updateDataCmd
             ]
-        | None -> 
-            if nextMain.HeightUpdated 
-            then
+        | None ->
+            if nextMain.HeightUpdated then
                 printf "woof"
-                nextState, Cmd.batch [
+
+                nextState,
+                Cmd.batch [
                     Cmd.map MainMsg mainCmd
                     Cmd.ofSub resizeCmd
-                ] 
+                ]
             else
                 nextState, Cmd.map MainMsg mainCmd
     | CreateBleetMsg msg' ->
@@ -198,15 +208,19 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 tw.``min-h-full``
                 tw.``h-full``
             ]
-            prop.style [ style.height state.AppHeight ]
+            prop.style [
+                style.height state.AppHeight
+            ]
             prop.children [
-                Menu.menuHtml state.AppHeight
+                Menu.menuHtml state.AppHeight state.CurrentUrl
 
                 (Main.render state.Main (MainMsg >> dispatch))
 
                 Html.div [
                     prop.classes [ tw.``flex-grow-1`` ]
-                    prop.style [ style.height state.AppHeight ]
+                    prop.style [
+                        style.height state.AppHeight
+                    ]
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
                         Distraction.render state.Distraction (DistractionMsg >> dispatch)
@@ -226,7 +240,7 @@ let appOnLoadHeight _ =
         window.addEventListener (
             "load",
             fun _ ->
-                let finalHeight = getWindowHeight()
+                let finalHeight = getWindowHeight ()
                 dispatch (UpdateHeight finalHeight)
         )
 
@@ -237,7 +251,7 @@ let appOnResizeHeight _ =
         window.addEventListener (
             "resize",
             fun _ ->
-                let finalHeight = getWindowHeight()
+                let finalHeight = getWindowHeight ()
                 dispatch (UpdateHeight finalHeight)
         )
 

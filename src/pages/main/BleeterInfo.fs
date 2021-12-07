@@ -5,9 +5,6 @@ open Feliz
 open Tailwind
 
 let page =
-    let coreComponents = 
-        [
-            MainLayout.heading "Bleeter Info!!!!"
-        ]
+    let coreComponents = [ MainLayout.heading "Bleeter Info!!!!" ]
 
     MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents

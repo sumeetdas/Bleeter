@@ -2,7 +2,7 @@
     {
       "Id": 1,
       "Name": "Sue Murry",
-      "Content": "Raise income tax on the wealthiest 10%, including me (future earnings only, just to clarify). Let's end the culture of greed and corruption in San Andreas! www.suemurry.com",
+      "Content": "Raise income tax on the wealthiest 10%, including me (future earnings only, just to clarify). Let's end the culture of greed and corruption in San Andreas! http://www.suemurry.com",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "SueMurry",
       "Time": "",
@@ -15,7 +15,7 @@
     {
       "Id": 33,
       "Name": "Bleeter Music",
-      "Content": "{card:https://www.youtube.com/watch?v=e0h09RpeMSY}",
+      "Content": "https://www.youtube.com/embed/e0h09RpeMSY",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "BleeterMusic",
       "Time": "",
@@ -93,7 +93,7 @@
     {
       "Id": 37,
       "Name": "Bleeter Music",
-      "Content": "{card:https://www.youtube.com/watch?v=8PMJNUjaivw}",
+      "Content": "https://www.youtube.com/embed/8PMJNUjaivw",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "BleeterMusic",
       "Time": "",
@@ -340,7 +340,7 @@
     {
       "Id": 36,
       "Name": "Bleeter Music",
-      "Content": "{card:https://www.youtube.com/watch?v=4MKvsXA94Zk}",
+      "Content": "https://www.youtube.com/embed/4MKvsXA94Zk",
       "ProfilePic": "/img/bleeter_profile_pic.png",
       "Handle": "BleeterMusic",
       "Time": "",
