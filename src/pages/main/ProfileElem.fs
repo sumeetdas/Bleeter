@@ -22,6 +22,9 @@ type State =
         Profile: Profile option
         BleetListElem: BleetListElem.State
         HeightUpdated: bool
+        ReportCount: int
+        NotifMsg: ReactElement option
+        ModalMsg: ReactElement option
     }
 
 let init (data: Data.State) =
@@ -65,6 +68,9 @@ let init (data: Data.State) =
         Profile = None
         BleetListElem = BleetListElem.init bleets
         HeightUpdated = false
+        ReportCount = 0
+        NotifMsg = None
+        ModalMsg = None
     }
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
@@ -116,9 +122,26 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
-        printf "Report Profile"
+        let notifMsgElem (msg: string) = 
+            Some (Html.p [ prop.text msg ])
+        
+        let nextState = 
+            match state.ReportCount with 
+            | 0 -> 
+                let notifText =
+                    match state.Profile with
+                    | Some profile -> 
+                        sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
+                    | None -> ""
+                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
+            | 1 -> 
+                let notifText = "We get it. You're pissed."
+                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
+            | _ -> 
+                { state with ModalMsg = None }
+
         let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) state.ProfileOption
-        { state with ProfileOption = profileOption }, cmd
+        { nextState with ProfileOption = profileOption }, cmd
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
 let private profileElem

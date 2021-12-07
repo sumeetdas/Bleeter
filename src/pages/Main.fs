@@ -5,6 +5,7 @@ open Elmish
 open Feliz
 open Tailwind
 open Feliz.Router
+open Browser.Dom
 
 type State =
     {
@@ -16,7 +17,8 @@ type State =
         SearchBleets: SearchBleets.State
         DistractionBleets: DistractionBleets.State
         SingleBleetPage: SingleBleetPage.State
-        HeightUpdated: bool
+        NotifMsg: ReactElement option
+        ModalMsg: ReactElement option
     }
 
 type Msg =
@@ -39,7 +41,8 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         SearchBleets = SearchBleets.init data
         DistractionBleets = DistractionBleets.init data
         SingleBleetPage = SingleBleetPage.init data
-        HeightUpdated = false
+        NotifMsg = None
+        ModalMsg = None
     },
     Cmd.none
 
@@ -71,6 +74,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map SingleBleetPageMsg singleBleetPageCmd
         ]
     | UrlChanged url ->
+        let height = document.documentElement.clientHeight |> int
+        let state = { state with Height = height }
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
@@ -111,21 +116,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | AppHeight height -> { state with Height = height }, Cmd.none
     | ProfileElemMsg msg' ->
         let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
-
-        if nextProfileElem.DeletedBleet.IsSome then
-            { state with
-                ProfileElem = nextProfileElem
-                DeletedBleet = nextProfileElem.DeletedBleet
-                HeightUpdated = nextProfileElem.HeightUpdated
-            },
-            Cmd.map ProfileElemMsg profileCmd
-        else
-            { state with
-                ProfileElem = nextProfileElem
-                DeletedBleet = None
-                HeightUpdated = nextProfileElem.HeightUpdated
-            },
-            Cmd.map ProfileElemMsg profileCmd
+        let state = { state with ProfileElem = nextProfileElem; NotifMsg = nextProfileElem.NotifMsg; ModalMsg = nextProfileElem.ModalMsg }
+        let state = 
+            match nextProfileElem.DeletedBleet with 
+            | Some bleet -> 
+                { state with DeletedBleet = nextProfileElem.DeletedBleet }
+            | None -> state
+        state, Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
@@ -139,7 +136,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             { state with
                 Home = nextHome
                 DeletedBleet = None
-                HeightUpdated = nextHome.HeightUpdated
             },
             Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->

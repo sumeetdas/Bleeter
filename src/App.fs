@@ -19,6 +19,8 @@ type State =
         Distraction: Distraction.State
         SearchBox: SearchBox.State
         AppHeight: int
+        Notification: Notification.State
+        Modal: Modal.State
     }
 
 // events
@@ -30,6 +32,8 @@ type Msg =
     | DistractionMsg of Distraction.Msg
     | SearchBoxMsg of SearchBox.Msg
     | UpdateHeight of int
+    | NotificationMsg of Notification.Msg
+    | ModalMsg of Modal.Msg
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -45,6 +49,8 @@ let init () =
         Distraction = Distraction.init data
         SearchBox = SearchBox.init ()
         AppHeight = 500
+        Notification = Notification.init()
+        Modal = Modal.init()
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -73,7 +79,7 @@ let changeUrl (url: string list, state: State) =
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
         scrollToTop ()
-        { state with CurrentUrl = url; Main = main }, (Cmd.map MainMsg cmd)
+        { state with CurrentUrl = url; Main = main; AppHeight = main.Height }, (Cmd.map MainMsg cmd)
 
 let getWindowHeight () =
     let scrollHeight =
@@ -139,31 +145,38 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | UrlChanged url -> changeUrl (url, state)
     | MainMsg msg' ->
         let nextMain, mainCmd = Main.update msg' state.Main
-        let nextState = { state with Main = nextMain }
-
-        match nextMain.DeletedBleet with
-        | Some bleet ->
-            let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) nextState.Data
-            let nextState = { nextState with Data = nextData }
-            let nextState, updateDataCmd = updateData nextState
-
-            nextState,
-            Cmd.batch [
-                Cmd.map MainMsg mainCmd
-                Cmd.map DataMsg dataCmd
-                updateDataCmd
-            ]
-        | None ->
-            if nextMain.HeightUpdated then
-                printf "woof"
+        let nextState = { state with Main = nextMain; AppHeight = nextMain.Height }
+        
+        let nextState, deleteBleetCmd = 
+            match nextMain.DeletedBleet with
+            | Some bleet ->
+                let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) nextState.Data
+                let nextState = { nextState with Data = nextData }
+                let nextState, updateDataCmd = updateData nextState
 
                 nextState,
                 Cmd.batch [
-                    Cmd.map MainMsg mainCmd
-                    Cmd.ofSub resizeCmd
+                    Cmd.map DataMsg dataCmd
+                    updateDataCmd
                 ]
-            else
-                nextState, Cmd.map MainMsg mainCmd
+            | None -> nextState, Cmd.none
+
+        let nextState, notifCmd = 
+            let nextNotif, notifCmd = Notification.update (Notification.Show nextMain.NotifMsg) state.Notification
+            { nextState with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
+
+        let nextState, modalCmd = 
+            let nextModal, modalCmd = Modal.update (Modal.Show nextMain.ModalMsg) state.Modal
+            { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
+
+        nextState, 
+        Cmd.batch [
+            Cmd.map MainMsg mainCmd
+            Cmd.ofSub resizeCmd
+            deleteBleetCmd
+            notifCmd
+            modalCmd
+        ]
     | CreateBleetMsg msg' ->
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
         let nextState = { state with CreateBleet = createBleet }
@@ -198,6 +211,12 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { nextState with SearchBox = nextSearchBox }, Cmd.none
         else
             nextState, Cmd.none
+    | NotificationMsg msg' ->
+        let nextNotif, notifCmd = Notification.update msg' state.Notification
+        { state with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
+    | ModalMsg msg' ->
+        let nextModal, modalCmd = Modal.update msg' state.Modal
+        { state with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let page =
@@ -227,6 +246,8 @@ let render (state: State) (dispatch: Msg -> Unit) =
                     ]
                 ]
                 (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
+
+                (Notification.render state.Notification (NotificationMsg >> dispatch))
             ]
         ]
 
