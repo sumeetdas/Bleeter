@@ -75,8 +75,7 @@ let init (data: Data.State) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    printf " nextBleetListElem %A" nextBleetListElem.HeightUpdated
-
+    
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
@@ -104,6 +103,8 @@ let updateData (state: State) : State * Msg Cmd =
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    // clear up transient state
+    let state = { state with DeletedBleet = None; NotifMsg = None }
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle -> updateData { state with Handle = handle }
@@ -140,7 +141,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             | _ -> 
                 { state with ModalMsg = None }
 
-        let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) state.ProfileOption
+        let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) nextState.ProfileOption
         { nextState with ProfileOption = profileOption }, cmd
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
@@ -308,7 +309,7 @@ let private profileElem
             ]
             prop.children [
                 Html.a [
-                    prop.href "#"
+                    prop.classes [ tw.``select-none`` ]
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]
@@ -321,8 +322,7 @@ let private profileElem
                     ]
                 ]
                 Html.a [
-                    prop.classes [ tw.``ml-2`` ]
-                    prop.href "#"
+                    prop.classes [ tw.``ml-2``; tw.``select-none`` ]
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]

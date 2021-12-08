@@ -117,27 +117,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | ProfileElemMsg msg' ->
         let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
         let state = { state with ProfileElem = nextProfileElem; NotifMsg = nextProfileElem.NotifMsg; ModalMsg = nextProfileElem.ModalMsg }
-        let state = 
-            match nextProfileElem.DeletedBleet with 
-            | Some bleet -> 
-                { state with DeletedBleet = nextProfileElem.DeletedBleet }
-            | None -> state
+        let state = { state with DeletedBleet = nextProfileElem.DeletedBleet }
         state, Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
-        if nextHome.DeletedBleet.IsSome then
-            { state with
-                Home = nextHome
-                DeletedBleet = nextHome.DeletedBleet
-            },
-            Cmd.map HomeMsg homeCmd
-        else
-            { state with
-                Home = nextHome
-                DeletedBleet = None
-            },
-            Cmd.map HomeMsg homeCmd
+        { state with
+            Home = nextHome
+            DeletedBleet = nextHome.DeletedBleet
+        },
+        Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->
         let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
         { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd

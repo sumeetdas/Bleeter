@@ -24,7 +24,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | Show notifMsgOpt -> 
         match notifMsgOpt with 
         | Some notifMsg -> 
-            printf "show notif %A" notifMsg
             let delayedClose = 
                 async {
                     do! Async.Sleep 5000
@@ -38,22 +37,26 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [ 
+            tw.``fixed`` 
             tw.flex
-            tw.``justify-center``
             tw.``z-50``
+            tw.``bottom-4`` 
+            tw.``left-1/3`` 
+            tw.``w-full`` 
+            tw.``h-8`` 
+            tw.``pl-12``
             (if state.Display then tw.``block`` else tw.``hidden``)
         ]
         prop.children [
             Html.div [
                 prop.onClick (fun _ -> dispatch(Close))
                 prop.classes [
-                    tw.``w-full``
                     tw.``px-6``
                     tw.``py-3``
                     tw.``shadow-2xl``
                     tw.``flex``
                     tw.``items-center``
-                    tw.``bg-blue-600``
+                    tw.``bg-bleeter-blue``
                     tw.``text-white``
                 ]
                 prop.children [

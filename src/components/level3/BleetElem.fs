@@ -4,6 +4,7 @@ module BleetElem
 open Elmish
 open Feliz
 open Tailwind
+open System.Text.RegularExpressions
 
 type Msg =
     | BleetOptionMsg of Msg EllipsisOption.Msg
@@ -106,13 +107,15 @@ let getBleetContent (content: string): ReactElement =
                 let ytThumbUrl = Some word
                 let content = content @ [ Html.span [ prop.text accText ] ]
                 let accText = ""
-                let content = if index < words.Length - 1 then content @ [ getLink word word ] else content
+                let urlName = Regex.Replace (word, "http(s?)://", "")
+                let content = if index < words.Length - 1 then content @ [ getLink word urlName ] else content
                 (content, accText, ytThumbUrl)
             else 
                 if word.StartsWith "http" || word.StartsWith "www"
                 then 
                     let content = content @ [ Html.span [ prop.text accText ] ]
-                    let content = content @ [ getLink word word ]
+                    let urlName = Regex.Replace (word, "http(s?)://", "")
+                    let content = content @ [ getLink word urlName ]
                     let accText = ""
                     (content, accText, ytThumbUrl)
                 else if word.StartsWith "#"

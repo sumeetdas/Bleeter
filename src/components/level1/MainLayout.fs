@@ -18,6 +18,9 @@ let heading (name: string) =
             tw.``border-b``
             tw.``border-gray-300``
         ]
+        prop.style [
+            style.minHeight 75
+        ]
         prop.children [
             Html.div [
                 prop.classes [ tw.``ml-4`` ]
