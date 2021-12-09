@@ -15,7 +15,6 @@ type State =
         Data: Data.State
         CurrentUrl: string list
         Main: Main.State
-        CreateBleet: CreateBleet.State
         Distraction: Distraction.State
         SearchBox: SearchBox.State
         AppHeight: int
@@ -28,7 +27,6 @@ type Msg =
     | DataMsg of Data.Msg
     | UrlChanged of string list
     | MainMsg of Main.Msg
-    | CreateBleetMsg of CreateBleet.Msg
     | DistractionMsg of Distraction.Msg
     | SearchBoxMsg of SearchBox.Msg
     | UpdateHeight of int
@@ -45,7 +43,6 @@ let init () =
         Data = data
         CurrentUrl = currentUrl
         Main = main
-        CreateBleet = CreateBleet.init ()
         Distraction = Distraction.init data
         SearchBox = SearchBox.init ()
         AppHeight = 500
@@ -71,10 +68,10 @@ let changeUrl (url: string list, state: State) =
     | [ "create"; "bleet" ] ->
         match state.Data.MyProfile with
         | Some profile ->
-            let createBleet, createBleetCmd =
-                CreateBleet.update (CreateBleet.Msg.DisplayModal(profile, state.CurrentUrl)) state.CreateBleet
+            let modal, modalCmd =
+                Modal.update (Modal.ShowCreateBleet (profile, state.CurrentUrl)) state.Modal
 
-            { state with CreateBleet = createBleet }, Cmd.map CreateBleetMsg createBleetCmd
+            { state with Modal = modal }, Cmd.map ModalMsg modalCmd
         | None -> state, Cmd.none
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
@@ -166,7 +163,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { nextState with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
 
         let nextState, modalCmd = 
-            let nextModal, modalCmd = Modal.update (Modal.Show nextMain.ModalMsg) state.Modal
+            let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
             { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
         nextState, 
@@ -177,27 +174,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             notifCmd
             modalCmd
         ]
-    | CreateBleetMsg msg' ->
-        let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
-        let nextState = { state with CreateBleet = createBleet }
-
-        match nextState.CreateBleet.Bleet with
-        | None -> nextState, Cmd.map CreateBleetMsg createBleetCmd
-        | Some bleet ->
-            let nextCreateBleet, _ = CreateBleet.update CreateBleet.Msg.CloseModal nextState.CreateBleet
-            let nextState = { nextState with CreateBleet = nextCreateBleet }
-            let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
-            let nextState = { nextState with Data = nextData }
-            let nextState, updateDataCmd = updateData nextState
-            let nextState, urlChangeCmd = changeUrl (createBleet.PreviousUrl, nextState)
-
-            nextState,
-            (Cmd.batch [
-                Cmd.map CreateBleetMsg createBleetCmd
-                Cmd.map DataMsg dataCmd
-                updateDataCmd
-                urlChangeCmd
-             ])
     | DistractionMsg msg ->
         let distraction, cmd = Distraction.update msg state.Distraction
         { state with Distraction = distraction }, (Cmd.map DistractionMsg cmd)
@@ -216,7 +192,25 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         { state with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
     | ModalMsg msg' ->
         let nextModal, modalCmd = Modal.update msg' state.Modal
-        { state with Modal = nextModal }, Cmd.map ModalMsg modalCmd
+        let nextState = { state with Modal = nextModal }
+
+        match nextState.Modal.NewBleet with
+        | None -> nextState, Cmd.map ModalMsg modalCmd
+        | Some bleet ->
+            let nextModal, _ = Modal.update Modal.Close nextState.Modal
+            let nextState = { nextState with Modal = nextModal }
+            let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
+            let nextState = { nextState with Data = nextData }
+            let nextState, updateDataCmd = updateData nextState
+            let nextState, urlChangeCmd = changeUrl (nextModal.PreviousUrl, nextState)
+
+            nextState,
+            (Cmd.batch [
+                Cmd.map ModalMsg modalCmd
+                Cmd.map DataMsg dataCmd
+                updateDataCmd
+                urlChangeCmd
+             ])
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let page =
@@ -245,7 +239,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         Distraction.render state.Distraction (DistractionMsg >> dispatch)
                     ]
                 ]
-                (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
+                (Modal.render state.Modal (ModalMsg >> dispatch))
 
                 (Notification.render state.Notification (NotificationMsg >> dispatch))
             ]

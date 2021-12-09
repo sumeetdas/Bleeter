@@ -24,7 +24,7 @@ type State =
         HeightUpdated: bool
         ReportCount: int
         NotifMsg: ReactElement option
-        ModalMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 let init (data: Data.State) =
@@ -70,7 +70,7 @@ let init (data: Data.State) =
         HeightUpdated = false
         ReportCount = 0
         NotifMsg = None
-        ModalMsg = None
+        ModalMsg = Modal.DoNothing
     }
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
@@ -136,10 +136,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                     | None -> ""
                 { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
             | 1 -> 
-                let notifText = "We get it. You're pissed."
+                let notifText = "We get it. You are pissed."
                 { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
             | _ -> 
-                { state with ModalMsg = None }
+                match state.Profile with 
+                | Some profile -> 
+                    { state with ModalMsg = Modal.ShowMeditation [ profile.Handle ] }
+                | None -> state
 
         let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) nextState.ProfileOption
         { nextState with ProfileOption = profileOption }, cmd

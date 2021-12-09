@@ -58,6 +58,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``items-center``
                     tw.``bg-bleeter-blue``
                     tw.``text-white``
+                    tw.``w-1/3``
                 ]
                 prop.children [
                     (

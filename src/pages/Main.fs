@@ -18,7 +18,7 @@ type State =
         DistractionBleets: DistractionBleets.State
         SingleBleetPage: SingleBleetPage.State
         NotifMsg: ReactElement option
-        ModalMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 type Msg =
@@ -42,7 +42,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         DistractionBleets = DistractionBleets.init data
         SingleBleetPage = SingleBleetPage.init data
         NotifMsg = None
-        ModalMsg = None
+        ModalMsg = Modal.Close
     },
     Cmd.none
 
