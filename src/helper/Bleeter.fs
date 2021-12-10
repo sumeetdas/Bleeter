@@ -2,6 +2,7 @@
 module Bleeter
 
 open Feliz
+open Browser.Dom
 
 let icon (name: string) (size: string) =
     Html.span [
@@ -18,3 +19,7 @@ let getUrl (url: string) =
     |> String.replace "https" ""
     |> String.replace "//" ""
     |> String.replace ":" ""
+
+let isMobile () = 
+    let width = window.innerWidth |> int
+    width <= 640

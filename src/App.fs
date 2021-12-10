@@ -230,7 +230,11 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 (Main.render state.Main (MainMsg >> dispatch))
 
                 Html.div [
-                    prop.classes [ tw.``flex-grow-1`` ]
+                    prop.classes [ 
+                        tw.``flex-grow-1`` 
+                        tw.``hidden``
+                        tw.``lg:block``
+                    ]
                     prop.style [
                         style.height state.AppHeight
                     ]
