@@ -56,6 +56,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let createBleet, createBleetCmd = CreateBleet.update (CreateBleet.Display profile) state.CreateBleet
         { state with PreviousUrl = previousUrl; Display = createBleet.Display; CreateBleet = createBleet; ModalType = ModalType.CreateBleet }, Cmd.map CreateBleetMsg createBleetCmd
     | ShowMeditation previousUrl -> 
+        printf "ShowMeditation"
         let meditation, meditationCmd = Meditation.update (Meditation.Display) state.Meditation
         { state with PreviousUrl = previousUrl; Display = meditation.Display; Meditation = meditation; ModalType = ModalType.Meditation }, Cmd.map MeditationMsg meditationCmd
     | Close -> 
@@ -77,11 +78,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
         { state with CreateBleet = createBleet; NewBleet = createBleet.Bleet }, Cmd.map CreateBleetMsg createBleetCmd
     | MeditationMsg msg' ->    
+        printf "MeditationMsg"
         let meditation, meditationCmd = Meditation.update msg' state.Meditation
         { state with Meditation = meditation }, Cmd.map MeditationMsg meditationCmd
     | _ -> state, Cmd.none
 
 let render (state: State) (dispatch: Msg -> unit) =
+    // printf "modal state %A" state
     let modalClasses =
         [
             tw.``fixed``

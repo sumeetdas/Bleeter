@@ -1,7 +1,6 @@
 [<RequireQualifiedAccess>]
 module Menu
 
-open Elmish
 open Feliz
 open Tailwind
 
@@ -27,7 +26,7 @@ let nav (currentUrl: string) (nav: Nav) =
     let isSelected = currentUrl = (nav.Url.Replace("/", "").Replace("#", ""))
 
     Html.a [
-        prop.classes [
+        prop.classes ([
             tw.``ml-4``
             tw.``mt-1``
             tw.group
@@ -35,17 +34,16 @@ let nav (currentUrl: string) (nav: Nav) =
             tw.``items-center``
             tw.``px-2``
             tw.``py-2``
-            tw.``text-base``
             tw.``text-gray-100``
+            tw.``text-base``
             tw.``leading-5``
             tw.``font-medium``
             tw.``rounded-full``
             tw.``hover:bg-bleeter-blue-hover``
             tw.``w-12``
-            tw.``md:w-max``
-            (if isSelected then tw.``font-black`` else tw.``font-normal``)
+            tw.``md:w-56``
             (if nav.HideOnLargeScreen then tw.``lg:hidden`` else tw.``block``)
-        ]
+        ] @ (if isSelected then [ tw.``font-black``; tw.``border``; tw.``border-4`` ] else [ tw.``font-normal`` ]))
         prop.target (if (nav.Url |> String.contains "http") then "_blank" else "")
         prop.href nav.Url
         prop.children [

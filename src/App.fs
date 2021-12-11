@@ -64,6 +64,7 @@ let scrollToTop () =
     Async.StartImmediate delayedScrollToTop
 
 let changeUrl (url: string list, state: State) =
+    let state = { state with Modal = Modal.init() }
     match url with
     | [ "create"; "bleet" ] ->
         match state.Data.MyProfile with

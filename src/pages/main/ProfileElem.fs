@@ -22,7 +22,7 @@ type State =
         Profile: Profile option
         BleetListElem: BleetListElem.State
         HeightUpdated: bool
-        ReportCount: int
+        ReportCount: int option
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
     }
@@ -68,7 +68,7 @@ let init (data: Data.State) =
         Profile = None
         BleetListElem = BleetListElem.init bleets
         HeightUpdated = false
-        ReportCount = 0
+        ReportCount = None
         NotifMsg = None
         ModalMsg = Modal.DoNothing
     }
@@ -84,6 +84,7 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
     Cmd.map BleetListElemMsg bleetListElemCmd
 
 let updateData (state: State) : State * Msg Cmd =
+    let state = { state with ModalMsg = Modal.DoNothing; ReportCount = None }
     // update profile
     let profileOpt =
         match state.Data.Profiles with
@@ -104,7 +105,7 @@ let updateData (state: State) : State * Msg Cmd =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     // clear up transient state
-    let state = { state with DeletedBleet = None; NotifMsg = None }
+    let state = { state with DeletedBleet = None; NotifMsg = None; ModalMsg = Modal.DoNothing  }
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle -> updateData { state with Handle = handle }
@@ -123,22 +124,23 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
+        printf "meow"
         let notifMsgElem (msg: string) = 
             Some (Html.p [ prop.text msg ])
         
         let nextState = 
             match state.ReportCount with 
-            | 0 -> 
+            | None -> 
                 let notifText =
                     match state.Profile with
                     | Some profile -> 
                         sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
                     | None -> ""
-                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
-            | 1 -> 
+                { state with NotifMsg = notifMsgElem notifText; ReportCount = Some 1 }
+            | Some 1 -> 
                 let notifText = "We get it. You are pissed."
-                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount + 1 }
-            | _ -> 
+                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount |> Option.bind (fun count -> Some (count + 1)) }
+            | Some _ -> 
                 match state.Profile with 
                 | Some profile -> 
                     { state with ModalMsg = Modal.ShowMeditation [ profile.Handle ] }

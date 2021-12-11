@@ -42,7 +42,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         DistractionBleets = DistractionBleets.init data
         SingleBleetPage = SingleBleetPage.init data
         NotifMsg = None
-        ModalMsg = Modal.Close
+        ModalMsg = Modal.DoNothing
     },
     Cmd.none
 
@@ -75,7 +75,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         ]
     | UrlChanged url ->
         let height = document.documentElement.clientHeight |> int
-        let state = { state with Height = height }
+        let state = { state with Height = height; ModalMsg = Modal.DoNothing; NotifMsg = None }
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
