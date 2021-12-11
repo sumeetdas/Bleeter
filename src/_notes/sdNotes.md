@@ -59,3 +59,15 @@ Program.mkSimple init update render
 |> Program.withReactSynchronous "elmish-app"
 |> Program.run
 ```
+
+
+* To upgrade fable:
+    * update package number in `App.fsproj` for `fable-core` and in `.config/dotnet-tools.json` to latest (here 3.6.3)
+
+    * update dotnet tool via 
+    ```
+    dotnet new tool-manifest # if you are setting up this repo
+    dotnet tool install --local Fable --version 3.6.3
+    dotnet tool install --global Fable --version 3.6.3
+    ```
+    * If s# goes south, then clear nuget packages via deleting everything in `~/.nuget/packages`

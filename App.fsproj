@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Description>Bleeter</Description>
+    <Authors>Sumeet Das</Authors>	
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
@@ -16,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Browser.Dom" Version="2.2.0" />
-    <PackageReference Include="Fable.Core" Version="3.2.3" />
+    <PackageReference Include="Fable.Core" Version="3.6.0" />
     <PackageReference Include="Fable.Elmish" Version="3.1.0" />
     <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
     <PackageReference Include="Fable.SimpleHttp" Version="3.0.0" />

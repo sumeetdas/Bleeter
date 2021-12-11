@@ -84,6 +84,35 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     },
                     bleetElemCmd)
 
+let loadMore (state: State) (dispatch: Msg -> unit) =
+    Html.div [
+        prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.BleetElems.Length, FETCH_NUM_BLEETS)))
+        prop.classes [
+            tw.flex
+            tw.``flex-row``
+            tw.``text-2xl``
+            tw.``bg-green-400``
+            tw.``text-gray-100``
+            tw.``w-full``
+            tw.``justify-center``
+            tw.``bleeter-pointer``
+            tw.``h-16``
+            (if state.ShowLoadMore then tw.block else tw.hidden)
+        ]
+
+        prop.children [
+            Html.button [
+                prop.classes [
+                    tw.uppercase
+                    tw.``bleeter-pointer``
+                    tw.``select-none``
+                ]
+                prop.text (if state.ShowLoadMore then "Load more" else "")
+            ]
+        ]
+    ]
+
+
 let render (state: State) (dispatch: Msg -> unit) =
     let bleetElemList =
         state.BleetElems
@@ -94,33 +123,6 @@ let render (state: State) (dispatch: Msg -> unit) =
                     ((fun msg -> BleetElemMsg(bleetElem.Bleet.Id, msg))
                      >> dispatch))
 
-    let loadMore =
-        Html.div [
-            prop.onClick (fun _ -> dispatch (LoadMoreBleets(state.BleetElems.Length, FETCH_NUM_BLEETS)))
-            prop.classes [
-                tw.flex
-                tw.``flex-row``
-                tw.``text-2xl``
-                tw.``bg-gray-100``
-                tw.``w-full``
-                tw.``justify-center``
-                tw.``bleeter-pointer``
-                tw.``h-12``
-                (if state.ShowLoadMore then tw.block else tw.hidden)
-            ]
-
-            prop.children [
-                Html.p [
-                    prop.classes [
-                        tw.uppercase
-                        tw.``bleeter-pointer``
-                        tw.``select-none``
-                    ]
-                    prop.text (if state.ShowLoadMore then "Load more" else "")
-                ]
-            ]
-        ]
-
     Html.div [
         prop.classes [
             tw.flex
@@ -128,5 +130,5 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``bg-gray-100``
             tw.``h-full``
         ]
-        prop.children ([ bleetElemList; [ loadMore ] ] |> List.concat)
+        prop.children ([ bleetElemList; [ loadMore state dispatch ] ] |> List.concat)
     ]

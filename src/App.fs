@@ -100,7 +100,10 @@ let resizeCmd (dispatch: Msg -> unit) =
             dispatch (UpdateHeight finalHeight)
         }
 
-    Async.StartImmediate delayedHeightCheck
+    [delayedHeightCheck; delayedHeightCheck] 
+    |> Async.Sequential
+    |> Async.RunSynchronously
+    |> ignore
 
 let updateData (state: State) =
     if state.Data.DoSyncData then
