@@ -51,7 +51,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         ]
         prop.children [
             Html.button [
-                prop.onClick (fun _ -> dispatch(DoSearch))
+                prop.onClick (fun _ -> dispatch (DoSearch))
                 prop.classes searchIconClasses
                 prop.children [
                     Bleeter.icon "ant-design:search-outlined" "24"

@@ -20,6 +20,6 @@ let getUrl (url: string) =
     |> String.replace "//" ""
     |> String.replace ":" ""
 
-let isMobile () = 
+let isMobile () =
     let width = window.innerWidth |> int
     width <= 640

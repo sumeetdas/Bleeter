@@ -46,38 +46,44 @@ let init () =
         Distraction = Distraction.init data
         SearchBox = SearchBox.init ()
         AppHeight = 500
-        Notification = Notification.init()
-        Modal = Modal.init()
+        Notification = Notification.init ()
+        Modal = Modal.init ()
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
         (Cmd.map DataMsg dataCmd)
     ]
 
-let scrollToTop () = 
+let scrollToTop () =
     let delayedScrollToTop =
         async {
             do! Async.Sleep 250
-            window.scrollTo(0.0, 0.0)
+            window.scrollTo (0.0, 0.0)
         }
 
     Async.StartImmediate delayedScrollToTop
 
 let changeUrl (url: string list, state: State) =
-    let state = { state with Modal = Modal.init() }
+    let state = { state with Modal = Modal.init () }
+
     match url with
     | [ "create"; "bleet" ] ->
         match state.Data.MyProfile with
         | Some profile ->
-            let modal, modalCmd =
-                Modal.update (Modal.ShowCreateBleet (profile, state.CurrentUrl)) state.Modal
+            let modal, modalCmd = Modal.update (Modal.ShowCreateBleet(profile, state.CurrentUrl)) state.Modal
 
             { state with Modal = modal }, Cmd.map ModalMsg modalCmd
         | None -> state, Cmd.none
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
         scrollToTop ()
-        { state with CurrentUrl = url; Main = main; AppHeight = main.Height }, (Cmd.map MainMsg cmd)
+
+        { state with
+            CurrentUrl = url
+            Main = main
+            AppHeight = main.Height
+        },
+        (Cmd.map MainMsg cmd)
 
 let getWindowHeight () =
     let scrollHeight =
@@ -95,15 +101,15 @@ let getWindowHeight () =
 let resizeCmd (dispatch: Msg -> unit) =
     let delayedHeightCheck =
         async {
-            do! Async.Sleep 250
+            do! Async.Sleep 500
             let finalHeight = getWindowHeight ()
             dispatch (UpdateHeight finalHeight)
         }
 
-    [delayedHeightCheck; delayedHeightCheck] 
+    [ delayedHeightCheck; delayedHeightCheck ]
     |> Async.Sequential
-    |> Async.RunSynchronously
-    |> ignore
+    |> Async.Ignore
+    |> Async.StartImmediate
 
 let updateData (state: State) =
     if state.Data.DoSyncData then
@@ -143,12 +149,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (Cmd.map DataMsg dataCmd)
             newCmd
         ]
-    | UrlChanged url -> changeUrl (url, state)
+    | UrlChanged url ->
+        let state, cmd = changeUrl (url, state)
+        state, Cmd.batch [ cmd; Cmd.ofSub resizeCmd ]
     | MainMsg msg' ->
         let nextMain, mainCmd = Main.update msg' state.Main
         let nextState = { state with Main = nextMain; AppHeight = nextMain.Height }
-        
-        let nextState, deleteBleetCmd = 
+
+        let nextState, deleteBleetCmd =
             match nextMain.DeletedBleet with
             | Some bleet ->
                 let nextData, dataCmd = Data.update (Data.Msg.DeleteBleet bleet) nextState.Data
@@ -162,15 +170,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 ]
             | None -> nextState, Cmd.none
 
-        let nextState, notifCmd = 
+        let nextState, notifCmd =
             let nextNotif, notifCmd = Notification.update (Notification.Show nextMain.NotifMsg) state.Notification
-            { nextState with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
+            { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
 
-        let nextState, modalCmd = 
+        let nextState, modalCmd =
             let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
             { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
-        nextState, 
+        nextState,
         Cmd.batch [
             Cmd.map MainMsg mainCmd
             Cmd.ofSub resizeCmd
@@ -193,7 +201,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             nextState, Cmd.none
     | NotificationMsg msg' ->
         let nextNotif, notifCmd = Notification.update msg' state.Notification
-        { state with Notification = nextNotif}, Cmd.map NotificationMsg notifCmd
+        { state with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
     | ModalMsg msg' ->
         let nextModal, modalCmd = Modal.update msg' state.Modal
         let nextState = { state with Modal = nextModal }
@@ -234,9 +242,9 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 (Main.render state.Main (MainMsg >> dispatch))
 
                 Html.div [
-                    prop.classes [ 
-                        tw.``flex-grow-1`` 
-                        tw.``hidden``
+                    prop.classes [
+                        tw.``flex-grow-1``
+                        tw.hidden
                         tw.``lg:block``
                     ]
                     prop.style [

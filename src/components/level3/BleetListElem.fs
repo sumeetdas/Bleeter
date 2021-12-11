@@ -130,5 +130,8 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``bg-gray-100``
             tw.``h-full``
         ]
-        prop.children ([ bleetElemList; [ loadMore state dispatch ] ] |> List.concat)
+        prop.children (
+            [ bleetElemList; [ loadMore state dispatch ] ]
+            |> List.concat
+        )
     ]

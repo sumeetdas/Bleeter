@@ -4,7 +4,7 @@ module Menu
 open Feliz
 open Tailwind
 
-type Nav = 
+type Nav =
     {
         IconName: string
         Text: string
@@ -14,43 +14,79 @@ type Nav =
 
 let navList =
     [
-        { IconName = "ant-design:home-outlined"; Text = "Home"; Url = "#/home"; HideOnLargeScreen = false }
-        { IconName = "bx:bx-user-circle"; Text = "Profile"; Url = "#/bleeter"; HideOnLargeScreen = false }
-        { IconName = "codicon:github"; Text = "Github"; Url = "https://www.github.com/sumeetdas/Bleeter"; HideOnLargeScreen = false }
-        { IconName = "akar-icons:info"; Text = "Bleeter"; Url = "#/bleeter-info"; HideOnLargeScreen = false }
-        { IconName = "ant-design:search-outlined"; Text = "Search"; Url = "#/search"; HideOnLargeScreen = true }
-        { IconName = "akar-icons:hashtag"; Text = "Explore"; Url = "#/explore"; HideOnLargeScreen = true }
+        {
+            IconName = "ant-design:home-outlined"
+            Text = "Home"
+            Url = "#/home"
+            HideOnLargeScreen = false
+        }
+        {
+            IconName = "bx:bx-user-circle"
+            Text = "Profile"
+            Url = "#/bleeter"
+            HideOnLargeScreen = false
+        }
+        {
+            IconName = "codicon:github"
+            Text = "Github"
+            Url = "https://www.github.com/sumeetdas/Bleeter"
+            HideOnLargeScreen = false
+        }
+        {
+            IconName = "akar-icons:info"
+            Text = "Bleeter"
+            Url = "#/bleeter-info"
+            HideOnLargeScreen = false
+        }
+        {
+            IconName = "ant-design:search-outlined"
+            Text = "Search"
+            Url = "#/search"
+            HideOnLargeScreen = true
+        }
+        {
+            IconName = "akar-icons:hashtag"
+            Text = "Explore"
+            Url = "#/explore"
+            HideOnLargeScreen = true
+        }
     ]
 
 let nav (currentUrl: string) (nav: Nav) =
     let isSelected = currentUrl = (nav.Url.Replace("/", "").Replace("#", ""))
 
     Html.a [
-        prop.classes ([
-            tw.``ml-4``
-            tw.``mt-1``
-            tw.group
-            tw.flex
-            tw.``items-center``
-            tw.``px-2``
-            tw.``py-2``
-            tw.``text-gray-100``
-            tw.``text-base``
-            tw.``leading-5``
-            tw.``font-medium``
-            tw.``rounded-full``
-            tw.``hover:bg-bleeter-blue-hover``
-            tw.``w-12``
-            tw.``md:w-56``
-            (if nav.HideOnLargeScreen then tw.``lg:hidden`` else tw.``block``)
-        ] @ (if isSelected then [ tw.``font-black``; tw.``border``; tw.``border-4`` ] else [ tw.``font-normal`` ]))
+        prop.classes (
+            [
+                tw.``ml-4``
+                tw.``mt-1``
+                tw.group
+                tw.flex
+                tw.``items-center``
+                tw.``px-2``
+                tw.``py-2``
+                tw.``text-gray-100``
+                tw.``text-base``
+                tw.``leading-5``
+                tw.``font-medium``
+                tw.``rounded-full``
+                tw.``hover:bg-bleeter-blue-hover``
+                tw.``w-12``
+                tw.``md:w-56``
+                (if nav.HideOnLargeScreen then tw.``lg:hidden`` else tw.block)
+            ]
+            @ (if isSelected then
+                   [ tw.``font-black``; tw.border; tw.``border-4`` ]
+               else
+                   [ tw.``font-normal`` ])
+        )
         prop.target (if (nav.Url |> String.contains "http") then "_blank" else "")
         prop.href nav.Url
         prop.children [
             Html.div [
-                prop.classes [ 
+                prop.classes [
                     tw.``mr-4``
-                    tw.``hidden``
+                    tw.hidden
                     tw.``md:block``
                 ]
                 prop.children [
@@ -58,9 +94,9 @@ let nav (currentUrl: string) (nav: Nav) =
                 ]
             ]
             Html.div [
-                prop.classes [ 
+                prop.classes [
                     tw.``mr-4``
-                    tw.``block``
+                    tw.block
                     tw.``md:hidden``
                 ]
                 prop.children [
@@ -69,7 +105,7 @@ let nav (currentUrl: string) (nav: Nav) =
             ]
             Html.div [
                 prop.classes [
-                    tw.``hidden``
+                    tw.hidden
                     tw.``md:block``
                 ]
                 prop.text nav.Text
@@ -78,35 +114,33 @@ let nav (currentUrl: string) (nav: Nav) =
     ]
 
 let bleeterIcon =
-    let commonCss = 
+    let commonCss =
         [
             tw.``py-2``
             tw.``px-2``
             tw.``mt-1``
             tw.``text-gray-100``
-            tw.``hidden``
+            tw.hidden
             tw.``md:block``
             tw.``ml-4``
         ]
 
-    let iconElem (css: string list) (icon: ReactElement): ReactElement =  
+    let iconElem (css: string list) (icon: ReactElement) : ReactElement =
         Html.div [
             prop.classes (commonCss @ css)
-            prop.children [
-                icon
-            ]
+            prop.children [ icon ]
         ]
 
     Html.a [
         prop.href ""
         prop.children [
-            iconElem ([tw.``hidden``;tw.``md:block``]) (Bleeter.bigIcon "mdi:sheep")
-            iconElem ([tw.``block``; tw.``md:hidden``]) (Bleeter.icon "mdi:sheep" "32")
+            iconElem ([ tw.hidden; tw.``md:block`` ]) (Bleeter.bigIcon "mdi:sheep")
+            iconElem ([ tw.block; tw.``md:hidden`` ]) (Bleeter.icon "mdi:sheep" "32")
         ]
     ]
 
 let bleetButton =
-    let commonCss = 
+    let commonCss =
         [
             tw.``bg-green-400``
             tw.``hover:bg-green-500``
@@ -118,32 +152,34 @@ let bleetButton =
             tw.``text-lg``
         ]
 
-    let buttonElem (css: string list) (text: ReactElement): ReactElement = 
+    let buttonElem (css: string list) (text: ReactElement) : ReactElement =
         Html.button [
             prop.classes (commonCss @ css)
-            prop.children [
-                text
-            ] 
+            prop.children [ text ]
         ]
 
     Html.a [
         prop.href "#/create/bleet"
         prop.children [
-            buttonElem [
-                tw.``w-full``
-                tw.``h-12``
-                tw.``py-2``
-                tw.``px-4``
-                tw.``hidden``
-                tw.``md:block``
-            ] (Html.text "Bleet")
-            buttonElem [
-                tw.``py-2``
-                tw.``px-2``
-                tw.``block``
-                tw.``md:hidden``
-                tw.``ml-4``
-            ] (Bleeter.icon "mdi:sheep" "32")
+            buttonElem
+                [
+                    tw.``w-full``
+                    tw.``h-12``
+                    tw.``py-2``
+                    tw.``px-4``
+                    tw.hidden
+                    tw.``md:block``
+                ]
+                (Html.text "Bleet")
+            buttonElem
+                [
+                    tw.``py-2``
+                    tw.``px-2``
+                    tw.block
+                    tw.``md:hidden``
+                    tw.``ml-4``
+                ]
+                (Bleeter.icon "mdi:sheep" "32")
         ]
     ]
 
@@ -158,7 +194,7 @@ let menuHtml (height: int) (currentUrl: string list) =
     Html.div [
         prop.classes [
             tw.``md:flex-grow-2``
-            tw.``flex``
+            tw.flex
             tw.``flex-row``
             tw.``justify-end``
             tw.``md:flex-1``
@@ -169,8 +205,8 @@ let menuHtml (height: int) (currentUrl: string list) =
         prop.style [ style.height height ]
         prop.children [
             Html.div [
-                prop.classes [ 
-                    tw.``flex``
+                prop.classes [
+                    tw.flex
                     tw.``flex-col``
                 ]
                 prop.style [ style.width 250 ]

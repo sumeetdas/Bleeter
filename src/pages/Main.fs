@@ -75,7 +75,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         ]
     | UrlChanged url ->
         let height = document.documentElement.clientHeight |> int
-        let state = { state with Height = height; ModalMsg = Modal.DoNothing; NotifMsg = None }
+
+        let state =
+            { state with
+                Height = height
+                ModalMsg = Modal.DoNothing
+                NotifMsg = None
+            }
+
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | [ "home" ] ->
@@ -116,7 +123,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | AppHeight height -> { state with Height = height }, Cmd.none
     | ProfileElemMsg msg' ->
         let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
-        let state = { state with ProfileElem = nextProfileElem; NotifMsg = nextProfileElem.NotifMsg; ModalMsg = nextProfileElem.ModalMsg }
+
+        let state =
+            { state with
+                ProfileElem = nextProfileElem
+                NotifMsg = nextProfileElem.NotifMsg
+                ModalMsg = nextProfileElem.ModalMsg
+            }
+
         let state = { state with DeletedBleet = nextProfileElem.DeletedBleet }
         state, Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->

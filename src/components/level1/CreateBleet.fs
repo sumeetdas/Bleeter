@@ -27,7 +27,7 @@ type Msg =
 let init () =
     {
         Display = false
-        Profile = Profile.init()
+        Profile = Profile.init ()
         Bleet = None
         BleetContent = ""
     }
@@ -35,8 +35,7 @@ let init () =
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | OutsideModalClickClose -> { state with Display = false }, Cmd.none
-    | Display profile -> 
-        { state with Display = true; Profile = profile }, Cmd.none
+    | Display profile -> { state with Display = true; Profile = profile }, Cmd.none
     | UpdateBleetContent content -> { state with BleetContent = content }, Cmd.none
     | AddBleet ->
         let bleet =
@@ -104,8 +103,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
                                 // https://stackoverflow.com/a/52338979
                                 prop.onChange
-                                    (fun (ev: Event) ->
-                                        dispatch (UpdateBleetContent(ev.target?value |> string)))
+                                    (fun (ev: Event) -> dispatch (UpdateBleetContent(ev.target?value |> string)))
                                 prop.placeholder "Mehehe?"
                             ]
                             Html.div [

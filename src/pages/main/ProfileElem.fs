@@ -75,7 +75,7 @@ let init (data: Data.State) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cmd =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    
+
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
@@ -84,7 +84,11 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
     Cmd.map BleetListElemMsg bleetListElemCmd
 
 let updateData (state: State) : State * Msg Cmd =
-    let state = { state with ModalMsg = Modal.DoNothing; ReportCount = None }
+    let state =
+        { state with
+            ModalMsg = Modal.DoNothing
+            ReportCount = None
+        }
     // update profile
     let profileOpt =
         match state.Data.Profiles with
@@ -105,7 +109,13 @@ let updateData (state: State) : State * Msg Cmd =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     // clear up transient state
-    let state = { state with DeletedBleet = None; NotifMsg = None; ModalMsg = Modal.DoNothing  }
+    let state =
+        { state with
+            DeletedBleet = None
+            NotifMsg = None
+            ModalMsg = Modal.DoNothing
+        }
+
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle -> updateData { state with Handle = handle }
@@ -124,26 +134,52 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
-        printf "meow"
-        let notifMsgElem (msg: string) = 
-            Some (Html.p [ prop.text msg ])
-        
-        let nextState = 
-            match state.ReportCount with 
-            | None -> 
+        let notifMsgElem (msg: string) =
+            Some(
+                Html.p [
+                    prop.classes [
+                        tw.``rounded-full``
+                        tw.border
+                        tw.``border-bleeter-blue-hover``
+                        tw.``leading-9``
+                        tw.``text-xl``
+                        tw.``bg-bleeter-blue-hover``
+                        tw.``text-gray-100``
+                        tw.``select-none``
+                        tw.``px-4``
+                        tw.``bleeter-pointer``
+                    ]
+                    prop.text msg
+                ]
+            )
+
+        let nextState =
+            match state.ReportCount with
+            | None ->
                 let notifText =
                     match state.Profile with
-                    | Some profile -> 
-                        sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
+                    | Some profile -> sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
                     | None -> ""
-                { state with NotifMsg = notifMsgElem notifText; ReportCount = Some 1 }
-            | Some 1 -> 
+
+                { state with
+                    NotifMsg = notifMsgElem notifText
+                    ReportCount = Some 1
+                }
+            | Some 1 ->
                 let notifText = "We get it. You are pissed."
-                { state with NotifMsg = notifMsgElem notifText; ReportCount = state.ReportCount |> Option.bind (fun count -> Some (count + 1)) }
-            | Some _ -> 
-                match state.Profile with 
-                | Some profile -> 
-                    { state with ModalMsg = Modal.ShowMeditation [ profile.Handle ] }
+
+                { state with
+                    NotifMsg = notifMsgElem notifText
+                    ReportCount =
+                        state.ReportCount
+                        |> Option.bind (fun count -> Some(count + 1))
+                }
+            | Some _ ->
+                match state.Profile with
+                | Some profile ->
+                    { state with
+                        ModalMsg = Modal.ShowMeditation [ profile.Handle ]
+                    }
                 | None -> state
 
         let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) nextState.ProfileOption
@@ -327,7 +363,10 @@ let private profileElem
                     ]
                 ]
                 Html.a [
-                    prop.classes [ tw.``ml-2``; tw.``select-none`` ]
+                    prop.classes [
+                        tw.``ml-2``
+                        tw.``select-none``
+                    ]
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]

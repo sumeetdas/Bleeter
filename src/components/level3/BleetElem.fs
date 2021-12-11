@@ -79,62 +79,81 @@ let ytEmbed (src: string) =
 
 let getLink (url: string) (name: string) =
     Html.a [
-        prop.classes [ tw.``text-green-500``; tw.``ml-1`` ]
+        prop.classes [
+            tw.``text-green-500``
+            tw.``ml-1``
+        ]
         prop.target "_blank"
         prop.href url
         prop.text name
     ]
 
-let getTagLink (tag: string) = 
+let getTagLink (tag: string) =
     let tagName = tag.Replace("#", "")
+
     Html.a [
-        prop.classes [ tw.``text-green-500``; tw.``ml-1`` ]
+        prop.classes [
+            tw.``text-green-500``
+            tw.``ml-1``
+        ]
         prop.href ("#/tags/" + tagName)
         prop.text tag
     ]
 
-let getBleetContent (content: string): ReactElement =
+let getBleetContent (content: string) : ReactElement =
     let words = content.Split [| ' ' |]
-    
+
     words
     |> Seq.indexed
-    |> Seq.fold (
-        fun (content: ReactElement list, accText: string, ytThumbUrl: string option) (pair: int * string) -> 
+    |> Seq.fold
+        (fun (content: ReactElement list, accText: string, ytThumbUrl: string option) (pair: int * string) ->
             let index, word = pair
-            
-            if word.Contains "youtube"
-            then 
+
+            if word.Contains "youtube" then
                 let ytThumbUrl = Some word
                 let content = content @ [ Html.span [ prop.text accText ] ]
                 let accText = ""
-                let urlName = Regex.Replace (word, "http(s?)://", "")
-                let content = if index < words.Length - 1 then content @ [ getLink word urlName ] else content
+                let urlName = Regex.Replace(word, "http(s?)://", "")
+
+                let content =
+                    if index < words.Length - 1 then
+                        content @ [ getLink word urlName ]
+                    else
+                        content
+
                 (content, accText, ytThumbUrl)
-            else 
-                if word.StartsWith "http" || word.StartsWith "www"
-                then 
-                    let content = content @ [ Html.span [ prop.text accText ] ]
-                    let urlName = Regex.Replace (word, "http(s?)://", "")
-                    let content = content @ [ getLink word urlName ]
-                    let accText = ""
-                    (content, accText, ytThumbUrl)
-                else if word.StartsWith "#"
-                then 
-                    let content = content @ [ Html.span [ prop.text accText ] ]
-                    let content = content @ [ getTagLink word ]
-                    let accText = ""
-                    (content, accText, ytThumbUrl)
-                else 
-                    // decided to concat multiple whitespaces into one ¯\_(ツ)_/¯
-                    let accText = accText + " " + word
-                    let content = if index = words.Length - 1 then content @ [ Html.span [ prop.text accText ] ] else content
-                    (content, accText, ytThumbUrl)
-        ) ([], "", None)
-    |> (fun (content: ReactElement list, _: string, ytThumbUrl: string option) -> 
+            else if word.StartsWith "http" || word.StartsWith "www" then
+                let content = content @ [ Html.span [ prop.text accText ] ]
+                let urlName = Regex.Replace(word, "http(s?)://", "")
+                let content = content @ [ getLink word urlName ]
+                let accText = ""
+                (content, accText, ytThumbUrl)
+            else if word.StartsWith "#" then
+                let content = content @ [ Html.span [ prop.text accText ] ]
+                let content = content @ [ getTagLink word ]
+                let accText = ""
+                (content, accText, ytThumbUrl)
+            else
+                // decided to concat multiple whitespaces into one ¯\_(ツ)_/¯
+                let accText = accText + " " + word
+
+                let content =
+                    if index = words.Length - 1 then
+                        content @ [ Html.span [ prop.text accText ] ]
+                    else
+                        content
+
+                (content, accText, ytThumbUrl))
+        ([], "", None)
+    |> (fun (content: ReactElement list, _: string, ytThumbUrl: string option) ->
         match ytThumbUrl with
-        | Some url -> 
+        | Some url ->
             Html.div [
-                prop.classes [ tw.flex; tw.``flex-col``; tw.``w-full`` ]
+                prop.classes [
+                    tw.flex
+                    tw.``flex-col``
+                    tw.``w-full``
+                ]
                 prop.children [
                     Html.p [
                         prop.classes [ tw.``flex-shrink`` ]
@@ -144,9 +163,9 @@ let getBleetContent (content: string): ReactElement =
                     //     prop.classes [ tw.flex; tw.``flex-row`` ]
                     //     prop.children (ytEmbed url)
                     // ]
-                ]   
+                    ]
             ]
-        | None -> 
+        | None ->
             Html.p [
                 prop.classes [ tw.``flex-shrink`` ]
                 prop.children content
@@ -235,7 +254,12 @@ let render (state: State) (dispatch: Msg -> unit) =
                         ]
                     ]
                     Html.div [
-                        prop.classes [ tw.flex; tw.``flex-row``; tw.``h-full``; tw.``w-full`` ]
+                        prop.classes [
+                            tw.flex
+                            tw.``flex-row``
+                            tw.``h-full``
+                            tw.``w-full``
+                        ]
                         prop.children (getBleetContent bleet.Content)
                     ]
                     Html.div [

@@ -7,16 +7,12 @@ open Feliz
 
 type State = { Display: bool }
 
-type Msg = 
-    | Display
+type Msg = | Display
 
 let init () = { Display = false }
 
-let update (msg: Msg) (state: State) : State * Msg Cmd = 
-    match msg with 
+let update (msg: Msg) (state: State) : State * Msg Cmd =
+    match msg with
     | Display -> { state with Display = true }, Cmd.none
 
-let render (state: State) (dispatch: Msg -> unit) = 
-    Html.div [
-        Html.text "Yolo"
-    ]
+let render (state: State) (dispatch: Msg -> unit) = Html.div [ Html.text "Yolo" ]
