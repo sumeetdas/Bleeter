@@ -1,7 +1,7 @@
 module List
 
 // https://stackoverflow.com/a/70053799/1583813
-let updateAt (elemFindFunc: 'a -> bool) (newElem: 'a) (source: 'a list) : 'a list =
+let updateAtCustom (elemFindFunc: 'a -> bool) (newElem: 'a) (source: 'a list) : 'a list =
     source
     |> List.map
         (fun elem ->

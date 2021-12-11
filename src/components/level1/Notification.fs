@@ -30,6 +30,24 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | None -> closeNotif state, Cmd.none
     | Close -> closeNotif state, Cmd.none
 
+let msgElem (msg: string) =
+    Html.p [
+        prop.classes [
+            tw.``rounded-full``
+            tw.border
+            tw.``border-bleeter-blue-hover``
+            tw.``leading-9``
+            tw.``text-xl``
+            tw.``bg-bleeter-blue-hover``
+            tw.``text-gray-100``
+            tw.``select-none``
+            tw.``px-4``
+            tw.``bleeter-pointer``
+        ]
+        prop.text msg
+    ]
+
+
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [

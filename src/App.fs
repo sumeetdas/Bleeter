@@ -15,7 +15,7 @@ type State =
         Data: Data.State
         CurrentUrl: string list
         Main: Main.State
-        Distraction: Distraction.State
+        DistractionElemList: DistractionElemList.State
         SearchBox: SearchBox.State
         AppHeight: int
         Notification: Notification.State
@@ -27,7 +27,7 @@ type Msg =
     | DataMsg of Data.Msg
     | UrlChanged of string list
     | MainMsg of Main.Msg
-    | DistractionMsg of Distraction.Msg
+    | DistractionElemListMsg of DistractionElemList.Msg
     | SearchBoxMsg of SearchBox.Msg
     | UpdateHeight of int
     | NotificationMsg of Notification.Msg
@@ -43,7 +43,7 @@ let init () =
         Data = data
         CurrentUrl = currentUrl
         Main = main
-        Distraction = Distraction.init data
+        DistractionElemList = DistractionElemList.init data
         SearchBox = SearchBox.init ()
         AppHeight = 500
         Notification = Notification.init ()
@@ -117,17 +117,17 @@ let updateData (state: State) =
         let nextMain, mainCmd = Main.update (Main.Msg.DataUpdate state.Data) state.Main
 
         let nextDistraction, distractionCmd =
-            Distraction.update (Distraction.Msg.DataUpdate state.Data) state.Distraction
+            DistractionElemList.update (DistractionElemList.Msg.DataUpdate state.Data) state.DistractionElemList
 
 
         { state with
             Data = nextData
             Main = nextMain
-            Distraction = nextDistraction
+            DistractionElemList = nextDistraction
         },
         Cmd.batch [
             Cmd.map MainMsg mainCmd
-            Cmd.map DistractionMsg distractionCmd
+            Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map DataMsg dataCmd
             Cmd.ofSub resizeCmd
         ]
@@ -186,9 +186,24 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             notifCmd
             modalCmd
         ]
-    | DistractionMsg msg ->
-        let distraction, cmd = Distraction.update msg state.Distraction
-        { state with Distraction = distraction }, (Cmd.map DistractionMsg cmd)
+    | DistractionElemListMsg msg ->
+        let distractionElemList, cmd = DistractionElemList.update msg state.DistractionElemList
+
+        let nextState = { state with DistractionElemList = distractionElemList }
+
+        let nextState, notifCmd =
+            let nextNotif, notifCmd = Notification.update (Notification.Show distractionElemList.NotifMsg) state.Notification
+            { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
+
+        let nextState, modalCmd =
+            let nextModal, modalCmd = Modal.update distractionElemList.ModalMsg state.Modal
+            { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
+
+        nextState, Cmd.batch [
+            (Cmd.map DistractionElemListMsg cmd)
+            notifCmd
+            modalCmd
+        ]
     | SearchBoxMsg msg ->
         let nextSearchBox = SearchBox.update msg state.SearchBox
         let nextState = { state with SearchBox = nextSearchBox }
@@ -252,7 +267,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                     ]
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
-                        Distraction.render state.Distraction (DistractionMsg >> dispatch)
+                        DistractionElemList.render state.DistractionElemList (DistractionElemListMsg >> dispatch)
                     ]
                 ]
                 (Modal.render state.Modal (ModalMsg >> dispatch))

@@ -69,7 +69,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
 
                 let newBleetElems =
                     state.BleetElems
-                    |> List.updateAt (fun elem -> elem.Bleet.Id = id) nextBleetElem
+                    |> List.updateAtCustom (fun elem -> elem.Bleet.Id = id) nextBleetElem
 
                 if nextBleetElem.IsDeleted then
                     { state with

@@ -134,25 +134,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
-        let notifMsgElem (msg: string) =
-            Some(
-                Html.p [
-                    prop.classes [
-                        tw.``rounded-full``
-                        tw.border
-                        tw.``border-bleeter-blue-hover``
-                        tw.``leading-9``
-                        tw.``text-xl``
-                        tw.``bg-bleeter-blue-hover``
-                        tw.``text-gray-100``
-                        tw.``select-none``
-                        tw.``px-4``
-                        tw.``bleeter-pointer``
-                    ]
-                    prop.text msg
-                ]
-            )
-
+        
         let nextState =
             match state.ReportCount with
             | None ->
@@ -162,14 +144,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                     | None -> ""
 
                 { state with
-                    NotifMsg = notifMsgElem notifText
+                    NotifMsg = Some(Notification.msgElem notifText)
                     ReportCount = Some 1
                 }
             | Some 1 ->
                 let notifText = "We get it. You are pissed."
 
                 { state with
-                    NotifMsg = notifMsgElem notifText
+                    NotifMsg = Some(Notification.msgElem notifText)
                     ReportCount =
                         state.ReportCount
                         |> Option.bind (fun count -> Some(count + 1))
