@@ -19,6 +19,8 @@ type State =
         SingleBleetPage: SingleBleetPage.State
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
+        ModalPage: ModalPage.State
+        AddBleet: Bleet option
     }
 
 type Msg =
@@ -30,6 +32,7 @@ type Msg =
     | SearchBleetsMsg of SearchBleets.Msg
     | DistractionBleetsMsg of DistractionBleets.Msg
     | SingleBleetPageMsg of SingleBleetPage.Msg
+    | ModalPageMsg of ModalPage.Msg
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -43,6 +46,8 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         SingleBleetPage = SingleBleetPage.init data
         NotifMsg = None
         ModalMsg = Modal.DoNothing
+        ModalPage = ModalPage.init ()
+        AddBleet = None
     },
     Cmd.none
 
@@ -85,6 +90,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
+        | "mobile" :: rest ->
+            let modalPage, cmd = ModalPage.update (ModalPage.UrlChanged rest) state.ModalPage
+
+            { state with
+                ModalPage = modalPage
+                AddBleet = modalPage.AddBleet
+            },
+            Cmd.map ModalPageMsg cmd
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
             { state with CurrentUrl = url; Home = home }, (Cmd.map HomeMsg homeCmd)
@@ -170,6 +183,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             ModalMsg = singleBleet.ModalMsg
         },
         Cmd.map SingleBleetPageMsg singleBleetCmd
+    | ModalPageMsg msg' ->
+        let modalPage, cmd = ModalPage.update msg' state.ModalPage
+
+        { state with
+            ModalPage = modalPage
+            AddBleet = modalPage.AddBleet
+        },
+        Cmd.map ModalPageMsg cmd
 
 let notFoundElem =
     Html.div [

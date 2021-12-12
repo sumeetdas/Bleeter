@@ -96,7 +96,6 @@ let changeUrl (url: string list, state: State) =
             Cmd.map ModalMsg modalCmd
         ]
 
-
 let getWindowHeight () =
     let scrollHeight =
         (document.getElementById "elmish-app")

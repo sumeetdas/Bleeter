@@ -58,7 +58,7 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | UrlChanged url -> updateBleetListElem (BleetListElem.UrlChanged url) state 
+    | UrlChanged url -> updateBleetListElem (BleetListElem.UrlChanged url) state
     | Search query ->
         let filteredBleets = filterBleets (state, query)
         updateBleetListElem (BleetListElem.Msg.DataUpdate filteredBleets) { state with Query = query }

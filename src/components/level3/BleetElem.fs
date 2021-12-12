@@ -79,9 +79,9 @@ let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) :
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     let state = { state with NotifMsg = None; ModalMsg = Modal.DoNothing }
+
     match msg with
-    | UrlChanged url -> 
-        { state with PreviousUrl = url }, Cmd.none
+    | UrlChanged url -> { state with PreviousUrl = url }, Cmd.none
     | DeleteBleet ->
         if state.Bleet.IsMyBleet then
             { state with IsDeleted = true }, Cmd.none
@@ -90,21 +90,19 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | ReportBleet ->
         let content = state.Bleet.Content
         let notPermitted = content.Contains("Xiowei") || content.Contains("Xina")
-            
+
         if notPermitted then
             let first = "Operation not permitted!"
             let second = "OPERATION NOT PERMITTED!!!"
 
-            let modalMsg =
-                Modal.ShowCCP state.PreviousUrl
+            let modalMsg = Modal.ShowCCP state.PreviousUrl
 
             report state (first, second, modalMsg)
         else
             let first = sprintf "We've reported @%s's bleet to Bleeter police." state.Bleet.Handle
             let second = "We get it. You are pissed."
 
-            let modalMsg =
-                Modal.ShowMeditation state.PreviousUrl
+            let modalMsg = Modal.ShowMeditation state.PreviousUrl
 
             report state (first, second, modalMsg)
     | BleetOptionMsg msg ->

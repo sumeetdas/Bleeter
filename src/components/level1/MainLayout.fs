@@ -27,7 +27,7 @@ let heading (name: string) =
         ]
     ]
 
-let elem (urlOpt: string option) (coreComponents: ReactElement list) =
+let elem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
     let transparentBackground =
         Html.div [
             prop.classes [
@@ -63,7 +63,7 @@ let elem (urlOpt: string option) (coreComponents: ReactElement list) =
 
     let children =
         [
-            (match urlOpt with
+            (match imgUrlOpt with
              | Some url -> imageBackground url
              | None -> transparentBackground)
             coreComponentsElem

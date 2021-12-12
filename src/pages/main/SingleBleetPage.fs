@@ -3,7 +3,6 @@ module SingleBleetPage
 
 open Elmish
 open Feliz
-open Tailwind
 
 type State =
     {
@@ -31,8 +30,7 @@ let init (data: Data.State) : State =
     }
 
 let updateData (state: State) : State * Msg Cmd =
-    let previousUrl (bleet: Bleet) =
-        [ bleet.Handle; "bleets"; (bleet.Id |> string) ]
+    let previousUrl (bleet: Bleet) = [ bleet.Handle; "bleets"; (bleet.Id |> string) ]
 
     let bleetElem =
         match state.Data.Bleets with

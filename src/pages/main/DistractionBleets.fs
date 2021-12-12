@@ -46,7 +46,14 @@ let filterBleets (state: State, tag: string) =
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Msg> =
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
-    let nextBleetListElem, _ = BleetListElem.update (BleetListElem.UrlChanged [ "tags"; state.HashTag ]) nextBleetListElem
+
+    let nextBleetListElem, _ =
+        BleetListElem.update
+            (BleetListElem.UrlChanged [
+                "tags"
+                state.HashTag
+             ])
+            nextBleetListElem
 
     { state with
         BleetListElem = nextBleetListElem

@@ -58,14 +58,14 @@ let refreshBleetList (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | UrlChanged url -> 
-        let updatedElems = 
+    | UrlChanged url ->
+        let updatedElems =
             state.BleetElems
-            |> List.map (
-                fun elem -> 
+            |> List.map
+                (fun elem ->
                     let nextElem, _ = BleetElem.update (BleetElem.UrlChanged url) elem
-                    nextElem
-            )
+                    nextElem)
+
         { state with PreviousUrl = url; BleetElems = updatedElems }, Cmd.none
     | DataUpdate bleets ->
         let nextState = refreshBleetList { state with Bleets = bleets }
