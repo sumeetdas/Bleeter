@@ -19,6 +19,7 @@ type Msg =
     | Search of string
     | DataUpdate of Data.State
     | BleetListElemMsg of BleetListElem.Msg
+    | UrlChanged of string list
 
 let getBleets (data: Data.State) =
     match data.Bleets with
@@ -57,6 +58,7 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | UrlChanged url -> updateBleetListElem (BleetListElem.UrlChanged url) state 
     | Search query ->
         let filteredBleets = filterBleets (state, query)
         updateBleetListElem (BleetListElem.Msg.DataUpdate filteredBleets) { state with Query = query }

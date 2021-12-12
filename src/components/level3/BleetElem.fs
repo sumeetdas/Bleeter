@@ -10,6 +10,7 @@ type Msg =
     | BleetOptionMsg of Msg EllipsisOption.Msg
     | DeleteBleet
     | ReportBleet
+    | UrlChanged of string list
 
 type State =
     {
@@ -19,9 +20,10 @@ type State =
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
         ReportCount: int option
+        PreviousUrl: string list
     }
 
-let init bleet =
+let init (previousUrl: string list) bleet =
     let options: Msg EllipsisOption.Option list =
         [
             { Name = "Delete"; Command = Cmd.ofMsg DeleteBleet }
@@ -52,6 +54,7 @@ let init bleet =
         NotifMsg = None
         ModalMsg = Modal.DoNothing
         ReportCount = None
+        PreviousUrl = previousUrl
     }
 
 let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) : State * Msg Cmd =
@@ -71,27 +74,29 @@ let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) :
             }
         | Some _ -> { state with ModalMsg = modalMsg }
 
-    let bleetOption, bleetOptionCmd = EllipsisOption.update (EllipsisOption.Close) state.BleetOption
-    { state with BleetOption = bleetOption }, bleetOptionCmd
+    let bleetOption, bleetOptionCmd = EllipsisOption.update (EllipsisOption.Close) nextState.BleetOption
+    { nextState with BleetOption = bleetOption }, bleetOptionCmd
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    let state = { state with NotifMsg = None; ModalMsg = Modal.DoNothing }
     match msg with
+    | UrlChanged url -> 
+        { state with PreviousUrl = url }, Cmd.none
     | DeleteBleet ->
         if state.Bleet.IsMyBleet then
             { state with IsDeleted = true }, Cmd.none
         else
             state, Cmd.none
     | ReportBleet ->
-        if state.Bleet.Content.Contains("Xiowei") then
+        let content = state.Bleet.Content
+        let notPermitted = content.Contains("Xiowei") || content.Contains("Xina")
+            
+        if notPermitted then
             let first = "Operation not permitted!"
             let second = "OPERATION NOT PERMITTED!!!"
 
             let modalMsg =
-                Modal.ShowCCP [
-                    state.Bleet.Handle
-                    "bleets"
-                    (state.Bleet.Id |> string)
-                ]
+                Modal.ShowCCP state.PreviousUrl
 
             report state (first, second, modalMsg)
         else
@@ -99,11 +104,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             let second = "We get it. You are pissed."
 
             let modalMsg =
-                Modal.ShowMeditation [
-                    state.Bleet.Handle
-                    "bleets"
-                    (state.Bleet.Id |> string)
-                ]
+                Modal.ShowMeditation state.PreviousUrl
 
             report state (first, second, modalMsg)
     | BleetOptionMsg msg ->

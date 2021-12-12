@@ -14,6 +14,7 @@ type State =
         HeightUpdated: bool
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
+        PreviousUrl: string list
     }
 
 type Msg =
@@ -21,6 +22,7 @@ type Msg =
     | LoadMoreBleets of int * int
     | BleetElemMsg of int * BleetElem.Msg
     | DataUpdate of Bleet list
+    | UrlChanged of string list
 
 let FETCH_NUM_BLEETS = 10
 
@@ -33,6 +35,7 @@ let init (bleets: Bleet list) =
         HeightUpdated = false
         NotifMsg = None
         ModalMsg = Modal.DoNothing
+        PreviousUrl = []
     }
 
 let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: int) =
@@ -41,7 +44,7 @@ let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: i
     let newBleetElems =
         state.Bleets
         |> List.truncate newBleetElemCount
-        |> List.map BleetElem.init
+        |> List.map (BleetElem.init state.PreviousUrl)
 
     { state with
         BleetElems = newBleetElems
@@ -55,6 +58,15 @@ let refreshBleetList (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | UrlChanged url -> 
+        let updatedElems = 
+            state.BleetElems
+            |> List.map (
+                fun elem -> 
+                    let nextElem, _ = BleetElem.update (BleetElem.UrlChanged url) elem
+                    nextElem
+            )
+        { state with PreviousUrl = url; BleetElems = updatedElems }, Cmd.none
     | DataUpdate bleets ->
         let nextState = refreshBleetList { state with Bleets = bleets }
         nextState, Cmd.none

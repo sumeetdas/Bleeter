@@ -31,12 +31,15 @@ let init (data: Data.State) : State =
     }
 
 let updateData (state: State) : State * Msg Cmd =
+    let previousUrl (bleet: Bleet) =
+        [ bleet.Handle; "bleets"; (bleet.Id |> string) ]
+
     let bleetElem =
         match state.Data.Bleets with
         | Resolved (Ok bleets) -> bleets
         | _ -> []
         |> List.tryFind (fun bleet -> bleet.Handle = state.Handle && bleet.Id = state.BleetId)
-        |> Option.bind (fun bleet -> Some(BleetElem.init bleet))
+        |> Option.bind (fun bleet -> Some(BleetElem.init (previousUrl bleet) bleet))
 
     { state with BleetElem = bleetElem }, Cmd.none
 

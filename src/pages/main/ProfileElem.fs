@@ -138,11 +138,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle ->
         let nextReportCount = if handle <> state.Handle then None else state.ReportCount
+        let nextBleetList, _ = BleetListElem.update (BleetListElem.UrlChanged [ handle ]) state.BleetListElem
 
         updateData
             { state with
                 Handle = handle
                 ReportCount = nextReportCount
+                BleetListElem = nextBleetList
             }
     | Follow ->
         match state.Profile with
