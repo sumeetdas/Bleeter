@@ -139,18 +139,37 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with
             Home = nextHome
             DeletedBleet = nextHome.DeletedBleet
+            NotifMsg = nextHome.NotifMsg
+            ModalMsg = nextHome.ModalMsg
         },
         Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->
         let nextSearchBleets, searchBleetsCmd = SearchBleets.update msg' state.SearchBleets
-        { state with SearchBleets = nextSearchBleets }, Cmd.map SearchBleetsMsg searchBleetsCmd
+
+        { state with
+            SearchBleets = nextSearchBleets
+            NotifMsg = nextSearchBleets.NotifMsg
+            ModalMsg = nextSearchBleets.ModalMsg
+        },
+        Cmd.map SearchBleetsMsg searchBleetsCmd
     | DistractionBleetsMsg msg' ->
         let nextDistractionBleets, distractionBleetsCmd = DistractionBleets.update msg' state.DistractionBleets
-        { state with DistractionBleets = nextDistractionBleets }, Cmd.map DistractionBleetsMsg distractionBleetsCmd
+
+        { state with
+            DistractionBleets = nextDistractionBleets
+            NotifMsg = nextDistractionBleets.NotifMsg
+            ModalMsg = nextDistractionBleets.ModalMsg
+        },
+        Cmd.map DistractionBleetsMsg distractionBleetsCmd
     | SingleBleetPageMsg msg' ->
         let singleBleet, singleBleetCmd = SingleBleetPage.update msg' state.SingleBleetPage
-        { state with SingleBleetPage = singleBleet }, Cmd.map SingleBleetPageMsg singleBleetCmd
 
+        { state with
+            SingleBleetPage = singleBleet
+            NotifMsg = singleBleet.NotifMsg
+            ModalMsg = singleBleet.ModalMsg
+        },
+        Cmd.map SingleBleetPageMsg singleBleetCmd
 
 let notFoundElem =
     Html.div [

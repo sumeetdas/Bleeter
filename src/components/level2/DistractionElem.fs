@@ -17,7 +17,7 @@ type State =
         ModalMsg: Modal.Msg
         NotifMsg: ReactElement option
         ReportCount: int option
-        Distraction: Distraction 
+        Distraction: Distraction
         PreviousUrl: string list
     }
 
@@ -50,7 +50,7 @@ let init (previousUrl: string list) (distraction: Distraction) =
         PreviousUrl = previousUrl
     }
 
-let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) : State * Msg Cmd = 
+let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) : State * Msg Cmd =
     let nextState =
         match state.ReportCount with
         | None ->
@@ -65,32 +65,27 @@ let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) :
                     state.ReportCount
                     |> Option.bind (fun count -> Some(count + 1))
             }
-        | Some _ ->
-            { state with
-                ModalMsg = modalMsg
-            }
+        | Some _ -> { state with ModalMsg = modalMsg }
 
     let distractionOption, distractionCmd = EllipsisOption.update (EllipsisOption.Msg.Close) nextState.DistractionOption
     { nextState with DistractionOption = distractionOption }, distractionCmd
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     let state = { state with ModalMsg = Modal.DoNothing; NotifMsg = None }
+
     match msg with
-    | UrlChanged url -> 
-        { state with PreviousUrl = url }, Cmd.none
-    | DataUpdate distraction -> 
-        { state with Distraction = distraction }, Cmd.none
+    | UrlChanged url -> { state with PreviousUrl = url }, Cmd.none
+    | DataUpdate distraction -> { state with Distraction = distraction }, Cmd.none
     | DistractionOptionMsg msg ->
         let distractionOption, cmd = EllipsisOption.update msg state.DistractionOption
         { state with DistractionOption = distractionOption }, cmd
-    | ReportDistraction -> 
-        if state.Distraction.Hashtag.Contains("Xiowei")
-        then 
+    | ReportDistraction ->
+        if state.Distraction.Hashtag.Contains("Xiowei") then
             let first = "Operation not permitted!"
             let second = "OPERATION NOT PERMITTED!!!"
             let modalMsg = Modal.ShowCCP state.PreviousUrl
-            report state (first, second, modalMsg)  
-        else 
+            report state (first, second, modalMsg)
+        else
             let first = sprintf "We've reported %s to Bleeter police." state.Distraction.Hashtag
             let second = "We get it. You are pissed."
             let modalMsg = Modal.ShowMeditation state.PreviousUrl

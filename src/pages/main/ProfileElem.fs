@@ -80,14 +80,13 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
         HeightUpdated = nextBleetListElem.HeightUpdated
+        NotifMsg = nextBleetListElem.NotifMsg
+        ModalMsg = nextBleetListElem.ModalMsg
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 
 let updateData (state: State) : State * Msg Cmd =
-    let state =
-        { state with
-            ModalMsg = Modal.DoNothing
-        }
+    let state = { state with ModalMsg = Modal.DoNothing }
     // update profile
     let profileOpt =
         match state.Data.Profiles with
@@ -106,6 +105,26 @@ let updateData (state: State) : State * Msg Cmd =
 
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
 
+let report (state: State) (profile: Profile) (first: string, second: string, modalMsg: Modal.Msg) =
+    let nextState =
+        match state.ReportCount with
+        | None ->
+            { state with
+                NotifMsg = Some(Notification.msgElem first)
+                ReportCount = Some 1
+            }
+        | Some 1 ->
+            { state with
+                NotifMsg = Some(Notification.msgElem second)
+                ReportCount =
+                    state.ReportCount
+                    |> Option.bind (fun count -> Some(count + 1))
+            }
+        | Some _ -> { state with ModalMsg = modalMsg }
+
+    let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) nextState.ProfileOption
+    { nextState with ProfileOption = profileOption }, cmd
+
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     // clear up transient state
     let state =
@@ -117,9 +136,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
-    | UrlChanged handle -> 
+    | UrlChanged handle ->
         let nextReportCount = if handle <> state.Handle then None else state.ReportCount
-        updateData { state with Handle = handle; ReportCount = nextReportCount }
+
+        updateData
+            { state with
+                Handle = handle
+                ReportCount = nextReportCount
+            }
     | Follow ->
         match state.Profile with
         | Some profile ->
@@ -135,38 +159,19 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
         { state with ProfileOption = profileOption }, cmd
     | ReportProfile ->
-        
-        let nextState =
-            match state.ReportCount with
-            | None ->
-                let notifText =
-                    match state.Profile with
-                    | Some profile -> sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
-                    | None -> ""
-
-                { state with
-                    NotifMsg = Some(Notification.msgElem notifText)
-                    ReportCount = Some 1
-                }
-            | Some 1 ->
-                let notifText = "We get it. You are pissed."
-
-                { state with
-                    NotifMsg = Some(Notification.msgElem notifText)
-                    ReportCount =
-                        state.ReportCount
-                        |> Option.bind (fun count -> Some(count + 1))
-                }
-            | Some _ ->
-                match state.Profile with
-                | Some profile ->
-                    { state with
-                        ModalMsg = Modal.ShowMeditation [ profile.Handle ]
-                    }
-                | None -> state
-
-        let profileOption, cmd = EllipsisOption.update (EllipsisOption.Close) nextState.ProfileOption
-        { nextState with ProfileOption = profileOption }, cmd
+        match state.Profile with
+        | Some profile ->
+            if profile.Handle.Contains("Xina") then
+                let first = "Operation not permitted!"
+                let second = "OPERATION NOT PERMITTED!!!"
+                let modalMsg = Modal.ShowCCP [ profile.Handle ]
+                report state profile (first, second, modalMsg)
+            else
+                let first = sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
+                let second = "We get it. You are pissed."
+                let modalMsg = Modal.ShowMeditation [ profile.Handle ]
+                report state profile (first, second, modalMsg)
+        | None -> state, Cmd.none
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
 let private profileElem

@@ -56,13 +56,12 @@ let init () =
 let closeModal (state: State) =
     let initState = init ()
     printf "modal state.PreviousUrl %A" state.PreviousUrl
-    Router.navigate (Router.format(state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
+    Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
     { initState with PreviousUrl = state.PreviousUrl }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | UrlChanged url -> 
-        { state with PreviousUrl = url }, Cmd.none
+    | UrlChanged url -> { state with PreviousUrl = url }, Cmd.none
     | ShowCreateBleet (profile, previousUrl) ->
         let createBleet, createBleetCmd = CreateBleet.update (CreateBleet.Display profile) state.CreateBleet
 

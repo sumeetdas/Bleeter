@@ -76,7 +76,10 @@ let changeUrl (url: string list, state: State) =
         | None -> state, Cmd.none
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
-        let distraction, distractionCmd = DistractionElemList.update (DistractionElemList.Msg.UrlChanged url) state.DistractionElemList
+
+        let distraction, distractionCmd =
+            DistractionElemList.update (DistractionElemList.Msg.UrlChanged url) state.DistractionElemList
+
         let modal, modalCmd = Modal.update (Modal.Msg.UrlChanged url) state.Modal
         scrollToTop ()
 
@@ -92,7 +95,7 @@ let changeUrl (url: string list, state: State) =
             Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map ModalMsg modalCmd
         ]
-        
+
 
 let getWindowHeight () =
     let scrollHeight =
@@ -201,14 +204,17 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let nextState = { state with DistractionElemList = distractionElemList }
 
         let nextState, notifCmd =
-            let nextNotif, notifCmd = Notification.update (Notification.Show distractionElemList.NotifMsg) state.Notification
+            let nextNotif, notifCmd =
+                Notification.update (Notification.Show distractionElemList.NotifMsg) state.Notification
+
             { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
 
         let nextState, modalCmd =
             let nextModal, modalCmd = Modal.update distractionElemList.ModalMsg state.Modal
             { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
-        nextState, Cmd.batch [
+        nextState,
+        Cmd.batch [
             (Cmd.map DistractionElemListMsg cmd)
             notifCmd
             modalCmd

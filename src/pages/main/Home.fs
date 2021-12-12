@@ -10,6 +10,8 @@ type State =
         BleetListElem: BleetListElem.State
         DeletedBleet: Bleet option
         HeightUpdated: bool
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 type Msg =
@@ -29,6 +31,8 @@ let init (data: Data.State) =
         BleetListElem = BleetListElem.init bleets
         DeletedBleet = None
         HeightUpdated = false
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
     }
 
 let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Msg> =
@@ -38,6 +42,8 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
         HeightUpdated = nextBleetListElem.HeightUpdated
+        NotifMsg = nextBleetListElem.NotifMsg
+        ModalMsg = nextBleetListElem.ModalMsg
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 

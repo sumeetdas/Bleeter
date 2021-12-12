@@ -16,6 +16,9 @@ type State =
         Bleet: Bleet
         BleetOption: Msg EllipsisOption.State
         IsDeleted: bool
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
+        ReportCount: int option
     }
 
 let init bleet =
@@ -46,7 +49,30 @@ let init bleet =
         Bleet = bleet
         BleetOption = EllipsisOption.init options 16 cssClasses offset
         IsDeleted = false
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
+        ReportCount = None
     }
+
+let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) : State * Msg Cmd =
+    let nextState =
+        match state.ReportCount with
+        | None ->
+            { state with
+                NotifMsg = Some(Notification.msgElem first)
+                ReportCount = Some 1
+            }
+        | Some 1 ->
+            { state with
+                NotifMsg = Some(Notification.msgElem second)
+                ReportCount =
+                    state.ReportCount
+                    |> Option.bind (fun count -> Some(count + 1))
+            }
+        | Some _ -> { state with ModalMsg = modalMsg }
+
+    let bleetOption, bleetOptionCmd = EllipsisOption.update (EllipsisOption.Close) state.BleetOption
+    { state with BleetOption = bleetOption }, bleetOptionCmd
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
@@ -56,9 +82,30 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         else
             state, Cmd.none
     | ReportBleet ->
-        printf "report bleet"
-        let bleetOption, bleetOptionCmd = EllipsisOption.update (EllipsisOption.Close) state.BleetOption
-        { state with BleetOption = bleetOption }, bleetOptionCmd
+        if state.Bleet.Content.Contains("Xiowei") then
+            let first = "Operation not permitted!"
+            let second = "OPERATION NOT PERMITTED!!!"
+
+            let modalMsg =
+                Modal.ShowCCP [
+                    state.Bleet.Handle
+                    "bleets"
+                    (state.Bleet.Id |> string)
+                ]
+
+            report state (first, second, modalMsg)
+        else
+            let first = sprintf "We've reported @%s's bleet to Bleeter police." state.Bleet.Handle
+            let second = "We get it. You are pissed."
+
+            let modalMsg =
+                Modal.ShowMeditation [
+                    state.Bleet.Handle
+                    "bleets"
+                    (state.Bleet.Id |> string)
+                ]
+
+            report state (first, second, modalMsg)
     | BleetOptionMsg msg ->
         let bleetOption, bleetOptionCmd = EllipsisOption.update msg state.BleetOption
         { state with BleetOption = bleetOption }, bleetOptionCmd

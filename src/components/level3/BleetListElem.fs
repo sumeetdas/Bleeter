@@ -12,6 +12,8 @@ type State =
         ShowLoadMore: bool
         DeletedBleet: Bleet option
         HeightUpdated: bool
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 type Msg =
@@ -29,6 +31,8 @@ let init (bleets: Bleet list) =
         ShowLoadMore = false
         DeletedBleet = None
         HeightUpdated = false
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
     }
 
 let loadMoreBleets (state: State, currentBleetElemCount: int, numBleetsToLoad: int) =
@@ -75,12 +79,16 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     { state with
                         BleetElems = newBleetElems
                         DeletedBleet = Some nextBleetElem.Bleet
+                        NotifMsg = nextBleetElem.NotifMsg
+                        ModalMsg = nextBleetElem.ModalMsg
                     },
                     bleetElemCmd
                 else
                     { state with
                         BleetElems = newBleetElems
                         DeletedBleet = None
+                        NotifMsg = nextBleetElem.NotifMsg
+                        ModalMsg = nextBleetElem.ModalMsg
                     },
                     bleetElemCmd)
 

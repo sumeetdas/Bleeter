@@ -11,6 +11,8 @@ type State =
         Bleets: Bleet list
         BleetListElem: BleetListElem.State
         DeletedBleet: Bleet option
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 type Msg =
@@ -31,6 +33,8 @@ let init (data: Data.State) =
         Bleets = bleets
         BleetListElem = BleetListElem.init bleets
         DeletedBleet = None
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
     }
 
 let filterBleets (state: State, query: string) =
@@ -46,6 +50,8 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
     { state with
         BleetListElem = nextBleetListElem
         DeletedBleet = nextBleetListElem.DeletedBleet
+        NotifMsg = nextBleetListElem.NotifMsg
+        ModalMsg = nextBleetListElem.ModalMsg
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 

@@ -11,6 +11,8 @@ type State =
         BleetElem: BleetElem.State option
         Handle: string
         BleetId: int
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
     }
 
 type Msg =
@@ -18,7 +20,15 @@ type Msg =
     | BleetElemMsg of BleetElem.Msg
     | DataUpdate of Data.State
 
-let init (data: Data.State) : State = { Data = data; BleetElem = None; Handle = ""; BleetId = 0 }
+let init (data: Data.State) : State =
+    {
+        Data = data
+        BleetElem = None
+        Handle = ""
+        BleetId = 0
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
+    }
 
 let updateData (state: State) : State * Msg Cmd =
     let bleetElem =
@@ -37,7 +47,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         match state.BleetElem with
         | Some bleetElem ->
             let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
-            { state with BleetElem = Some nextBleetElem }, Cmd.map BleetElemMsg bleetElemCmd
+
+            { state with
+                BleetElem = Some nextBleetElem
+                NotifMsg = nextBleetElem.NotifMsg
+                ModalMsg = nextBleetElem.ModalMsg
+            },
+            Cmd.map BleetElemMsg bleetElemCmd
         | None -> state, Cmd.none
     | DataUpdate data -> updateData { state with Data = data }
 

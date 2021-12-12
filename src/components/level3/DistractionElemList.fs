@@ -20,7 +20,7 @@ type State =
     }
 
 let init (data: Data.State) =
-    
+
     {
         Data = data
         DistractionElems = []
@@ -37,43 +37,55 @@ let distractionList (state: State) : Distraction list =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | UrlChanged url ->
-        let updatedElems = 
+        let updatedElems =
             state.DistractionElems
-            |> List.map (
-                fun elem -> 
+            |> List.map
+                (fun elem ->
                     let nextElem, _ = DistractionElem.update (DistractionElem.UrlChanged url) elem
-                    nextElem
-            )
-        { state with PreviousUrl = url; DistractionElems = updatedElems }, Cmd.none
-    | DataUpdate data -> 
+                    nextElem)
+
+        { state with
+            PreviousUrl = url
+            DistractionElems = updatedElems
+        },
+        Cmd.none
+    | DataUpdate data ->
         let nextState = { state with Data = data }
-        let distractionElems = 
+
+        let distractionElems =
             distractionList nextState
             |> List.map (DistractionElem.init state.PreviousUrl)
+
         { state with DistractionElems = distractionElems }, Cmd.none
-    | DistractionElemMsg (hashTag: string, msg') -> 
-        let elem = 
-            state.DistractionElems 
+    | DistractionElemMsg (hashTag: string, msg') ->
+        let elem =
+            state.DistractionElems
             |> List.tryFind (fun elem -> elem.Distraction.Hashtag = hashTag)
 
-        match elem with 
+        match elem with
         | Some elem ->
             let nextElem, cmd = DistractionElem.update msg' elem
-            let updatedElems = 
+
+            let updatedElems =
                 state.DistractionElems
                 |> List.updateAtCustom (fun elem -> elem.Distraction.Hashtag = hashTag) nextElem
-            { state with DistractionElems = updatedElems; ModalMsg = nextElem.ModalMsg; NotifMsg = nextElem.NotifMsg }, 
+
+            { state with
+                DistractionElems = updatedElems
+                ModalMsg = nextElem.ModalMsg
+                NotifMsg = nextElem.NotifMsg
+            },
             Cmd.map (fun msg -> DistractionElemMsg(hashTag, msg)) cmd
         | None -> state, Cmd.none
-    
+
 let render (state: State) (dispatch: Msg -> unit) =
-    let distractionElems = 
+    let distractionElems =
         state.DistractionElems
-        |> List.map (
-            fun state -> 
+        |> List.map
+            (fun state ->
                 let tag = state.Distraction.Hashtag
-                DistractionElem.render state ((fun msg -> DistractionElemMsg(tag, msg)) >> dispatch)
-            )
+                DistractionElem.render state ((fun msg -> DistractionElemMsg(tag, msg)) >> dispatch))
+
     Html.div [
         prop.classes [
             tw.``max-w-sm``
