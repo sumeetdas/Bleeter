@@ -12,6 +12,7 @@ open Fable.Core.JsInterop
 type ModalType =
     | CreateBleet
     | Meditation
+    | CCP
     | Empty
 
 type State =
@@ -22,6 +23,7 @@ type State =
         ModalType: ModalType
         CreateBleet: CreateBleet.State
         Meditation: Meditation.State
+        CCP: CCP.State
         PreviousUrl: string list
         NewBleet: Bleet option
     }
@@ -29,11 +31,14 @@ type State =
 type Msg =
     | ShowCreateBleet of Profile * string list
     | ShowMeditation of string list
+    | ShowCCP of string list
     | Close
     | OutsideModalClickClose of string
     | CreateBleetMsg of CreateBleet.Msg
     | MeditationMsg of Meditation.Msg
+    | CCPMsg of CCP.Msg
     | DoNothing
+    | UrlChanged of string list
 
 let init () =
     {
@@ -43,17 +48,21 @@ let init () =
         ModalType = ModalType.Empty
         CreateBleet = CreateBleet.init ()
         Meditation = Meditation.init ()
+        CCP = CCP.init ()
         PreviousUrl = []
         NewBleet = None
     }
 
 let closeModal (state: State) =
     let initState = init ()
-    Router.navigate (state.PreviousUrl |> List.toArray)
+    printf "modal state.PreviousUrl %A" state.PreviousUrl
+    Router.navigate (Router.format(state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
     { initState with PreviousUrl = state.PreviousUrl }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | UrlChanged url -> 
+        { state with PreviousUrl = url }, Cmd.none
     | ShowCreateBleet (profile, previousUrl) ->
         let createBleet, createBleetCmd = CreateBleet.update (CreateBleet.Display profile) state.CreateBleet
 
@@ -74,6 +83,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             ModalType = ModalType.Meditation
         },
         Cmd.map MeditationMsg meditationCmd
+    | ShowCCP previousUrl ->
+        let ccp, ccpCmd = CCP.update (CCP.Display) state.CCP
+
+        { state with
+            PreviousUrl = previousUrl
+            Display = ccp.Display
+            CCP = ccp
+            ModalType = ModalType.CCP
+        },
+        Cmd.map CCPMsg ccpCmd
     | Close -> closeModal state, Cmd.none
     | OutsideModalClickClose id ->
         if (state.Display && id = state.ModalId) then
@@ -162,6 +181,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                         (match state.ModalType with
                          | ModalType.CreateBleet -> CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch)
                          | ModalType.Meditation -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
+                         | ModalType.CCP -> CCP.render state.CCP (CCPMsg >> dispatch)
                          | _ -> Html.none)
                     ]
                 ]

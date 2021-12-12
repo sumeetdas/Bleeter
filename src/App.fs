@@ -76,14 +76,23 @@ let changeUrl (url: string list, state: State) =
         | None -> state, Cmd.none
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
+        let distraction, distractionCmd = DistractionElemList.update (DistractionElemList.Msg.UrlChanged url) state.DistractionElemList
+        let modal, modalCmd = Modal.update (Modal.Msg.UrlChanged url) state.Modal
         scrollToTop ()
 
         { state with
             CurrentUrl = url
             Main = main
             AppHeight = main.Height
+            DistractionElemList = distraction
+            Modal = modal
         },
-        (Cmd.map MainMsg cmd)
+        Cmd.batch [
+            Cmd.map MainMsg cmd
+            Cmd.map DistractionElemListMsg distractionCmd
+            Cmd.map ModalMsg modalCmd
+        ]
+        
 
 let getWindowHeight () =
     let scrollHeight =

@@ -87,7 +87,6 @@ let updateData (state: State) : State * Msg Cmd =
     let state =
         { state with
             ModalMsg = Modal.DoNothing
-            ReportCount = None
         }
     // update profile
     let profileOpt =
@@ -118,7 +117,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
-    | UrlChanged handle -> updateData { state with Handle = handle }
+    | UrlChanged handle -> 
+        let nextReportCount = if handle <> state.Handle then None else state.ReportCount
+        updateData { state with Handle = handle; ReportCount = nextReportCount }
     | Follow ->
         match state.Profile with
         | Some profile ->

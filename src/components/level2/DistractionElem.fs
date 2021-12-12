@@ -9,6 +9,7 @@ type Msg =
     | DataUpdate of Distraction
     | DistractionOptionMsg of Msg EllipsisOption.Msg
     | ReportDistraction
+    | UrlChanged of string list
 
 type State =
     {
@@ -75,6 +76,8 @@ let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) :
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     let state = { state with ModalMsg = Modal.DoNothing; NotifMsg = None }
     match msg with
+    | UrlChanged url -> 
+        { state with PreviousUrl = url }, Cmd.none
     | DataUpdate distraction -> 
         { state with Distraction = distraction }, Cmd.none
     | DistractionOptionMsg msg ->
@@ -85,7 +88,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         then 
             let first = "Operation not permitted!"
             let second = "OPERATION NOT PERMITTED!!!"
-            let modalMsg = Modal.ShowMeditation state.PreviousUrl
+            let modalMsg = Modal.ShowCCP state.PreviousUrl
             report state (first, second, modalMsg)  
         else 
             let first = sprintf "We've reported %s to Bleeter police." state.Distraction.Hashtag

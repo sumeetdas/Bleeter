@@ -37,7 +37,14 @@ let distractionList (state: State) : Distraction list =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | UrlChanged url ->
-        { state with PreviousUrl = url }, Cmd.none
+        let updatedElems = 
+            state.DistractionElems
+            |> List.map (
+                fun elem -> 
+                    let nextElem, _ = DistractionElem.update (DistractionElem.UrlChanged url) elem
+                    nextElem
+            )
+        { state with PreviousUrl = url; DistractionElems = updatedElems }, Cmd.none
     | DataUpdate data -> 
         let nextState = { state with Data = data }
         let distractionElems = 
