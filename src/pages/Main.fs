@@ -19,7 +19,7 @@ type State =
         SingleBleetPage: SingleBleetPage.State
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
-        ModalPage: ModalPage.State
+        MobilePage: MobilePage.State
         AddBleet: Bleet option
     }
 
@@ -32,7 +32,7 @@ type Msg =
     | SearchBleetsMsg of SearchBleets.Msg
     | DistractionBleetsMsg of DistractionBleets.Msg
     | SingleBleetPageMsg of SingleBleetPage.Msg
-    | ModalPageMsg of ModalPage.Msg
+    | MobilePageMsg of MobilePage.Msg
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -46,7 +46,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         SingleBleetPage = SingleBleetPage.init data
         NotifMsg = None
         ModalMsg = Modal.DoNothing
-        ModalPage = ModalPage.init ()
+        MobilePage = MobilePage.init data
         AddBleet = None
     },
     Cmd.none
@@ -91,13 +91,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
         | "mobile" :: rest ->
-            let modalPage, cmd = ModalPage.update (ModalPage.UrlChanged rest) state.ModalPage
+            let mobilePage, cmd = MobilePage.update (MobilePage.UrlChanged rest) state.MobilePage
 
             { state with
-                ModalPage = modalPage
-                AddBleet = modalPage.AddBleet
+                CurrentUrl = url
+                MobilePage = mobilePage
+                AddBleet = mobilePage.AddBleet
             },
-            Cmd.map ModalPageMsg cmd
+            Cmd.map MobilePageMsg cmd
         | [ "home" ] ->
             let home, homeCmd = Home.update Home.Msg.RefreshHome state.Home
             { state with CurrentUrl = url; Home = home }, (Cmd.map HomeMsg homeCmd)
@@ -183,14 +184,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             ModalMsg = singleBleet.ModalMsg
         },
         Cmd.map SingleBleetPageMsg singleBleetCmd
-    | ModalPageMsg msg' ->
-        let modalPage, cmd = ModalPage.update msg' state.ModalPage
+    | MobilePageMsg msg' ->
+        let mobilePage, cmd = MobilePage.update msg' state.MobilePage
 
         { state with
-            ModalPage = modalPage
-            AddBleet = modalPage.AddBleet
+            MobilePage = mobilePage
+            AddBleet = mobilePage.AddBleet
         },
-        Cmd.map ModalPageMsg cmd
+        Cmd.map MobilePageMsg cmd
 
 let notFoundElem =
     Html.div [
@@ -216,6 +217,8 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.children [
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
+            | "mobile" :: _ -> 
+                MobilePage.render state.MobilePage (MobilePageMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
             | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
             | [ "tags"; (_: string) ] ->

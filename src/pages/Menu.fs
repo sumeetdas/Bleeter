@@ -41,13 +41,13 @@ let navList =
         {
             IconName = "ant-design:search-outlined"
             Text = "Search"
-            Url = "#/search"
+            Url = "#/mobile/search"
             HideOnLargeScreen = true
         }
         {
             IconName = "akar-icons:hashtag"
             Text = "Explore"
-            Url = "#/explore"
+            Url = "#/mobile/explore"
             HideOnLargeScreen = true
         }
     ]

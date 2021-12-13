@@ -37,18 +37,23 @@ let elem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             prop.style [ style.minHeight 160 ]
         ]
 
-    let imageBackground (url: string) =
+    let banner (url: string) (height: int) =
         Html.img [
             prop.classes [
                 tw.``w-full``
                 tw.``bg-cover``
             ]
             prop.style [
-                style.minHeight 160
-                style.maxHeight 160
+                style.minHeight height
+                style.maxHeight height
             ]
             prop.src url
         ]
+
+    let banner (url: string) = 
+        if Bleeter.isMobile() 
+        then banner url 80
+        else banner url 160
 
     let coreComponentsElem =
         Html.div [
@@ -64,7 +69,7 @@ let elem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
     let children =
         [
             (match imgUrlOpt with
-             | Some url -> imageBackground url
+             | Some url -> banner url
              | None -> transparentBackground)
             coreComponentsElem
         ]

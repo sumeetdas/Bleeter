@@ -45,9 +45,9 @@ let init () =
         Main = main
         DistractionElemList = DistractionElemList.init data
         SearchBox = SearchBox.init ()
-        AppHeight = 500
+        AppHeight = 400
         Notification = Notification.init ()
-        Modal = Modal.init ()
+        Modal = Modal.init data
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -64,16 +64,18 @@ let scrollToTop () =
     Async.StartImmediate delayedScrollToTop
 
 let changeUrl (url: string list, state: State) =
-    let state = { state with Modal = Modal.init () }
-
+    let state = { state with Modal = Modal.init state.Data }
     match url with
     | [ "create"; "bleet" ] ->
-        match state.Data.MyProfile with
-        | Some profile ->
-            let modal, modalCmd = Modal.update (Modal.ShowCreateBleet(profile, state.CurrentUrl)) state.Modal
-
-            { state with Modal = modal }, Cmd.map ModalMsg modalCmd
-        | None -> state, Cmd.none
+        printf "ismobile %A" (Bleeter.isMobile())
+        let nextUrl = if state.CurrentUrl = [ "create"; "bleet" ] then [] else state.CurrentUrl
+        if Bleeter.isMobile() 
+        then 
+            let main, mainCmd = Main.update (Main.UrlChanged ([ "mobile" ] @ url)) state.Main
+            { state with Main = main; CurrentUrl = nextUrl }, Cmd.map MainMsg mainCmd
+        else
+            let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
+            { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
         let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
 
@@ -124,22 +126,24 @@ let resizeCmd (dispatch: Msg -> unit) =
 
 let updateData (state: State) =
     if state.Data.DoSyncData then
-        let nextData, dataCmd = Data.update (Data.Msg.DoneSyncData) state.Data
-        let nextMain, mainCmd = Main.update (Main.Msg.DataUpdate state.Data) state.Main
+        let nextData, dataCmd = Data.update (Data.DoneSyncData) state.Data
+        let nextMain, mainCmd = Main.update (Main.DataUpdate state.Data) state.Main
+        let nextModal, modalCmd = Modal.update (Modal.DataUpdated state.Data) state.Modal
 
         let nextDistraction, distractionCmd =
             DistractionElemList.update (DistractionElemList.Msg.DataUpdate state.Data) state.DistractionElemList
-
 
         { state with
             Data = nextData
             Main = nextMain
             DistractionElemList = nextDistraction
+            Modal = nextModal
         },
         Cmd.batch [
             Cmd.map MainMsg mainCmd
             Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map DataMsg dataCmd
+            Cmd.map ModalMsg modalCmd
             Cmd.ofSub resizeCmd
         ]
     else
@@ -181,6 +185,20 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 ]
             | None -> nextState, Cmd.none
 
+        let nextState, addBleetCmd =
+            match nextMain.AddBleet with
+            | Some bleet ->
+                let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
+                let nextState = { nextState with Data = nextData }
+                let nextState, updateDataCmd = updateData nextState
+
+                nextState,
+                Cmd.batch [
+                    Cmd.map DataMsg dataCmd
+                    updateDataCmd
+                ]
+            | None -> nextState, Cmd.none
+
         let nextState, notifCmd =
             let nextNotif, notifCmd = Notification.update (Notification.Show nextMain.NotifMsg) state.Notification
             { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
@@ -194,6 +212,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             Cmd.map MainMsg mainCmd
             Cmd.ofSub resizeCmd
             deleteBleetCmd
+            addBleetCmd
             notifCmd
             modalCmd
         ]
@@ -323,7 +342,7 @@ let appOnResizeHeight _ =
 //     let sub dispatch = window.addEventListener("load", fun _ ->
 //         let followButton = document.getElementById "bleeter-follow"
 //         followButton.addEventListener("onClick", fun _ ->
-//             printf "yolo"
+//             true |> ignore
 //         )
 //     )
 //     Cmd.ofSub sub

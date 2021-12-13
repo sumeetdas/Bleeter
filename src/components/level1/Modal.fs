@@ -17,6 +17,7 @@ type ModalType =
 
 type State =
     {
+        Data: Data.State
         Content: ReactElement option
         Display: bool
         ModalId: string
@@ -29,7 +30,7 @@ type State =
     }
 
 type Msg =
-    | ShowCreateBleet of Profile * string list
+    | ShowCreateBleet of string list
     | ShowMeditation of string list
     | ShowCCP of string list
     | Close
@@ -39,9 +40,11 @@ type Msg =
     | CCPMsg of CCP.Msg
     | DoNothing
     | UrlChanged of string list
+    | DataUpdated of Data.State
 
-let init () =
+let init (data: Data.State) =
     {
+        Data = data
         Content = None
         Display = false
         ModalId = ""
@@ -54,24 +57,37 @@ let init () =
     }
 
 let closeModal (state: State) =
-    let initState = init ()
+    let initState = init state.Data
     printf "modal state.PreviousUrl %A" state.PreviousUrl
     Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
     { initState with PreviousUrl = state.PreviousUrl }
 
+let updateCreateBleet (msg': CreateBleet.Msg) (state: State) = 
+    let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
+
+    { state with
+        Display = createBleet.Display
+        CreateBleet = createBleet
+        ModalType = ModalType.CreateBleet
+    },
+    Cmd.map CreateBleetMsg createBleetCmd
+    
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | DataUpdated data -> 
+        let state = { state with Data = data }
+        match state.Data.MyProfile with 
+        | Some profile -> 
+            updateCreateBleet (CreateBleet.DataUpdated profile) state
+        | None -> state, Cmd.none
     | UrlChanged url -> { state with PreviousUrl = url }, Cmd.none
-    | ShowCreateBleet (profile, previousUrl) ->
-        let createBleet, createBleetCmd = CreateBleet.update (CreateBleet.Display profile) state.CreateBleet
-
-        { state with
-            PreviousUrl = previousUrl
-            Display = createBleet.Display
-            CreateBleet = createBleet
-            ModalType = ModalType.CreateBleet
-        },
-        Cmd.map CreateBleetMsg createBleetCmd
+    | ShowCreateBleet previousUrl -> 
+        let state = { state with PreviousUrl = previousUrl }
+        let state, _ = updateCreateBleet CreateBleet.Display state
+        match state.Data.MyProfile with 
+        | Some profile -> 
+            updateCreateBleet (CreateBleet.DataUpdated profile) state
+        | None -> state, Cmd.none
     | ShowMeditation previousUrl ->
         let meditation, meditationCmd = Meditation.update (Meditation.Display) state.Meditation
 

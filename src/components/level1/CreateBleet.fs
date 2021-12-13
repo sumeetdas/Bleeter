@@ -4,7 +4,6 @@ module CreateBleet
 open Elmish
 open Feliz
 open Tailwind
-open Browser
 open Browser.Types
 // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
 open Fable.Core.JsInterop
@@ -19,10 +18,11 @@ type State =
     }
 
 type Msg =
-    | Display of Profile
+    | Display
     | UpdateBleetContent of string
     | OutsideModalClickClose
     | AddBleet
+    | DataUpdated of Profile
 
 let init () =
     {
@@ -34,8 +34,9 @@ let init () =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | DataUpdated profile -> { state with Profile = profile }, Cmd.none
     | OutsideModalClickClose -> { state with Display = false }, Cmd.none
-    | Display profile -> { state with Display = true; Profile = profile }, Cmd.none
+    | Display -> { state with Display = true }, Cmd.none
     | UpdateBleetContent content -> { state with BleetContent = content }, Cmd.none
     | AddBleet ->
         let bleet =
