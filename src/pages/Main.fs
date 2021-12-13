@@ -57,6 +57,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
         let searchBleets, searchBleetCmd = SearchBleets.update (SearchBleets.Msg.DataUpdate data) state.SearchBleets
+        let mobilePage, mobilePageCmd = MobilePage.update (MobilePage.DataUpdated data) state.MobilePage
 
         let singleBleetPage, singleBleetPageCmd =
             SingleBleetPage.update (SingleBleetPage.Msg.DataUpdate data) state.SingleBleetPage
@@ -70,6 +71,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             SearchBleets = searchBleets
             DistractionBleets = distractionBleets
             SingleBleetPage = singleBleetPage
+            MobilePage = mobilePage
         },
         Cmd.batch [
             Cmd.map HomeMsg homeCmd
@@ -77,6 +79,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map SearchBleetsMsg searchBleetCmd
             Cmd.map DistractionBleetsMsg distractionBleetsCmd
             Cmd.map SingleBleetPageMsg singleBleetPageCmd
+            Cmd.map MobilePageMsg mobilePageCmd
         ]
     | UrlChanged url ->
         let height = document.documentElement.clientHeight |> int
@@ -217,8 +220,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.children [
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
-            | "mobile" :: _ -> 
-                MobilePage.render state.MobilePage (MobilePageMsg >> dispatch)
+            | "mobile" :: _ -> MobilePage.render state.MobilePage (MobilePageMsg >> dispatch)
             | [ "bleeter-info" ] -> BleeterInfo.page
             | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
             | [ "tags"; (_: string) ] ->

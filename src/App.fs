@@ -65,13 +65,19 @@ let scrollToTop () =
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }
+
     match url with
     | [ "create"; "bleet" ] ->
-        printf "ismobile %A" (Bleeter.isMobile())
-        let nextUrl = if state.CurrentUrl = [ "create"; "bleet" ] then [] else state.CurrentUrl
-        if Bleeter.isMobile() 
-        then 
-            let main, mainCmd = Main.update (Main.UrlChanged ([ "mobile" ] @ url)) state.Main
+        printf "ismobile %A" (Bleeter.isMobile ())
+
+        let nextUrl =
+            if state.CurrentUrl = [ "create"; "bleet" ] then
+                []
+            else
+                state.CurrentUrl
+
+        if Bleeter.isMobile () then
+            let main, mainCmd = Main.update (Main.UrlChanged([ "mobile" ] @ url)) state.Main
             { state with Main = main; CurrentUrl = nextUrl }, Cmd.map MainMsg mainCmd
         else
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal

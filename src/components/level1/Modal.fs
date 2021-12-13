@@ -62,7 +62,7 @@ let closeModal (state: State) =
     Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
     { initState with PreviousUrl = state.PreviousUrl }
 
-let updateCreateBleet (msg': CreateBleet.Msg) (state: State) = 
+let updateCreateBleet (msg': CreateBleet.Msg) (state: State) =
     let createBleet, createBleetCmd = CreateBleet.update msg' state.CreateBleet
 
     { state with
@@ -71,22 +71,22 @@ let updateCreateBleet (msg': CreateBleet.Msg) (state: State) =
         ModalType = ModalType.CreateBleet
     },
     Cmd.map CreateBleetMsg createBleetCmd
-    
+
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | DataUpdated data -> 
+    | DataUpdated data ->
         let state = { state with Data = data }
-        match state.Data.MyProfile with 
-        | Some profile -> 
-            updateCreateBleet (CreateBleet.DataUpdated profile) state
+
+        match state.Data.MyProfile with
+        | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state
         | None -> state, Cmd.none
     | UrlChanged url -> { state with PreviousUrl = url }, Cmd.none
-    | ShowCreateBleet previousUrl -> 
+    | ShowCreateBleet previousUrl ->
         let state = { state with PreviousUrl = previousUrl }
         let state, _ = updateCreateBleet CreateBleet.Display state
-        match state.Data.MyProfile with 
-        | Some profile -> 
-            updateCreateBleet (CreateBleet.DataUpdated profile) state
+
+        match state.Data.MyProfile with
+        | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state
         | None -> state, Cmd.none
     | ShowMeditation previousUrl ->
         let meditation, meditationCmd = Meditation.update (Meditation.Display) state.Meditation

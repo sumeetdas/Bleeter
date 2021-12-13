@@ -78,14 +78,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             Cmd.map (fun msg -> DistractionElemMsg(hashTag, msg)) cmd
         | None -> state, Cmd.none
 
-let render (state: State) (dispatch: Msg -> unit) =
-    let distractionElems =
-        state.DistractionElems
-        |> List.map
-            (fun state ->
-                let tag = state.Distraction.Hashtag
-                DistractionElem.render state ((fun msg -> DistractionElemMsg(tag, msg)) >> dispatch))
+let distractionElems (state: State) (dispatch: Msg -> unit) =
+    state.DistractionElems
+    |> List.map
+        (fun state ->
+            let tag = state.Distraction.Hashtag
+            DistractionElem.render state ((fun msg -> DistractionElemMsg(tag, msg)) >> dispatch))
 
+let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
             tw.``max-w-sm``
@@ -108,7 +108,33 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.text "Distractions"
             ]
             Html.div [
-                prop.children distractionElems
+                prop.children (distractionElems state dispatch)
+            ]
+        ]
+    ]
+
+let renderMobile (state: State) (dispatch: Msg -> unit) =
+    Html.div [
+        prop.classes [
+            tw.``w-max``
+            tw.``rounded-lg``
+            tw.``bg-gray-100``
+            tw.``overflow-hidden``
+        ]
+        prop.children [
+            Html.h2 [
+                prop.classes [
+                    tw.``m-4``
+                    tw.``px-4``
+                    tw.``py-2``
+                    tw.``text-xl``
+                    tw.``w-48``
+                    tw.``font-semibold``
+                ]
+                prop.text "Distractions"
+            ]
+            Html.div [
+                prop.children (distractionElems state dispatch)
             ]
         ]
     ]

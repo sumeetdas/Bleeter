@@ -3,6 +3,7 @@ module MobilePage
 
 open Elmish
 open Feliz
+open Feliz.Router
 open Tailwind
 
 type State =
@@ -41,7 +42,11 @@ let init (data: Data.State) =
         SearchBox = SearchBox.init ()
     }
 
-let updateCreateBleet (msg: CreateBleet.Msg) (state: State) = 
+let updateDistractionList (msg: DistractionElemList.Msg) (state: State) =
+    let distraction, cmd = DistractionElemList.update msg state.DistractionElemList
+    { state with DistractionElemList = distraction }, Cmd.map DistractionMsg cmd
+
+let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
     let createBleet, cmd = CreateBleet.update msg state.CreateBleet
 
     { state with
@@ -52,62 +57,57 @@ let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
-    | DataUpdated data -> 
-        { state with Data = data }, Cmd.none
+    | DataUpdated data ->
+        let state = { state with Data = data }
+        let state, _ = updateDistractionList (DistractionElemList.DataUpdate data) state
+
+        match state.Data.MyProfile with
+        | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state
+        | None -> state, Cmd.none
     | Display -> { state with Display = true }, Cmd.none
     | UrlChanged url ->
         let state = { state with CurrentUrl = url }
 
         match url with
-        | [ "create"; "bleet" ] -> 
-            let state, _ = updateCreateBleet (CreateBleet.Display) state 
-            match state.Data.MyProfile with 
-            | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state 
-            | None -> state, Cmd.none 
+        | [ "create"; "bleet" ] ->
+            let state, _ = updateCreateBleet (CreateBleet.Display) state
+
+            match state.Data.MyProfile with
+            | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state
+            | None -> state, Cmd.none
         | [ "modal"; "meditation" ] -> state, Cmd.none
         | [ "modal"; "ccp" ] -> state, Cmd.none
         | [ "explore" ] -> state, Cmd.none
         | [ "search" ] -> state, Cmd.none
         | _ -> state, Cmd.none
-    | CreateBleetMsg msg' -> updateCreateBleet msg' state 
+    | CreateBleetMsg msg' -> updateCreateBleet msg' state
     | MeditationMsg msg' ->
         let meditation, cmd = Meditation.update msg' state.Meditation
         { state with Meditation = meditation }, Cmd.map MeditationMsg cmd
     | CCPMsg msg' ->
         let ccp, cmd = CCP.update msg' state.CCP
         { state with CCP = ccp }, Cmd.map CCPMsg cmd
-    | DistractionMsg msg' ->
-        let distraction, cmd = DistractionElemList.update msg' state.DistractionElemList
-        { state with DistractionElemList = distraction }, Cmd.map DistractionMsg cmd
-    | SearchBoxMsg msg' -> 
+    | DistractionMsg msg' -> updateDistractionList msg' state
+    | SearchBoxMsg msg' ->
         let searchBox = SearchBox.update msg' state.SearchBox
-        { state with SearchBox = searchBox }, Cmd.none
+        let state = { state with SearchBox = searchBox }
+
+        if searchBox.DoSearch then
+            Router.navigate ("search", searchBox.Content)
+            let searchBox = SearchBox.update SearchBox.Msg.Clear state.SearchBox
+            { state with SearchBox = searchBox }, Cmd.none
+        else
+            state, Cmd.none
+
 
 let render (state: State) (dispatch: Msg -> unit) =
-    let wrapper (elem: ReactElement) = 
-        Html.div [
-            prop.classes [ 
-                tw.``flex``
-                tw.``flex-col``
-                tw.``m-4`` 
-                tw.``w-full``
-            ]
-            prop.children [ elem ]
-        ]
-
     let coreComponent =
         match state.CurrentUrl with
-        | [ "create"; "bleet" ] -> wrapper (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
-        | [ "modal"; "meditation" ] -> wrapper (Meditation.render state.Meditation (MeditationMsg >> dispatch))
-        | [ "modal"; "ccp" ] -> wrapper (CCP.render state.CCP (CCPMsg >> dispatch))
-        | [ "explore" ] -> wrapper (DistractionElemList.render state.DistractionElemList (DistractionMsg >> dispatch))
-        | [ "search" ] -> wrapper (SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch))
+        | [ "create"; "bleet" ] -> CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch)
+        | [ "modal"; "meditation" ] -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
+        | [ "modal"; "ccp" ] -> CCP.render state.CCP (CCPMsg >> dispatch)
+        | [ "explore" ] -> DistractionElemList.renderMobile state.DistractionElemList (DistractionMsg >> dispatch)
+        | [ "search" ] -> SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
         | _ -> Html.none
 
-    Html.div [
-        prop.classes [ tw.``m-4`` ]
-        prop.children [
-            MainLayout.elem (Some "/img/bleeter-logo.png") [ coreComponent ]
-        ]
-    ]
-    
+    MainLayout.mobileElem (Some "/img/bleeter-logo.png") [ coreComponent ]
