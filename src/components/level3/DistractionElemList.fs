@@ -88,7 +88,7 @@ let distractionElems (state: State) (dispatch: Msg -> unit) =
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
-            tw.``max-w-sm``
+            tw.``xl:max-w-sm``
             tw.``rounded-lg``
             tw.``bg-gray-100``
             tw.``overflow-hidden``

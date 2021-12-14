@@ -36,13 +36,16 @@ let msgElem (msg: string) =
             tw.``rounded-full``
             tw.border
             tw.``border-bleeter-blue-hover``
-            tw.``leading-9``
-            tw.``text-xl``
+            tw.``leading-5``
+            tw.``sm:leading-9``
+            tw.``text-base``
+            tw.``sm:text-xl``
             tw.``bg-bleeter-blue-hover``
             tw.``text-gray-100``
             tw.``select-none``
             tw.``px-4``
             tw.``bleeter-pointer``
+            tw.``shadow-2xl``
         ]
         prop.text msg
     ]
@@ -50,27 +53,26 @@ let msgElem (msg: string) =
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
-        prop.classes [
+        prop.classes ([
             tw.``fixed``
             tw.``z-50``
             tw.``bottom-4``
-            tw.``left-1/3``
             tw.``w-full``
-            tw.``h-8``
-            tw.``pl-12``
-            (if state.Display then tw.flex else tw.hidden)
-        ]
+            tw.``h-16``
+            tw.``sm:h-8``
+            tw.``items-center``
+            tw.``justify-center``
+        ] @ (if state.Display then [ tw.flex; tw.``flex-row`` ] else [ tw.hidden ]))
         prop.children [
             Html.div [
                 prop.onClick (fun _ -> dispatch (Close))
                 prop.classes [
                     tw.``px-6``
                     tw.``py-3``
-                    tw.``shadow-2xl``
                     tw.flex
+                    tw.``flex-row``
                     tw.``items-center``
                     tw.``justify-center``
-                    tw.``w-1/3``
                 ]
                 prop.children [
                     (match state.Content with

@@ -41,7 +41,8 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.``bg-gray-100``
             tw.``text-gray-500``
-            tw.``w-96``
+            tw.``w-80``
+            tw.``xl:w-96``
             tw.``h-10``
             tw.``m-4``
             tw.``focus-within:ring``
@@ -61,7 +62,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.classes [
                     tw.``bg-gray-100``
                     tw.``h-10``
-                    tw.``w-72``
+                    tw.``w-56``
+                    tw.``xl:w-72``
                     tw.``text-sm``
                     tw.``border-0``
                     tw.``focus:outline-none``

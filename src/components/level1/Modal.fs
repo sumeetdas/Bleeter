@@ -58,7 +58,6 @@ let init (data: Data.State) =
 
 let closeModal (state: State) =
     let initState = init state.Data
-    printf "modal state.PreviousUrl %A" state.PreviousUrl
     Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
     { initState with PreviousUrl = state.PreviousUrl }
 

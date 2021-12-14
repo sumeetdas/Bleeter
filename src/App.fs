@@ -71,8 +71,6 @@ let changeUrl (url: string list, state: State) =
 
     match url with
     | [ "create"; "bleet" ] ->
-        printf "ismobile %A" (Bleeter.isMobile ())
-
         let nextUrl =
             if state.CurrentUrl = [ "create"; "bleet" ] then
                 []
@@ -123,7 +121,7 @@ let getWindowHeight () =
 let resizeCmd (dispatch: Msg -> unit) =
     let delayedHeightCheck =
         async {
-            do! Async.Sleep 500
+            do! Async.Sleep 250
             let finalHeight = getWindowHeight ()
             dispatch (UpdateHeight finalHeight)
         }
@@ -304,6 +302,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         tw.``flex-grow-1``
                         tw.hidden
                         tw.``lg:flex``
+                        tw.``lg:flex-col``
                     ]
                     prop.style [
                         style.height state.AppHeight
