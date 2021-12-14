@@ -201,8 +201,8 @@ let menuHtml (height: int) (currentUrl: string list) =
             tw.``w-16``
             tw.``md:w-max``
             tw.``mr-4``
-            tw.``hidden``
-            tw.``sm:block``
+            tw.hidden
+            tw.``sm:flex``
         ]
         prop.style [ style.height height ]
         prop.children [

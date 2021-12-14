@@ -156,54 +156,48 @@ let render (state: State) (dispatch: Msg -> unit) =
 
     let classes = [ modalClasses; displayModalClass ] |> List.concat
 
-    let createBleetElem =
-        Html.div [
-            prop.id state.ModalId
-            prop.onClick (fun event -> dispatch (OutsideModalClickClose event.target?id))
-            prop.classes classes
-            prop.children [
-                Html.div [
-                    prop.id (state.ModalId + "Main")
-                    prop.classes [
-                        tw.border
-                        tw.``border-blue-500``
-                        tw.``shadow-lg``
-                        tw.``bg-white``
-                        tw.``md:max-w-md``
-                        tw.``mx-auto``
-                        tw.rounded
-                        tw.``shadow-lg``
-                        tw.``overflow-y-auto``
-                        tw.``text-left``
-                        tw.``py-4``
-                        tw.``px-6``
-                        tw.``w-2/4``
-                        tw.``h-48``
-                        tw.flex
-                        tw.``flex-col``
-                    ]
-                    prop.children [
-                        Html.button [
-                            prop.classes [
-                                tw.flex
-                                tw.``flex-row``
-                            ]
-                            prop.children [
-                                Bleeter.icon "akar-icons:cross" "12"
-                            ]
-                            prop.onClick (fun _ -> dispatch (Close))
+    Html.div [
+        prop.id state.ModalId
+        prop.onClick (fun event -> dispatch (OutsideModalClickClose event.target?id))
+        prop.classes classes
+        prop.children [
+            Html.div [
+                prop.id (state.ModalId + "Main")
+                prop.classes [
+                    tw.border
+                    tw.``border-blue-500``
+                    tw.``shadow-lg``
+                    tw.``bg-white``
+                    tw.``md:max-w-md``
+                    tw.``mx-auto``
+                    tw.rounded
+                    tw.``shadow-lg``
+                    tw.``overflow-y-auto``
+                    tw.``text-left``
+                    tw.``py-4``
+                    tw.``px-6``
+                    tw.``w-2/4``
+                    tw.``h-48``
+                    tw.flex
+                    tw.``flex-col``
+                ]
+                prop.children [
+                    Html.button [
+                        prop.classes [
+                            tw.flex
+                            tw.``flex-row``
                         ]
-                        (match state.ModalType with
-                         | ModalType.CreateBleet -> CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch)
-                         | ModalType.Meditation -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
-                         | ModalType.CCP -> CCP.render state.CCP (CCPMsg >> dispatch)
-                         | _ -> Html.none)
+                        prop.children [
+                            Bleeter.icon "akar-icons:cross" "12"
+                        ]
+                        prop.onClick (fun _ -> dispatch (Close))
                     ]
+                    (match state.ModalType with
+                     | ModalType.CreateBleet -> CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch)
+                     | ModalType.Meditation -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
+                     | ModalType.CCP -> CCP.render state.CCP (CCPMsg >> dispatch)
+                     | _ -> Html.none)
                 ]
             ]
         ]
-
-    Html.div [
-        prop.classes [ tw.``ml-3`` ]
-        prop.children [ createBleetElem ]
     ]

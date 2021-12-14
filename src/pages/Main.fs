@@ -212,7 +212,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.flex
             tw.``flex-grow-1``
-            tw.``max-w-screen-sm``
+            tw.``sm:max-w-screen-sm``
             tw.``h-full``
             tw.``w-full``
         ]

@@ -57,6 +57,7 @@ let commonLayout (children: ReactElement list) =
             tw.``flex-col``
             tw.``flex-grow-1``
             tw.``h-full``
+            tw.``w-full``
         ]
         prop.children [
             Html.div [

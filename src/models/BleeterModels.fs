@@ -112,7 +112,7 @@ module Distraction =
     let decodeListResult (json: string) : Result<Distraction list, string> =
         Decode.Auto.fromString<Distraction list> (json)
 
-type ScreenSize = 
+type ScreenSize =
     | Mobile
     | Small
     | Medium
@@ -121,8 +121,8 @@ type ScreenSize =
     | XXL
 
 [<RequireQualifiedAccess>]
-module ScreenSize = 
-    let getSize (widthInPixel: int) = 
+module ScreenSize =
+    let getSize (widthInPixel: int) =
         match widthInPixel with
         | width when width < 640 -> Mobile
         | width when width < 768 -> Small
@@ -131,14 +131,13 @@ module ScreenSize =
         | width when width < 1536 -> XL
         | _ -> XXL
 
-    let rank (size: ScreenSize) = 
-        match size with 
+    let rank (size: ScreenSize) =
+        match size with
         | Mobile -> 0
         | Small -> 1
         | Medium -> 2
         | Large -> 3
         | XL -> 4
         | XXL -> 5
-    
-    let isMobile (size: ScreenSize) = 
-        (size |> rank) = (Mobile |> rank)
+
+    let isMobile (size: ScreenSize) = (size |> rank) = (Mobile |> rank)

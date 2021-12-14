@@ -64,76 +64,70 @@ let render (state: State) (dispatch: Msg -> unit) =
     let profile = state.Profile
 
     Html.div [
-        prop.classes [ tw.``ml-3`` ]
+        prop.classes [
+            tw.flex
+            tw.``flex-row``
+            tw.``mt-4``
+        ]
         prop.children [
+            Html.img [
+                prop.classes [
+                    tw.flex
+                    tw.``flex-grow-0``
+                    tw.``mr-2``
+                    tw.``h-8``
+                    tw.``w-8``
+                    tw.``rounded-full``
+                    tw.``border-2``
+                    tw.``border-gray-100``
+                ]
+                prop.src profile.ProfilePic
+            ]
             Html.div [
                 prop.classes [
                     tw.flex
-                    tw.``flex-row``
-                    tw.``mt-4``
+                    tw.``flex-grow-1``
+                    tw.``flex-col``
                 ]
                 prop.children [
-                    Html.img [
+                    Html.textarea [
+                        prop.id "create-bleet-text"
                         prop.classes [
-                            tw.flex
-                            tw.``flex-grow-0``
-                            tw.``mr-2``
-                            tw.``h-8``
-                            tw.``w-8``
-                            tw.``rounded-full``
-                            tw.``border-2``
-                            tw.``border-gray-100``
+                            tw.``resize-none``
+                            tw.``outline-none``
                         ]
-                        prop.src profile.ProfilePic
+                        prop.rows 3
+                        prop.value state.BleetContent
+                        // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
+                        // https://stackoverflow.com/a/52338979
+                        prop.onChange (fun (ev: Event) -> dispatch (UpdateBleetContent(ev.target?value |> string)))
+                        prop.placeholder "Mehehe?"
                     ]
                     Html.div [
                         prop.classes [
                             tw.flex
-                            tw.``flex-grow-1``
-                            tw.``flex-col``
+                            tw.``flex-row-reverse``
                         ]
                         prop.children [
-                            Html.textarea [
-                                prop.id "create-bleet-text"
+                            Html.button [
+                                prop.id "create-bleet-button"
                                 prop.classes [
-                                    tw.``resize-none``
-                                    tw.``outline-none``
+                                    tw.``bg-green-500``
+                                    tw.``text-white``
+                                    tw.``rounded-md``
+                                    tw.``px-8``
+                                    tw.``py-2``
+                                    tw.``w-24``
+                                    tw.``float-right``
+                                    tw.``text-base``
+                                    tw.``font-medium``
+                                    tw.``hover:bg-green-600``
+                                    tw.``focus:outline-none``
+                                    tw.``focus:ring-2``
+                                    tw.``focus:ring-green-300``
                                 ]
-                                prop.rows 3
-                                prop.value state.BleetContent
-                                // https://stackoverflow.com/questions/64194493/syntax-confusion-in-fable-with-eventtarget
-                                // https://stackoverflow.com/a/52338979
-                                prop.onChange
-                                    (fun (ev: Event) -> dispatch (UpdateBleetContent(ev.target?value |> string)))
-                                prop.placeholder "Mehehe?"
-                            ]
-                            Html.div [
-                                prop.classes [
-                                    tw.flex
-                                    tw.``flex-row-reverse``
-                                ]
-                                prop.children [
-                                    Html.button [
-                                        prop.id "create-bleet-button"
-                                        prop.classes [
-                                            tw.``bg-green-500``
-                                            tw.``text-white``
-                                            tw.``rounded-md``
-                                            tw.``px-8``
-                                            tw.``py-2``
-                                            tw.``w-24``
-                                            tw.``float-right``
-                                            tw.``text-base``
-                                            tw.``font-medium``
-                                            tw.``hover:bg-green-600``
-                                            tw.``focus:outline-none``
-                                            tw.``focus:ring-2``
-                                            tw.``focus:ring-green-300``
-                                        ]
-                                        prop.onClick (fun _ -> dispatch AddBleet)
-                                        prop.text "Bleet"
-                                    ]
-                                ]
+                                prop.onClick (fun _ -> dispatch AddBleet)
+                                prop.text "Bleet"
                             ]
                         ]
                     ]

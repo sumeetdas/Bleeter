@@ -52,14 +52,13 @@ let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
             tw.``fixed``
-            tw.flex
             tw.``z-50``
             tw.``bottom-4``
             tw.``left-1/3``
             tw.``w-full``
             tw.``h-8``
             tw.``pl-12``
-            (if state.Display then tw.block else tw.hidden)
+            (if state.Display then tw.flex else tw.hidden)
         ]
         prop.children [
             Html.div [
