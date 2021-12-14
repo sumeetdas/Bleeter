@@ -20,6 +20,7 @@ type State =
         AppHeight: int
         Notification: Notification.State
         Modal: Modal.State
+        ScreenSize: ScreenSize
     }
 
 // events
@@ -32,6 +33,7 @@ type Msg =
     | UpdateHeight of int
     | NotificationMsg of Notification.Msg
     | ModalMsg of Modal.Msg
+    | ScreenSizeUpdated of ScreenSize
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -48,6 +50,7 @@ let init () =
         AppHeight = 400
         Notification = Notification.init ()
         Modal = Modal.init data
+        ScreenSize = Mobile
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -157,6 +160,8 @@ let updateData (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | ScreenSizeUpdated screenSize -> 
+        { state with ScreenSize = screenSize }, Cmd.none
     | UpdateHeight height ->
         let nextMain, mainCmd = Main.update (Main.Msg.AppHeight height) state.Main
         { state with Main = nextMain; AppHeight = height }, Cmd.map MainMsg mainCmd
@@ -320,25 +325,21 @@ let render (state: State) (dispatch: Msg -> Unit) =
         router.children page
     ]
 
+let sizeUpdate (dispatch: Msg -> unit) = 
+    let finalHeight = getWindowHeight ()
+    dispatch (UpdateHeight finalHeight)
+    let width = Bleeter.getWindowWidth()
+    dispatch (ScreenSizeUpdated (width |> ScreenSize.getSize))
+
 let appOnLoadHeight _ =
     let sub dispatch =
-        window.addEventListener (
-            "load",
-            fun _ ->
-                let finalHeight = getWindowHeight ()
-                dispatch (UpdateHeight finalHeight)
-        )
+        window.addEventListener ("load", fun _ -> sizeUpdate dispatch)
 
     Cmd.ofSub sub
 
 let appOnResizeHeight _ =
     let sub dispatch =
-        window.addEventListener (
-            "resize",
-            fun _ ->
-                let finalHeight = getWindowHeight ()
-                dispatch (UpdateHeight finalHeight)
-        )
+        window.addEventListener ("resize", fun _ -> sizeUpdate dispatch)
 
     Cmd.ofSub sub
 
