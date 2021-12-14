@@ -60,7 +60,7 @@ let init () =
 let scrollToTop () =
     let delayedScrollToTop =
         async {
-            do! Async.Sleep 250
+            // do! Async.Sleep 250
             window.scrollTo (0.0, 0.0)
         }
 
@@ -338,6 +338,13 @@ let appOnResizeHeight _ =
     let sub dispatch = window.addEventListener ("resize", (fun _ -> sizeUpdate dispatch))
 
     Cmd.ofSub sub
+
+// No object for screen.orientation as yet 
+// GitHub issue: https://github.com/fable-compiler/fable-browser/issues/89
+// let appOnOrientationChange _ =
+//     let sub dispatch = screen.orientation.addEventListener ("change", (fun _ -> sizeUpdate dispatch))
+
+//     Cmd.ofSub sub
 
 // Subscriptions for DOM events doesn't work.
 // GitHub Issue: https://github.com/elmish/elmish/issues/229

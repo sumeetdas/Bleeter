@@ -202,7 +202,7 @@ let getBleetContent (content: string) : ReactElement =
                 ]
                 prop.children [
                     Html.p [
-                        prop.classes [ tw.``flex-shrink`` ]
+                        prop.classes [ tw.``flex``; tw.``flex-col``; tw.``flex-shrink`` ]
                         prop.children content
                     ]
                     // Html.div [
@@ -213,9 +213,31 @@ let getBleetContent (content: string) : ReactElement =
             ]
         | None ->
             Html.p [
-                prop.classes [ tw.``flex-shrink`` ]
+                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``flex-shrink`` ]
                 prop.children content
             ])
+
+let bleetProfilePic (bleet: Bleet) = 
+    Html.div [
+        prop.classes [
+            tw.flex
+            tw.``flex-grow-0``
+            tw.``w-12``
+            tw.``min-w-max``
+        ]
+        prop.children [
+            Html.img [
+                prop.classes [
+                    tw.``h-12``
+                    tw.``w-12``
+                    tw.``rounded-full``
+                    tw.``border-2``
+                    tw.``border-green-100``
+                ]
+                prop.src bleet.ProfilePic
+            ]
+        ]
+    ]
 
 let render (state: State) (dispatch: Msg -> unit) =
     let bleet = state.Bleet
@@ -234,25 +256,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``bg-gray-100``
         ]
         prop.children [
-            Html.div [
-                prop.classes [
-                    tw.flex
-                    tw.``flex-grow-0``
-                    tw.``w-12``
-                ]
-                prop.children [
-                    Html.img [
-                        prop.classes [
-                            tw.``h-12``
-                            tw.``w-12``
-                            tw.``rounded-full``
-                            tw.``border-2``
-                            tw.``border-green-100``
-                        ]
-                        prop.src bleet.ProfilePic
-                    ]
-                ]
-            ]
+            (bleetProfilePic bleet)
             Html.div [
                 prop.classes [
                     tw.flex
@@ -274,14 +278,15 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 ]
                                 prop.children [
                                     Html.a [
+                                        prop.classes [ tw.``flex``; tw.``flex-row``; tw.``flex-wrap`` ]
                                         prop.href (sprintf "#/%s" bleet.Handle)
                                         prop.children [
                                             Html.span [
-                                                prop.classes [ tw.``hover:underline`` ]
+                                                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``hover:underline`` ]
                                                 prop.text bleet.Name
                                             ]
                                             Html.span [
-                                                prop.classes [ tw.``ml-1`` ]
+                                                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``ml-1`` ]
                                                 prop.text ("@" + bleet.Handle)
                                             ]
                                         ]

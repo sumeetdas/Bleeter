@@ -137,29 +137,32 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
         let classes = [ size.CssClasses; state.CssClasses ] |> List.concat
 
         Html.div [
-            Html.div [
-                prop.onClick
-                    (fun event ->
-                        // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
-                        let coordinates =
-                            {
-                                X = event.currentTarget?offsetLeft
-                                Y = event.currentTarget?offsetTop
-                            }
+            prop.classes [ tw.``flex``; tw.``flex-row`` ]
+            prop.children [
+                Html.div [
+                    prop.onClick
+                        (fun event ->
+                            // https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
+                            let coordinates =
+                                {
+                                    X = event.currentTarget?offsetLeft
+                                    Y = event.currentTarget?offsetTop
+                                }
 
-                        let coordinates =
-                            {
-                                X = coordinates.X + state.Offset.X
-                                Y = coordinates.Y + state.Offset.Y
-                            }
+                            let coordinates =
+                                {
+                                    X = coordinates.X + state.Offset.X
+                                    Y = coordinates.Y + state.Offset.Y
+                                }
 
-                        dispatch (Open coordinates))
-                prop.classes classes
-                prop.children [
-                    Bleeter.icon "ant-design:ellipsis-outlined" (size.IconSize)
+                            dispatch (Open coordinates))
+                    prop.classes classes
+                    prop.children [
+                        Bleeter.icon "ant-design:ellipsis-outlined" (size.IconSize)
+                    ]
                 ]
+                optionsElem
             ]
-            optionsElem
         ]
 
     match sizes.TryFind state.Size with
