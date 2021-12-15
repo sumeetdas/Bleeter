@@ -315,6 +315,40 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 (Modal.render state.Modal (ModalMsg >> dispatch))
 
                 (Notification.render state.Notification (NotificationMsg >> dispatch))
+
+                (
+                    if state.ScreenSize |> ScreenSize.isMobile
+                    then Html.div [
+                        prop.classes [
+                            tw.``fixed`` 
+                            tw.``bottom-0`` 
+                            tw.``right-0``
+                            tw.``mr-8``
+                            tw.``mb-24``
+                        ]
+                        prop.children [
+                            Menu.bleetButton
+                        ]
+                    ]
+                    else Html.none
+                )
+
+                (
+                    if state.ScreenSize |> ScreenSize.isMobile
+                    then Html.div [
+                        prop.classes [
+                            tw.``fixed`` 
+                            tw.``top-0`` 
+                            tw.``right-0``
+                            tw.``mr-8``
+                            tw.``mt-4``
+                        ]
+                        prop.children [
+                            Menu.bleetButton
+                        ]
+                    ]
+                    else Html.none
+                )
             ]
         ]
 
@@ -339,13 +373,20 @@ let appOnResizeHeight _ =
 
     Cmd.ofSub sub
 
-// No object for screen.orientation as yet 
-// GitHub issue: https://github.com/fable-compiler/fable-browser/issues/89
-// let appOnOrientationChange _ =
-//     let sub dispatch = screen.orientation.addEventListener ("change", (fun _ -> sizeUpdate dispatch))
+let appOnOrientationChange _ =
+    // listening to 'change' event in screen.orientation does not work
+    // in Firefox. Commenting it for now 
+    // let sub dispatch = window.screen.orientation.addEventListener ("change", (
+    //     fun _ -> 
+    //         printf "appOnOrientationChange"
+    //         sizeUpdate dispatch))
 
-//     Cmd.ofSub sub
+    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> sizeUpdate dispatch))
 
+    Cmd.batch [
+        Cmd.ofSub sub
+    ]
+    
 // Subscriptions for DOM events doesn't work.
 // GitHub Issue: https://github.com/elmish/elmish/issues/229
 // let followClick initial =
@@ -363,6 +404,7 @@ let subscribers initial =
     Cmd.batch [
         appOnLoadHeight initial
         appOnResizeHeight initial
+        appOnOrientationChange initial
         Cmd.ofMsg (UrlChanged(if currentUrl.Length = 0 then [ "home" ] else currentUrl))
     ]
 

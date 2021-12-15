@@ -137,7 +137,10 @@ let render (state: 'a State) (dispatch: 'a Msg -> unit) =
         let classes = [ size.CssClasses; state.CssClasses ] |> List.concat
 
         Html.div [
-            prop.classes [ tw.``flex``; tw.``flex-row`` ]
+            prop.classes [
+                tw.flex
+                tw.``flex-row``
+            ]
             prop.children [
                 Html.div [
                     prop.onClick

@@ -53,16 +53,22 @@ let msgElem (msg: string) =
 
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
-        prop.classes ([
-            tw.``fixed``
-            tw.``z-50``
-            tw.``bottom-4``
-            tw.``w-full``
-            tw.``h-16``
-            tw.``sm:h-8``
-            tw.``items-center``
-            tw.``justify-center``
-        ] @ (if state.Display then [ tw.flex; tw.``flex-row`` ] else [ tw.hidden ]))
+        prop.classes (
+            [
+                tw.``fixed``
+                tw.``z-50``
+                tw.``bottom-4``
+                tw.``w-full``
+                tw.``h-16``
+                tw.``sm:h-8``
+                tw.``items-center``
+                tw.``justify-center``
+            ]
+            @ (if state.Display then
+                   [ tw.flex; tw.``flex-row`` ]
+               else
+                   [ tw.hidden ])
+        )
         prop.children [
             Html.div [
                 prop.onClick (fun _ -> dispatch (Close))

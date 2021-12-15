@@ -202,7 +202,11 @@ let getBleetContent (content: string) : ReactElement =
                 ]
                 prop.children [
                     Html.p [
-                        prop.classes [ tw.``flex``; tw.``flex-col``; tw.``flex-shrink`` ]
+                        prop.classes [
+                            tw.flex
+                            tw.``flex-col``
+                            tw.``flex-shrink``
+                        ]
                         prop.children content
                     ]
                     // Html.div [
@@ -213,11 +217,15 @@ let getBleetContent (content: string) : ReactElement =
             ]
         | None ->
             Html.p [
-                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``flex-shrink`` ]
+                prop.classes [
+                    tw.flex
+                    tw.``flex-col``
+                    tw.``flex-shrink``
+                ]
                 prop.children content
             ])
 
-let bleetProfilePic (bleet: Bleet) = 
+let bleetProfilePic (bleet: Bleet) =
     Html.div [
         prop.classes [
             tw.flex
@@ -278,15 +286,27 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 ]
                                 prop.children [
                                     Html.a [
-                                        prop.classes [ tw.``flex``; tw.``flex-row``; tw.``flex-wrap`` ]
+                                        prop.classes [
+                                            tw.flex
+                                            tw.``flex-row``
+                                            tw.``flex-wrap``
+                                        ]
                                         prop.href (sprintf "#/%s" bleet.Handle)
                                         prop.children [
                                             Html.span [
-                                                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``hover:underline`` ]
+                                                prop.classes [
+                                                    tw.flex
+                                                    tw.``flex-col``
+                                                    tw.``hover:underline``
+                                                ]
                                                 prop.text bleet.Name
                                             ]
                                             Html.span [
-                                                prop.classes [ tw.``flex``; tw.``flex-col``; tw.``ml-1`` ]
+                                                prop.classes [
+                                                    tw.flex
+                                                    tw.``flex-col``
+                                                    tw.``ml-1``
+                                                ]
                                                 prop.text ("@" + bleet.Handle)
                                             ]
                                         ]
