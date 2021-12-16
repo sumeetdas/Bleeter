@@ -17,7 +17,7 @@ type State =
         Main: Main.State
         DistractionElemList: DistractionElemList.State
         SearchBox: SearchBox.State
-        AppHeight: int
+        AppHeight: int option
         Notification: Notification.State
         Modal: Modal.State
         ScreenSize: ScreenSize
@@ -34,6 +34,7 @@ type Msg =
     | NotificationMsg of Notification.Msg
     | ModalMsg of Modal.Msg
     | ScreenSizeUpdated of ScreenSize
+    | OrientationChange
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -47,7 +48,7 @@ let init () =
         Main = main
         DistractionElemList = DistractionElemList.init data
         SearchBox = SearchBox.init ()
-        AppHeight = 400
+        AppHeight = None
         Notification = Notification.init ()
         Modal = Modal.init data
         ScreenSize = Mobile
@@ -65,6 +66,32 @@ let scrollToTop () =
         }
 
     Async.StartImmediate delayedScrollToTop
+
+let getWindowHeight () =
+    let scrollHeight =
+        (document.getElementById "elmish-app")
+            .scrollHeight
+        |> int
+
+    let windowHeight = window.innerHeight |> int
+
+    if scrollHeight > windowHeight then
+        scrollHeight
+    else
+        windowHeight
+
+let resizeCmd (dispatch: Msg -> unit) =
+    let delayedHeightCheck =
+        async {
+            do! Async.Sleep 200
+            let finalHeight = getWindowHeight ()
+            dispatch (UpdateHeight finalHeight)
+        }
+
+    [ delayedHeightCheck; delayedHeightCheck ]
+    |> Async.Sequential
+    |> Async.Ignore
+    |> Async.StartImmediate
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }
@@ -84,7 +111,9 @@ let changeUrl (url: string list, state: State) =
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
-        let main, cmd = Main.update (Main.Msg.UrlChanged url) state.Main
+        let main, _ = Main.update (Main.AppHeight None) state.Main
+        let state = { state with Main = main }
+        let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 
         let distraction, distractionCmd =
             DistractionElemList.update (DistractionElemList.Msg.UrlChanged url) state.DistractionElemList
@@ -95,41 +124,15 @@ let changeUrl (url: string list, state: State) =
         { state with
             CurrentUrl = url
             Main = main
-            AppHeight = main.Height
             DistractionElemList = distraction
             Modal = modal
         },
         Cmd.batch [
-            Cmd.map MainMsg cmd
+            Cmd.map MainMsg mainCmd
             Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map ModalMsg modalCmd
+            Cmd.ofSub resizeCmd
         ]
-
-let getWindowHeight () =
-    let scrollHeight =
-        (document.getElementById "elmish-app")
-            .scrollHeight
-        |> int
-
-    let windowHeight = window.innerHeight |> int
-
-    if scrollHeight > windowHeight then
-        scrollHeight
-    else
-        windowHeight
-
-let resizeCmd (dispatch: Msg -> unit) =
-    let delayedHeightCheck =
-        async {
-            do! Async.Sleep 250
-            let finalHeight = getWindowHeight ()
-            dispatch (UpdateHeight finalHeight)
-        }
-
-    [ delayedHeightCheck; delayedHeightCheck ]
-    |> Async.Sequential
-    |> Async.Ignore
-    |> Async.StartImmediate
 
 let updateData (state: State) =
     if state.Data.DoSyncData then
@@ -160,8 +163,8 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | ScreenSizeUpdated screenSize -> { state with ScreenSize = screenSize }, Cmd.none
     | UpdateHeight height ->
-        let nextMain, mainCmd = Main.update (Main.Msg.AppHeight height) state.Main
-        { state with Main = nextMain; AppHeight = height }, Cmd.map MainMsg mainCmd
+        let nextMain, mainCmd = Main.update (Main.Msg.AppHeight (Some height)) state.Main
+        { state with Main = nextMain; AppHeight = Some height }, Cmd.map MainMsg mainCmd
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -177,7 +180,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         state, Cmd.batch [ cmd; Cmd.ofSub resizeCmd ]
     | MainMsg msg' ->
         let nextMain, mainCmd = Main.update msg' state.Main
-        let nextState = { state with Main = nextMain; AppHeight = nextMain.Height }
+        let nextState = { state with Main = nextMain }
 
         let nextState, deleteBleetCmd =
             match nextMain.DeletedBleet with
@@ -279,8 +282,16 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 updateDataCmd
                 urlChangeCmd
              ])
+    | OrientationChange ->
+        let main, _ = Main.update (Main.AppHeight None) state.Main
+        { state with Main = main; AppHeight = None }, Cmd.ofSub resizeCmd
 
 let render (state: State) (dispatch: Msg -> Unit) =
+    let heightStyle = 
+        match state.AppHeight with 
+        | Some height -> [ style.height height ]
+        | None -> []
+
     let page =
         Html.div [
             prop.classes [
@@ -289,9 +300,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 tw.``min-h-full``
                 tw.``h-full``
             ]
-            prop.style [
-                style.height state.AppHeight
-            ]
+            prop.style heightStyle
             prop.children [
                 Menu.menuHtml state.AppHeight state.CurrentUrl
 
@@ -304,9 +313,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         tw.``lg:flex``
                         tw.``lg:flex-col``
                     ]
-                    prop.style [
-                        style.height state.AppHeight
-                    ]
+                    prop.style heightStyle
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
                         DistractionElemList.render state.DistractionElemList (DistractionElemListMsg >> dispatch)
@@ -381,7 +388,7 @@ let appOnOrientationChange _ =
     //         printf "appOnOrientationChange"
     //         sizeUpdate dispatch))
 
-    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> sizeUpdate dispatch))
+    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> dispatch (OrientationChange)))
 
     Cmd.batch [
         Cmd.ofSub sub

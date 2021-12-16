@@ -183,7 +183,7 @@ let bleetButton =
         ]
     ]
 
-let menuHtml (height: int) (currentUrl: string list) =
+let menuHtml (height: int option) (currentUrl: string list) =
     let urlString =
         currentUrl
         |> Seq.map (fun elem -> elem.ToLower())
@@ -204,7 +204,11 @@ let menuHtml (height: int) (currentUrl: string list) =
             tw.hidden
             tw.``sm:flex``
         ]
-        prop.style [ style.height height ]
+        prop.style (
+            match height with 
+            | Some height -> [ style.height height ]
+            | None -> []
+        )
         prop.children [
             Html.div [
                 prop.classes [

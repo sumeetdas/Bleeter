@@ -10,7 +10,7 @@ open Browser.Dom
 type State =
     {
         CurrentUrl: string list
-        Height: int
+        Height: int option
         ProfileElem: ProfileElem.State
         Home: Home.State
         DeletedBleet: Bleet option
@@ -25,7 +25,7 @@ type State =
 
 type Msg =
     | UrlChanged of string list
-    | AppHeight of int
+    | AppHeight of int option
     | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
     | DataUpdate of Data.State
@@ -37,7 +37,7 @@ type Msg =
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
         CurrentUrl = currentUrl
-        Height = 0
+        Height = None
         ProfileElem = ProfileElem.init data
         Home = Home.init data
         DeletedBleet = None
@@ -82,11 +82,10 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             Cmd.map MobilePageMsg mobilePageCmd
         ]
     | UrlChanged url ->
-        let height = document.documentElement.clientHeight |> int
+        // let height = document.documentElement.clientHeight |> int
 
         let state =
             { state with
-                Height = height
                 ModalMsg = Modal.DoNothing
                 NotifMsg = None
             }
@@ -216,7 +215,11 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``h-full``
             tw.``w-full``
         ]
-        prop.style [ style.height state.Height ]
+        prop.style (
+            match state.Height with 
+            | Some height -> [ style.height height ]
+            | None -> []
+        )
         prop.children [
             match state.CurrentUrl with
             | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
