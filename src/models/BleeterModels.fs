@@ -141,3 +141,11 @@ module ScreenSize =
         | XXL -> 5
 
     let isMobile (size: ScreenSize) = (size |> rank) = (Mobile |> rank)
+
+type Nav =
+    {
+        IconName: string
+        Text: string
+        Url: string
+        HideOnLargeScreen: bool
+    }

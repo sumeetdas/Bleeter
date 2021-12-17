@@ -4,14 +4,6 @@ module Menu
 open Feliz
 open Tailwind
 
-type Nav =
-    {
-        IconName: string
-        Text: string
-        Url: string
-        HideOnLargeScreen: bool
-    }
-
 let navList =
     [
         {
@@ -61,7 +53,6 @@ let nav (currentUrl: string) (nav: Nav) =
                 tw.``ml-4``
                 tw.``mt-1``
                 tw.group
-                tw.flex
                 tw.``items-center``
                 tw.``px-2``
                 tw.``py-2``
@@ -73,7 +64,7 @@ let nav (currentUrl: string) (nav: Nav) =
                 tw.``hover:bg-bleeter-blue-hover``
                 tw.``w-12``
                 tw.``md:w-56``
-                (if nav.HideOnLargeScreen then tw.``lg:hidden`` else tw.block)
+                (if nav.HideOnLargeScreen then tw.``lg:hidden`` else tw.flex)
             ]
             @ (if isSelected then
                    [ tw.``font-black``; tw.border; tw.``border-4`` ]

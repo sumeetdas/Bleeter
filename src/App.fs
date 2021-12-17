@@ -30,11 +30,9 @@ type Msg =
     | MainMsg of Main.Msg
     | DistractionElemListMsg of DistractionElemList.Msg
     | SearchBoxMsg of SearchBox.Msg
-    | UpdateHeight of int
     | NotificationMsg of Notification.Msg
     | ModalMsg of Modal.Msg
-    | ScreenSizeUpdated of ScreenSize
-    | OrientationChange
+    | ScreenSizeUpdated of int option * ScreenSize option
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -81,17 +79,23 @@ let getWindowHeight () =
         windowHeight
 
 let resizeCmd (dispatch: Msg -> unit) =
+    dispatch (ScreenSizeUpdated (None, None))
     let delayedHeightCheck =
         async {
             do! Async.Sleep 200
             let finalHeight = getWindowHeight ()
-            dispatch (UpdateHeight finalHeight)
+            let width = Bleeter.getWindowWidth ()
+            dispatch (ScreenSizeUpdated (Some finalHeight, Some (width |> ScreenSize.getSize)))
         }
 
     [ delayedHeightCheck; delayedHeightCheck ]
     |> Async.Sequential
     |> Async.Ignore
     |> Async.StartImmediate
+
+let resetHeight state = 
+    let main, _ = Main.update (Main.AppHeight None) state.Main
+    { state with Main = main; AppHeight = None }
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }
@@ -111,8 +115,7 @@ let changeUrl (url: string list, state: State) =
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
-        let main, _ = Main.update (Main.AppHeight None) state.Main
-        let state = { state with Main = main }
+        let state = resetHeight state
         let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 
         let distraction, distractionCmd =
@@ -161,10 +164,14 @@ let updateData (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | ScreenSizeUpdated screenSize -> { state with ScreenSize = screenSize }, Cmd.none
-    | UpdateHeight height ->
-        let nextMain, mainCmd = Main.update (Main.Msg.AppHeight (Some height)) state.Main
-        { state with Main = nextMain; AppHeight = Some height }, Cmd.map MainMsg mainCmd
+    | ScreenSizeUpdated (heightOpt, screenSizeOpt) -> 
+        let state = 
+            let nextMain, _ = Main.update (Main.Msg.AppHeight heightOpt) state.Main
+            { state with Main = nextMain; AppHeight = heightOpt }
+    
+        match screenSizeOpt with 
+        | Some screenSize -> { state with ScreenSize = screenSize }, Cmd.none
+        | None -> state, Cmd.none
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -177,7 +184,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         ]
     | UrlChanged url ->
         let state, cmd = changeUrl (url, state)
-        state, Cmd.batch [ cmd; Cmd.ofSub resizeCmd ]
+        state, cmd
     | MainMsg msg' ->
         let nextMain, mainCmd = Main.update msg' state.Main
         let nextState = { state with Main = nextMain }
@@ -221,7 +228,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         nextState,
         Cmd.batch [
             Cmd.map MainMsg mainCmd
-            Cmd.ofSub resizeCmd
             deleteBleetCmd
             addBleetCmd
             notifCmd
@@ -282,9 +288,6 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 updateDataCmd
                 urlChangeCmd
              ])
-    | OrientationChange ->
-        let main, _ = Main.update (Main.AppHeight None) state.Main
-        { state with Main = main; AppHeight = None }, Cmd.ofSub resizeCmd
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let heightStyle = 
@@ -348,7 +351,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                             tw.``top-0`` 
                             tw.``right-0``
                             tw.``mr-8``
-                            tw.``mt-4``
+                            tw.``mt-0``
                         ]
                         prop.children [
                             Menu.bleetButton
@@ -364,19 +367,13 @@ let render (state: State) (dispatch: Msg -> Unit) =
         router.children page
     ]
 
-let sizeUpdate (dispatch: Msg -> unit) =
-    let finalHeight = getWindowHeight ()
-    dispatch (UpdateHeight finalHeight)
-    let width = Bleeter.getWindowWidth ()
-    dispatch (ScreenSizeUpdated(width |> ScreenSize.getSize))
-
 let appOnLoadHeight _ =
-    let sub dispatch = window.addEventListener ("load", (fun _ -> sizeUpdate dispatch))
+    let sub dispatch = window.addEventListener ("load", fun _ -> dispatch |> resizeCmd)
 
     Cmd.ofSub sub
 
 let appOnResizeHeight _ =
-    let sub dispatch = window.addEventListener ("resize", (fun _ -> sizeUpdate dispatch))
+    let sub dispatch = window.addEventListener ("resize", fun _ -> dispatch |> resizeCmd)
 
     Cmd.ofSub sub
 
@@ -388,7 +385,7 @@ let appOnOrientationChange _ =
     //         printf "appOnOrientationChange"
     //         sizeUpdate dispatch))
 
-    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> dispatch (OrientationChange)))
+    let sub dispatch = window.addEventListener ("orientationchange", fun _ -> dispatch |> resizeCmd)
 
     Cmd.batch [
         Cmd.ofSub sub
