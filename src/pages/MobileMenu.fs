@@ -25,7 +25,7 @@ let update (msg: Msg) (state: State) : State =
         else
             state
 
-let nav (currentUrl: string) (nav: Nav) =
+let nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
     let isSelected = currentUrl = (nav.Url.Replace("/", "").Replace("#", ""))
 
     Html.a [
@@ -52,6 +52,7 @@ let nav (currentUrl: string) (nav: Nav) =
         )
         prop.target (if (nav.Url |> String.contains "http") then "_blank" else "")
         prop.href nav.Url
+        prop.onClick (fun _ -> dispatch (Close))
         prop.children [
             Html.div [
                 prop.classes [
@@ -72,17 +73,24 @@ let closeButton (dispatch: Msg -> unit) =
         prop.classes [
             tw.flex
             tw.``flex-row``
+            tw.``text-gray-100``
+            tw.``px-2.5``
+            tw.``py-2.5``
+            tw.``hover:bg-bleeter-blue-hover``
+            tw.``w-11``
+            tw.``h-11``
+            tw.``rounded-full``
         ]
         prop.children [
-            Bleeter.icon "akar-icons:cross" "12"
+            Bleeter.icon "akar-icons:cross" "24"
         ]
         prop.onClick (fun _ -> dispatch (Close))
     ]
 
-let navElems (urlString: string) = 
+let navElems (urlString: string) (dispatch: Msg -> unit) = 
     let elem = 
         Menu.navList 
-        |> List.map (nav urlString)
+        |> List.map (nav urlString dispatch)
     
     Html.div [
         prop.classes [
@@ -134,6 +142,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                             tw.``flex``
                             tw.``flex-row``
                             tw.``h-8``
+                            tw.``mb-4``
                         ]
                         prop.children [
                             Html.div [
@@ -153,7 +162,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                             ]
                         ]
                     ]
-                    navElems urlString
+                    navElems urlString dispatch
                 ]
             ]
         ]

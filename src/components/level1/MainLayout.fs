@@ -105,17 +105,12 @@ let mobileElem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             ]
             prop.children coreComponents
         ]
-
-    let height =
-        let width = Bleeter.getWindowWidth ()
-        let diff = (width - 320) / 5
-        Math.Min(160, Math.Max(80, 80 + diff))
-
+        
     let children =
         [
             (match imgUrlOpt with
-             | Some url -> banner url height
-             | None -> transparentBackground height)
+             | Some url -> banner url 160
+             | None -> transparentBackground 160)
             coreComponentsElem
         ]
 

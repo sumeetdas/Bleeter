@@ -21,6 +21,7 @@ type State =
         Notification: Notification.State
         Modal: Modal.State
         ScreenSize: ScreenSize
+        MobileMenu: MobileMenu.State
     }
 
 // events
@@ -33,6 +34,7 @@ type Msg =
     | NotificationMsg of Notification.Msg
     | ModalMsg of Modal.Msg
     | ScreenSizeUpdated of int option * ScreenSize option
+    | MobileMenuMsg of MobileMenu.Msg
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -45,11 +47,12 @@ let init () =
         CurrentUrl = currentUrl
         Main = main
         DistractionElemList = DistractionElemList.init data
-        SearchBox = SearchBox.init ()
+        SearchBox = SearchBox.init()
         AppHeight = None
-        Notification = Notification.init ()
+        Notification = Notification.init()
         Modal = Modal.init data
         ScreenSize = Mobile
+        MobileMenu = MobileMenu.init()
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -288,6 +291,43 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 updateDataCmd
                 urlChangeCmd
              ])
+    | MobileMenuMsg msg' -> 
+        let menu = MobileMenu.update msg' state.MobileMenu
+        { state with MobileMenu = menu }, Cmd.none
+
+let mobileElem (state: State) (dispatch: Msg -> unit) = 
+    Html.div [
+        Html.div [
+            prop.classes [
+                tw.``fixed``
+                tw.``bg-bleeter-blue``
+                tw.``flex``
+                tw.``flex-row``
+                tw.``flex-grow-1``
+                tw.``w-full``
+                tw.``text-gray-100``
+                tw.``bleeter-pointer``
+            ]
+            prop.onClick (fun _ -> MobileMenu.Display |> MobileMenuMsg |> dispatch)
+            prop.children [
+                Bleeter.icon "ci:hamburger" "32"
+            ]
+        ]
+        Html.div [
+            prop.classes [
+                tw.``fixed`` 
+                tw.``bottom-0`` 
+                tw.``right-0``
+                tw.``mr-8``
+                tw.``mb-24``
+                (if Router.currentUrl() = [ "create"; "bleet" ] then tw.``hidden`` else tw.``block``)
+            ]
+            prop.children [
+                Menu.bleetButton
+            ]
+        ]
+        MobileMenu.render state.MobileMenu (MobileMenuMsg >> dispatch)
+    ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
     let heightStyle = 
@@ -305,6 +345,12 @@ let render (state: State) (dispatch: Msg -> Unit) =
             ]
             prop.style heightStyle
             prop.children [
+                (
+                    if state.ScreenSize |> ScreenSize.isMobile
+                    then mobileElem state dispatch
+                    else Html.none
+                )
+
                 Menu.menuHtml state.AppHeight state.CurrentUrl
 
                 (Main.render state.Main (MainMsg >> dispatch))
@@ -325,40 +371,6 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 (Modal.render state.Modal (ModalMsg >> dispatch))
 
                 (Notification.render state.Notification (NotificationMsg >> dispatch))
-
-                (
-                    if state.ScreenSize |> ScreenSize.isMobile
-                    then Html.div [
-                        prop.classes [
-                            tw.``fixed`` 
-                            tw.``bottom-0`` 
-                            tw.``right-0``
-                            tw.``mr-8``
-                            tw.``mb-24``
-                        ]
-                        prop.children [
-                            Menu.bleetButton
-                        ]
-                    ]
-                    else Html.none
-                )
-
-                (
-                    if state.ScreenSize |> ScreenSize.isMobile
-                    then Html.div [
-                        prop.classes [
-                            tw.``fixed`` 
-                            tw.``top-0`` 
-                            tw.``right-0``
-                            tw.``mr-8``
-                            tw.``mt-0``
-                        ]
-                        prop.children [
-                            Menu.bleetButton
-                        ]
-                    ]
-                    else Html.none
-                )
             ]
         ]
 

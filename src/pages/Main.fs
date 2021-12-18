@@ -192,6 +192,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         { state with
             MobilePage = mobilePage
             AddBleet = mobilePage.AddBleet
+            NotifMsg = mobilePage.NotifMsg
+            ModalMsg = mobilePage.ModalMsg
         },
         Cmd.map MobilePageMsg cmd
 

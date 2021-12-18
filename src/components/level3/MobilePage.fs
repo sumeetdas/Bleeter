@@ -17,6 +17,9 @@ type State =
         AddBleet: Bleet option
         DistractionElemList: DistractionElemList.State
         SearchBox: SearchBox.State
+        NotifMsg: ReactElement option
+        ModalMsg: Modal.Msg
+        PreviousUrl: string list
     }
 
 type Msg =
@@ -28,6 +31,7 @@ type Msg =
     | DistractionMsg of DistractionElemList.Msg
     | SearchBoxMsg of SearchBox.Msg
     | DataUpdated of Data.State
+    | Close
 
 let init (data: Data.State) =
     {
@@ -40,11 +44,14 @@ let init (data: Data.State) =
         AddBleet = None
         DistractionElemList = DistractionElemList.init data
         SearchBox = SearchBox.init ()
+        NotifMsg = None
+        ModalMsg = Modal.DoNothing
+        PreviousUrl = []
     }
 
 let updateDistractionList (msg: DistractionElemList.Msg) (state: State) =
     let distraction, cmd = DistractionElemList.update msg state.DistractionElemList
-    { state with DistractionElemList = distraction }, Cmd.map DistractionMsg cmd
+    { state with DistractionElemList = distraction; NotifMsg = distraction.NotifMsg; ModalMsg = distraction.ModalMsg }, Cmd.map DistractionMsg cmd
 
 let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
     let createBleet, cmd = CreateBleet.update msg state.CreateBleet
@@ -66,7 +73,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | None -> state, Cmd.none
     | Display -> { state with Display = true }, Cmd.none
     | UrlChanged url ->
-        let state = { state with CurrentUrl = url }
+        let state = { state with PreviousUrl = state.CurrentUrl; CurrentUrl = url }
+        let mobileUrl = [ "mobile" ] @ url
 
         match url with
         | [ "create"; "bleet" ] ->
@@ -77,7 +85,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             | None -> state, Cmd.none
         | [ "modal"; "meditation" ] -> state, Cmd.none
         | [ "modal"; "ccp" ] -> state, Cmd.none
-        | [ "explore" ] -> state, Cmd.none
+        | [ "explore" ] -> updateDistractionList (DistractionElemList.UrlChanged mobileUrl) state
         | [ "search" ] -> state, Cmd.none
         | _ -> state, Cmd.none
     | CreateBleetMsg msg' -> updateCreateBleet msg' state
@@ -98,12 +106,41 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             { state with SearchBox = searchBox }, Cmd.none
         else
             state, Cmd.none
+    | Close -> 
+        Router.navigate("#/" + (state.PreviousUrl |> String.concat "/"))
+        state, Cmd.none
 
+let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
+    Html.div [
+        prop.classes [ 
+            tw.``flex``
+            tw.``flex-col``
+            tw.``w-full``
+        ]
+        prop.children [
+            Html.button [
+                prop.classes [
+                    tw.flex
+                    tw.``flex-row``
+                    tw.``text-gray-100``
+                    tw.``px-2.5``
+                    tw.``py-2.5``
+                    tw.``w-11``
+                    tw.``h-11``
+                ]
+                prop.children [
+                    Bleeter.icon "akar-icons:cross" "24"
+                ]
+                prop.onClick (fun _ -> dispatch (Close))
+            ]
+            elem
+        ]
+    ]
 
 let render (state: State) (dispatch: Msg -> unit) =
     let coreComponent =
         match state.CurrentUrl with
-        | [ "create"; "bleet" ] -> CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch)
+        | [ "create"; "bleet" ] -> closeBtnWrapper dispatch (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
         | [ "modal"; "meditation" ] -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
         | [ "modal"; "ccp" ] -> CCP.render state.CCP (CCPMsg >> dispatch)
         | [ "explore" ] -> DistractionElemList.renderMobile state.DistractionElemList (DistractionMsg >> dispatch)
