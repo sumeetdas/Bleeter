@@ -162,7 +162,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let nextHome, homeCmd = Home.update msg' state.Home
 
         { state with
-            Home = nextHome
+            Home = { nextHome with HeightUpdated = false }
             DeletedBleet = nextHome.DeletedBleet
             NotifMsg = nextHome.NotifMsg
             ModalMsg = nextHome.ModalMsg

@@ -39,7 +39,7 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Cmd<Ms
     let nextBleetListElem, bleetListElemCmd = BleetListElem.update msg state.BleetListElem
 
     { state with
-        BleetListElem = nextBleetListElem
+        BleetListElem = { nextBleetListElem with HeightUpdated = false }
         DeletedBleet = nextBleetListElem.DeletedBleet
         HeightUpdated = nextBleetListElem.HeightUpdated
         NotifMsg = nextBleetListElem.NotifMsg

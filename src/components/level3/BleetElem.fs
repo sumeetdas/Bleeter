@@ -128,6 +128,7 @@ let getLink (url: string) (name: string) =
         prop.classes [
             tw.``text-green-500``
             tw.``ml-1``
+            tw.``inline-flex``
         ]
         prop.target "_blank"
         prop.href url
@@ -141,6 +142,7 @@ let getTagLink (tag: string) =
         prop.classes [
             tw.``text-green-500``
             tw.``ml-1``
+            tw.``inline-flex``
         ]
         prop.href ("#/tags/" + tagName)
         prop.text tag
@@ -201,29 +203,14 @@ let getBleetContent (content: string) : ReactElement =
                     tw.``w-full``
                 ]
                 prop.children [
-                    Html.p [
-                        prop.classes [
-                            tw.flex
-                            tw.``flex-col``
-                            tw.``flex-shrink``
-                        ]
-                        prop.children content
-                    ]
+                    Html.p content
                     // Html.div [
                     //     prop.classes [ tw.flex; tw.``flex-row`` ]
                     //     prop.children (ytEmbed url)
                     // ]
                     ]
             ]
-        | None ->
-            Html.p [
-                prop.classes [
-                    tw.flex
-                    tw.``flex-col``
-                    tw.``flex-shrink``
-                ]
-                prop.children content
-            ])
+        | None -> Html.p content)
 
 let bleetProfilePic (bleet: Bleet) =
     Html.div [

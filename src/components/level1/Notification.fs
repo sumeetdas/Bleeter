@@ -46,6 +46,7 @@ let msgElem (msg: string) =
             tw.``px-4``
             tw.``bleeter-pointer``
             tw.``shadow-2xl``
+            tw.``py-2``
         ]
         prop.text msg
     ]
@@ -58,6 +59,9 @@ let render (state: State) (dispatch: Msg -> unit) =
                 tw.``fixed``
                 tw.``z-50``
                 tw.``bottom-4``
+                tw.``sm:bottom-8``
+                tw.``md:bottom-12``
+                tw.``lg:bottom-16``
                 tw.``w-full``
                 tw.``h-16``
                 tw.``sm:h-8``
