@@ -25,7 +25,7 @@ let update (msg: Msg) (state: State) : State =
         else
             state
 
-let nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
+let private nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
     let isSelected = currentUrl = (nav.Url.Replace("/", "").Replace("#", ""))
 
     Html.a [
@@ -68,7 +68,7 @@ let nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
         ]
     ]
 
-let closeButton (dispatch: Msg -> unit) = 
+let private closeButton (dispatch: Msg -> unit) = 
     Html.button [
         prop.classes [
             tw.flex
@@ -87,7 +87,7 @@ let closeButton (dispatch: Msg -> unit) =
         prop.onClick (fun _ -> dispatch (Close))
     ]
 
-let navElems (urlString: string) (dispatch: Msg -> unit) = 
+let private navElems (urlString: string) (dispatch: Msg -> unit) = 
     let elem = 
         Menu.navList 
         |> List.map (nav urlString dispatch)

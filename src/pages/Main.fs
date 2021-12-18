@@ -21,6 +21,7 @@ type State =
         ModalMsg: Modal.Msg
         MobilePage: MobilePage.State
         AddBleet: Bleet option
+        HeightUpdated: bool
     }
 
 type Msg =
@@ -48,6 +49,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         ModalMsg = Modal.DoNothing
         MobilePage = MobilePage.init data
         AddBleet = None
+        HeightUpdated = false
     },
     Cmd.none
 
@@ -89,6 +91,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 ModalMsg = Modal.DoNothing
                 NotifMsg = None
             }
+        
+        let state = 
+            match url with 
+            | "mobile" :: _ -> state
+            | _ -> 
+                let nextMobilePage, _ = MobilePage.update (MobilePage.PreviousUrlUpdate url) state.MobilePage
+                { state with MobilePage = nextMobilePage }
 
         match url with
         | [ "bleeter-info" ] -> { state with CurrentUrl = [ "bleeter-info" ] }, Cmd.none
@@ -157,6 +166,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             DeletedBleet = nextHome.DeletedBleet
             NotifMsg = nextHome.NotifMsg
             ModalMsg = nextHome.ModalMsg
+            HeightUpdated = nextHome.HeightUpdated
         },
         Cmd.map HomeMsg homeCmd
     | SearchBleetsMsg msg' ->

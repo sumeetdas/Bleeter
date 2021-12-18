@@ -192,6 +192,8 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let nextMain, mainCmd = Main.update msg' state.Main
         let nextState = { state with Main = nextMain }
 
+        let resizeCmd = if nextMain.HeightUpdated then Cmd.ofSub resizeCmd else Cmd.none
+
         let nextState, deleteBleetCmd =
             match nextMain.DeletedBleet with
             | Some bleet ->
@@ -231,6 +233,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         nextState,
         Cmd.batch [
             Cmd.map MainMsg mainCmd
+            resizeCmd
             deleteBleetCmd
             addBleetCmd
             notifCmd
@@ -307,6 +310,7 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
                 tw.``w-full``
                 tw.``text-gray-100``
                 tw.``bleeter-pointer``
+                tw.``pl-2``
             ]
             prop.onClick (fun _ -> MobileMenu.Display |> MobileMenuMsg |> dispatch)
             prop.children [
@@ -316,10 +320,10 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
         Html.div [
             prop.classes [
                 tw.``fixed`` 
-                tw.``bottom-0`` 
+                tw.``top-0`` 
                 tw.``right-0``
-                tw.``mr-8``
-                tw.``mb-24``
+                tw.``mr-2``
+                tw.``mt-8``
                 (if Router.currentUrl() = [ "create"; "bleet" ] then tw.``hidden`` else tw.``block``)
             ]
             prop.children [

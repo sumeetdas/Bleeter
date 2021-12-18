@@ -32,6 +32,7 @@ type Msg =
     | SearchBoxMsg of SearchBox.Msg
     | DataUpdated of Data.State
     | Close
+    | PreviousUrlUpdate of string list
 
 let init (data: Data.State) =
     {
@@ -64,6 +65,7 @@ let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | PreviousUrlUpdate url -> { state with PreviousUrl = url }, Cmd.none
     | DataUpdated data ->
         let state = { state with Data = data }
         let state, _ = updateDistractionList (DistractionElemList.DataUpdate data) state
@@ -73,7 +75,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | None -> state, Cmd.none
     | Display -> { state with Display = true }, Cmd.none
     | UrlChanged url ->
-        let state = { state with PreviousUrl = state.CurrentUrl; CurrentUrl = url }
+        let state = { state with CurrentUrl = url }
         let mobileUrl = [ "mobile" ] @ url
 
         match url with
@@ -122,7 +124,6 @@ let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
                 prop.classes [
                     tw.flex
                     tw.``flex-row``
-                    tw.``text-gray-100``
                     tw.``px-2.5``
                     tw.``py-2.5``
                     tw.``w-11``
