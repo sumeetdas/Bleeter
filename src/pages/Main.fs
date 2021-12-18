@@ -86,16 +86,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | UrlChanged url ->
         // let height = document.documentElement.clientHeight |> int
 
+        let state = { state with ModalMsg = Modal.DoNothing; NotifMsg = None }
+
         let state =
-            { state with
-                ModalMsg = Modal.DoNothing
-                NotifMsg = None
-            }
-        
-        let state = 
-            match url with 
+            match url with
             | "mobile" :: _ -> state
-            | _ -> 
+            | _ ->
                 let nextMobilePage, _ = MobilePage.update (MobilePage.PreviousUrlUpdate url) state.MobilePage
                 { state with MobilePage = nextMobilePage }
 
@@ -207,17 +203,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         },
         Cmd.map MobilePageMsg cmd
 
-let notFoundElem =
-    Html.div [
-        prop.classes [
-            tw.flex
-            tw.``flex-col``
-            tw.``flex-grow-1``
-            tw.``text-3xl``
-        ]
-        prop.text "Page not found"
-    ]
-
 let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
@@ -228,7 +213,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``w-full``
         ]
         prop.style (
-            match state.Height with 
+            match state.Height with
             | Some height -> [ style.height height ]
             | None -> []
         )
@@ -240,7 +225,7 @@ let render (state: State) (dispatch: Msg -> unit) =
             | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
             | [ "tags"; (_: string) ] ->
                 DistractionBleets.render state.DistractionBleets (DistractionBleetsMsg >> dispatch)
-            | [ "not-found" ] -> notFoundElem
+            | [ "not-found" ] -> NotFound.render
             | [ (_: string); "bleets"; Route.Int (_: int) ] ->
                 SingleBleetPage.render state.SingleBleetPage (SingleBleetPageMsg >> dispatch)
             | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)

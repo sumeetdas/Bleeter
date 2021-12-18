@@ -47,12 +47,12 @@ let init () =
         CurrentUrl = currentUrl
         Main = main
         DistractionElemList = DistractionElemList.init data
-        SearchBox = SearchBox.init()
+        SearchBox = SearchBox.init ()
         AppHeight = None
-        Notification = Notification.init()
+        Notification = Notification.init ()
         Modal = Modal.init data
         ScreenSize = Mobile
-        MobileMenu = MobileMenu.init()
+        MobileMenu = MobileMenu.init ()
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -82,13 +82,14 @@ let getWindowHeight () =
         windowHeight
 
 let resizeCmd (dispatch: Msg -> unit) =
-    dispatch (ScreenSizeUpdated (None, None))
+    dispatch (ScreenSizeUpdated(None, None))
+
     let delayedHeightCheck =
         async {
             do! Async.Sleep 200
             let finalHeight = getWindowHeight ()
             let width = Bleeter.getWindowWidth ()
-            dispatch (ScreenSizeUpdated (Some finalHeight, Some (width |> ScreenSize.getSize)))
+            dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize)))
         }
 
     [ delayedHeightCheck; delayedHeightCheck ]
@@ -96,7 +97,7 @@ let resizeCmd (dispatch: Msg -> unit) =
     |> Async.Ignore
     |> Async.StartImmediate
 
-let resetHeight state = 
+let resetHeight state =
     let main, _ = Main.update (Main.AppHeight None) state.Main
     { state with Main = main; AppHeight = None }
 
@@ -112,8 +113,13 @@ let changeUrl (url: string list, state: State) =
                 state.CurrentUrl
 
         if Bleeter.isMobile () then
+            let state = resetHeight state
             let main, mainCmd = Main.update (Main.UrlChanged([ "mobile" ] @ url)) state.Main
-            { state with Main = main; CurrentUrl = nextUrl }, Cmd.map MainMsg mainCmd
+            { state with Main = main; CurrentUrl = nextUrl }, 
+            Cmd.batch [
+                Cmd.map MainMsg mainCmd
+                Cmd.ofSub resizeCmd
+            ]
         else
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
@@ -167,12 +173,12 @@ let updateData (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | ScreenSizeUpdated (heightOpt, screenSizeOpt) -> 
-        let state = 
+    | ScreenSizeUpdated (heightOpt, screenSizeOpt) ->
+        let state =
             let nextMain, _ = Main.update (Main.Msg.AppHeight heightOpt) state.Main
             { state with Main = nextMain; AppHeight = heightOpt }
-    
-        match screenSizeOpt with 
+
+        match screenSizeOpt with
         | Some screenSize -> { state with ScreenSize = screenSize }, Cmd.none
         | None -> state, Cmd.none
     | DataMsg msg' ->
@@ -192,7 +198,11 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let nextMain, mainCmd = Main.update msg' state.Main
         let nextState = { state with Main = nextMain }
 
-        let resizeCmd = if nextMain.HeightUpdated then Cmd.ofSub resizeCmd else Cmd.none
+        let resizeCmd =
+            if nextMain.HeightUpdated then
+                Cmd.ofSub resizeCmd
+            else
+                Cmd.none
 
         let nextState, deleteBleetCmd =
             match nextMain.DeletedBleet with
@@ -294,17 +304,17 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                 updateDataCmd
                 urlChangeCmd
              ])
-    | MobileMenuMsg msg' -> 
+    | MobileMenuMsg msg' ->
         let menu = MobileMenu.update msg' state.MobileMenu
         { state with MobileMenu = menu }, Cmd.none
 
-let mobileElem (state: State) (dispatch: Msg -> unit) = 
+let mobileElem (state: State) (dispatch: Msg -> unit) =
     Html.div [
         Html.div [
             prop.classes [
                 tw.``fixed``
                 tw.``bg-bleeter-blue``
-                tw.``flex``
+                tw.flex
                 tw.``flex-row``
                 tw.``flex-grow-1``
                 tw.``w-full``
@@ -319,23 +329,24 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
         ]
         Html.div [
             prop.classes [
-                tw.``fixed`` 
-                tw.``top-0`` 
+                tw.``fixed``
+                tw.``top-0``
                 tw.``right-0``
                 tw.``mr-2``
-                tw.``mt-8``
-                (if Router.currentUrl() = [ "create"; "bleet" ] then tw.``hidden`` else tw.``block``)
+                tw.``mt-4``
+                (if Router.currentUrl () = [ "create"; "bleet" ] then
+                     tw.hidden
+                 else
+                     tw.block)
             ]
-            prop.children [
-                Menu.bleetButton
-            ]
+            prop.children [ Menu.bleetButton ]
         ]
         MobileMenu.render state.MobileMenu (MobileMenuMsg >> dispatch)
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
-    let heightStyle = 
-        match state.AppHeight with 
+    let heightStyle =
+        match state.AppHeight with
         | Some height -> [ style.height height ]
         | None -> []
 
@@ -349,15 +360,40 @@ let render (state: State) (dispatch: Msg -> Unit) =
             ]
             prop.style heightStyle
             prop.children [
-                (
-                    if state.ScreenSize |> ScreenSize.isMobile
-                    then mobileElem state dispatch
-                    else Html.none
-                )
+                (if state.ScreenSize |> ScreenSize.isMobile then
+                     mobileElem state dispatch
+                 else
+                     Html.none)
 
                 Menu.menuHtml state.AppHeight state.CurrentUrl
 
-                (Main.render state.Main (MainMsg >> dispatch))
+                (if state.ScreenSize |> ScreenSize.isMobile then
+                    Html.div [
+                        prop.classes [
+                            tw.``flex``
+                            tw.``flex-col``
+                            tw.``w-full``
+                        ]
+                        prop.style (
+                            match state.AppHeight with
+                            | Some height -> [ style.height height ]
+                            | None -> []
+                        )
+                        prop.children [
+                            Html.div [
+                                prop.classes [
+                                    tw.``flex``
+                                    tw.``flex-row``
+                                    tw.``w-full``
+                                    tw.``h-8``
+                                    tw.``bg-bleeter-blue``
+                                ]
+                            ]
+                            Main.render state.Main (MainMsg >> dispatch)
+                        ]
+                    ]
+                 else
+                     Main.render state.Main (MainMsg >> dispatch))
 
                 Html.div [
                     prop.classes [
@@ -384,29 +420,27 @@ let render (state: State) (dispatch: Msg -> Unit) =
     ]
 
 let appOnLoadHeight _ =
-    let sub dispatch = window.addEventListener ("load", fun _ -> dispatch |> resizeCmd)
+    let sub dispatch = window.addEventListener ("load", (fun _ -> dispatch |> resizeCmd))
 
     Cmd.ofSub sub
 
 let appOnResizeHeight _ =
-    let sub dispatch = window.addEventListener ("resize", fun _ -> dispatch |> resizeCmd)
+    let sub dispatch = window.addEventListener ("resize", (fun _ -> dispatch |> resizeCmd))
 
     Cmd.ofSub sub
 
 let appOnOrientationChange _ =
     // listening to 'change' event in screen.orientation does not work
-    // in Firefox. Commenting it for now 
+    // in Firefox. Commenting it for now
     // let sub dispatch = window.screen.orientation.addEventListener ("change", (
-    //     fun _ -> 
+    //     fun _ ->
     //         printf "appOnOrientationChange"
     //         sizeUpdate dispatch))
 
-    let sub dispatch = window.addEventListener ("orientationchange", fun _ -> dispatch |> resizeCmd)
+    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> dispatch |> resizeCmd))
 
-    Cmd.batch [
-        Cmd.ofSub sub
-    ]
-    
+    Cmd.batch [ Cmd.ofSub sub ]
+
 // Subscriptions for DOM events doesn't work.
 // GitHub Issue: https://github.com/elmish/elmish/issues/229
 // let followClick initial =

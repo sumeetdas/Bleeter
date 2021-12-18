@@ -8,15 +8,15 @@ open Fable.Core.JsInterop
 
 type State = { Display: bool; CurrentUrl: string list }
 
-type Msg = 
+type Msg =
     | Display
     | Close
     | OutsideModalClickClose of string
 
 let init () = { Display = false; CurrentUrl = [] }
 
-let update (msg: Msg) (state: State) : State = 
-    match msg with 
+let update (msg: Msg) (state: State) : State =
+    match msg with
     | Display -> { state with Display = true }
     | Close -> { state with Display = false }
     | OutsideModalClickClose id ->
@@ -55,20 +55,16 @@ let private nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
         prop.onClick (fun _ -> dispatch (Close))
         prop.children [
             Html.div [
-                prop.classes [
-                    tw.``mr-4``
-                ]
+                prop.classes [ tw.``mr-4`` ]
                 prop.children [
                     Bleeter.icon nav.IconName "32"
                 ]
             ]
-            Html.div [
-                prop.text nav.Text
-            ]
+            Html.div [ prop.text nav.Text ]
         ]
     ]
 
-let private closeButton (dispatch: Msg -> unit) = 
+let private closeButton (dispatch: Msg -> unit) =
     Html.button [
         prop.classes [
             tw.flex
@@ -87,11 +83,9 @@ let private closeButton (dispatch: Msg -> unit) =
         prop.onClick (fun _ -> dispatch (Close))
     ]
 
-let private navElems (urlString: string) (dispatch: Msg -> unit) = 
-    let elem = 
-        Menu.navList 
-        |> List.map (nav urlString dispatch)
-    
+let private navElems (urlString: string) (dispatch: Msg -> unit) =
+    let elem = Menu.navList |> List.map (nav urlString dispatch)
+
     Html.div [
         prop.classes [
 
@@ -99,7 +93,7 @@ let private navElems (urlString: string) (dispatch: Msg -> unit) =
         prop.children elem
     ]
 
-let render (state: State) (dispatch: Msg -> unit) = 
+let render (state: State) (dispatch: Msg -> unit) =
     let urlString =
         state.CurrentUrl
         |> Seq.map (fun elem -> elem.ToLower())
@@ -108,12 +102,12 @@ let render (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.id "MobileMenu"
         prop.classes [
-            tw.``fixed`` 
-            tw.``inset-0`` 
-            tw.``bg-gray-800`` 
+            tw.``fixed``
+            tw.``inset-0``
+            tw.``bg-gray-800``
             tw.``bg-opacity-75``
-            tw.``z-50`` 
-            (if state.Display then tw.``block`` else tw.``hidden``)
+            tw.``z-50``
+            (if state.Display then tw.block else tw.hidden)
         ]
         prop.onClick (fun event -> dispatch (OutsideModalClickClose event.target?id))
         prop.children [
@@ -121,25 +115,30 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.id "MobileMenuMain"
                 prop.classes [
                     tw.``fixed``
-                    tw.``top-0`` 
-                    tw.``left-0`` 
-                    tw.``bottom-0`` 
-                    tw.``flex`` 
-                    tw.``flex-col`` 
-                    tw.``w-3/6`` 
-                    tw.``max-w-sm`` 
-                    tw.``py-6`` 
-                    tw.``px-6`` 
-                    tw.``bg-bleeter-blue`` 
-                    tw.``border-r`` 
+                    tw.``top-0``
+                    tw.``left-0``
+                    tw.``bottom-0``
+                    tw.flex
+                    tw.``flex-col``
+                    tw.``w-3/6``
+                    tw.``max-w-sm``
+                    tw.``py-6``
+                    tw.``px-6``
+                    tw.``bg-bleeter-blue``
+                    tw.``border-r``
                     tw.``overflow-y-auto``
                     tw.``duration-300``
                 ]
-                prop.style (if state.Display then [ style.width 250 ] else [ style.width 0 ])
+                prop.style (
+                    if state.Display then
+                        [ style.width 250 ]
+                    else
+                        [ style.width 0 ]
+                )
                 prop.children [
                     Html.div [
                         prop.classes [
-                            tw.``flex``
+                            tw.flex
                             tw.``flex-row``
                             tw.``h-8``
                             tw.``mb-4``
@@ -147,14 +146,14 @@ let render (state: State) (dispatch: Msg -> unit) =
                         prop.children [
                             Html.div [
                                 prop.classes [
-                                    tw.``flex``
+                                    tw.flex
                                     tw.``flex-row``
                                 ]
                                 prop.children []
                             ]
                             Html.div [
                                 prop.classes [
-                                    tw.``flex``
+                                    tw.flex
                                     tw.``flex-row``
                                     tw.``float-right``
                                 ]
@@ -166,5 +165,5 @@ let render (state: State) (dispatch: Msg -> unit) =
                 ]
             ]
         ]
-        
-    ]
+
+        ]

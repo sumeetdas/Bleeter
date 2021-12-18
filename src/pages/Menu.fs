@@ -196,7 +196,7 @@ let menuHtml (height: int option) (currentUrl: string list) =
             tw.``sm:flex``
         ]
         prop.style (
-            match height with 
+            match height with
             | Some height -> [ style.height height ]
             | None -> []
         )

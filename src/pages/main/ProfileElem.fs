@@ -3,6 +3,7 @@ module ProfileElem
 
 open Elmish
 open Feliz
+open Feliz.Router
 open Tailwind
 
 type Msg =
@@ -85,15 +86,17 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 
+let findProfile (handle: string) (data: Data.State) =
+    match data.Profiles with
+    | Resolved (Ok profiles) ->
+        profiles
+        |> List.tryFind (fun profile -> profile.Handle = handle)
+    | _ -> None
+
 let updateData (state: State) : State * Msg Cmd =
     let state = { state with ModalMsg = Modal.DoNothing }
     // update profile
-    let profileOpt =
-        match state.Data.Profiles with
-        | Resolved (Ok profiles) ->
-            profiles
-            |> List.tryFind (fun profile -> profile.Handle = state.Handle)
-        | _ -> None
+    let profileOpt = findProfile state.Handle state.Data
 
     // update bleets
     let bleets =
@@ -137,15 +140,28 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle ->
-        let nextReportCount = if handle <> state.Handle then None else state.ReportCount
-        let nextBleetList, _ = BleetListElem.update (BleetListElem.UrlChanged [ handle ]) state.BleetListElem
+        let profileOpt = findProfile handle state.Data
 
-        updateData
-            { state with
-                Handle = handle
-                ReportCount = nextReportCount
-                BleetListElem = nextBleetList
-            }
+        match profileOpt with
+        | None ->
+            Router.navigate ("not-found")
+            state, Cmd.none
+        | Some profile ->
+            let nextReportCount = if handle <> state.Handle then None else state.ReportCount
+
+            let nextBleetList, _ =
+                BleetListElem.update
+                    (BleetListElem.UrlChanged [
+                        profile.Handle
+                     ])
+                    state.BleetListElem
+
+            updateData
+                { state with
+                    Handle = profile.Handle
+                    ReportCount = nextReportCount
+                    BleetListElem = nextBleetList
+                }
     | Follow ->
         match state.Profile with
         | Some profile ->

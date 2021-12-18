@@ -52,7 +52,13 @@ let init (data: Data.State) =
 
 let updateDistractionList (msg: DistractionElemList.Msg) (state: State) =
     let distraction, cmd = DistractionElemList.update msg state.DistractionElemList
-    { state with DistractionElemList = distraction; NotifMsg = distraction.NotifMsg; ModalMsg = distraction.ModalMsg }, Cmd.map DistractionMsg cmd
+
+    { state with
+        DistractionElemList = distraction
+        NotifMsg = distraction.NotifMsg
+        ModalMsg = distraction.ModalMsg
+    },
+    Cmd.map DistractionMsg cmd
 
 let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
     let createBleet, cmd = CreateBleet.update msg state.CreateBleet
@@ -108,14 +114,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             { state with SearchBox = searchBox }, Cmd.none
         else
             state, Cmd.none
-    | Close -> 
-        Router.navigate("#/" + (state.PreviousUrl |> String.concat "/"))
+    | Close ->
+        Router.navigate ("#/" + (state.PreviousUrl |> String.concat "/"))
         state, Cmd.none
 
 let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
     Html.div [
-        prop.classes [ 
-            tw.``flex``
+        prop.classes [
+            tw.flex
             tw.``flex-col``
             tw.``w-full``
         ]
@@ -141,7 +147,8 @@ let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
 let render (state: State) (dispatch: Msg -> unit) =
     let coreComponent =
         match state.CurrentUrl with
-        | [ "create"; "bleet" ] -> closeBtnWrapper dispatch (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
+        | [ "create"; "bleet" ] ->
+            closeBtnWrapper dispatch (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
         | [ "modal"; "meditation" ] -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
         | [ "modal"; "ccp" ] -> CCP.render state.CCP (CCPMsg >> dispatch)
         | [ "explore" ] -> DistractionElemList.renderMobile state.DistractionElemList (DistractionMsg >> dispatch)

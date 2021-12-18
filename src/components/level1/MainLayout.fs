@@ -3,7 +3,6 @@ module MainLayout
 
 open Feliz
 open Tailwind
-open System
 
 let heading (name: string) =
     Html.div [
@@ -28,26 +27,22 @@ let heading (name: string) =
         ]
     ]
 
-let banner (url: string) (height: int) =
+let banner (url: string option) (height: int) =
     Html.img [
         prop.classes [
             tw.``w-full``
-            tw.``bg-cover``
+            tw.``h-auto``
+            (if url.IsSome then tw.``bg-cover`` else tw.``bg-transparent``)
         ]
-        prop.style [
-            style.minHeight height
-            style.maxHeight height
-        ]
-        prop.src url
-    ]
-
-let transparentBackground (height: int) =
-    Html.div [
-        prop.classes [
-            tw.``w-full``
-            tw.``bg-transparent``
-        ]
-        prop.style [ style.minHeight height ]
+        // prop.style [
+        //     style.minHeight height
+        //     style.maxHeight height
+        // ]
+        prop.src (
+            match url with 
+            | Some url -> url 
+            | None -> ""
+        )
     ]
 
 let commonLayout (children: ReactElement list) =
@@ -84,10 +79,8 @@ let elem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
         ]
 
     let children =
-        [
-            (match imgUrlOpt with
-             | Some url -> banner url 160
-             | None -> transparentBackground 160)
+        [   
+            banner imgUrlOpt 160
             coreComponentsElem
         ]
 
@@ -105,12 +98,10 @@ let mobileElem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             ]
             prop.children coreComponents
         ]
-        
+
     let children =
         [
-            (match imgUrlOpt with
-             | Some url -> banner url 160
-             | None -> transparentBackground 160)
+            banner imgUrlOpt 160
             coreComponentsElem
         ]
 
