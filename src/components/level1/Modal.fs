@@ -177,8 +177,13 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``px-6``
                     tw.``w-2/4``
                     tw.``h-60``
+                    tw.``lg:h-96``
                     tw.flex
                     tw.``flex-col``
+                    tw.``md:max-w-md`` 
+                    tw.``lg:max-w-lg`` 
+                    tw.``xl:max-w-xl`` 
+                    tw.``2xl:max-w-2xl``
                 ]
                 prop.children [
                     Html.button [

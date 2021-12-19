@@ -27,8 +27,7 @@ let isMobile () =
     let width = getWindowWidth ()
     width <= 640
 
-// https://youtu.be/HrcbCW4y9Dw?t=14
-let numberToWoman (number: int) : string =
+let condensedCount (number: int) : string =
     let getString (exponent: int) (prefix: char) (number: int) =
         let num = (number * 10) / exponent
 
@@ -49,7 +48,7 @@ let ytEmbed (src: string) =
                 prop.custom ("data-src", src)
                 prop.src src
                 prop.custom ("frameBorder", "0")
-                prop.custom ("allow", "accelerometer; autoplay")
+                // prop.custom ("allow", "accelerometer; autoplay")
                 prop.custom ("allowFullScreen", true)
             ]
         ]

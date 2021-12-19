@@ -315,21 +315,21 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 prop.href (sprintf "#/%s/bleets/%d" bleet.Handle bleet.Id)
                                 prop.children [
                                     Bleeter.icon "ei:comment" "24"
-                                    Html.text (bleet.Replies |> Bleeter.numberToWoman)
+                                    Html.text (bleet.Replies |> Bleeter.condensedCount)
                                 ]
                             ]
                             Html.div [
                                 prop.classes [ tw.flex; tw.``flex-1`` ]
                                 prop.children [
                                     Bleeter.icon "ei:retweet" "24"
-                                    Html.text (bleet.Rebleets |> Bleeter.numberToWoman)
+                                    Html.text (bleet.Rebleets |> Bleeter.condensedCount)
                                 ]
                             ]
                             Html.div [
                                 prop.classes [ tw.flex; tw.``flex-1`` ]
                                 prop.children [
                                     Bleeter.icon "ei:heart" "24"
-                                    Html.text (bleet.Likes |> Bleeter.numberToWoman)
+                                    Html.text (bleet.Likes |> Bleeter.condensedCount)
                                 ]
                             ]
                         ]

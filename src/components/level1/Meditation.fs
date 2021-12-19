@@ -24,6 +24,6 @@ let render (_: State) (dispatch: Msg -> unit) =
             tw.``h-auto``
         ]
         prop.children [
-            Bleeter.ytEmbed "https://www.youtube.com/watch?v=ZToicYcHIOU"
+            Bleeter.ytEmbed "https://www.youtube.com/embed/ZToicYcHIOU"
         ]
     ]

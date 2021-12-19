@@ -125,6 +125,7 @@ let changeUrl (url: string list, state: State) =
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
+        printf "changeUrl %A" url
         let state = resetHeight state
         let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 
@@ -238,8 +239,19 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
 
         let nextState, modalCmd =
-            let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
-            { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
+            if nextState.ScreenSize |> ScreenSize.isMobile 
+            then 
+                match nextMain.ModalMsg with 
+                | Modal.ShowCCP _ -> 
+                    let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "ccp"]) nextState.Main
+                    { nextState with Main = main }, Cmd.map MainMsg mainCmd
+                | Modal.ShowMeditation _ -> 
+                    let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "meditation"]) nextState.Main
+                    { nextState with Main = main }, Cmd.map MainMsg mainCmd
+                | _ -> nextState, Cmd.none
+            else 
+                let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
+                { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
         nextState,
         Cmd.batch [

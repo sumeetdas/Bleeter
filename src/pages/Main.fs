@@ -124,7 +124,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 CurrentUrl = url
             },
             Cmd.map DistractionBleetsMsg distractionBleetsCmd
-        | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
+        | [ "not-found" ] -> 
+            printf "not found %A" url
+            { state with CurrentUrl = url }, Cmd.none
         | [ (handle: string); "bleets"; Route.Int (bleetId: int) ] ->
             let singleBleet, singleBleetCmd =
                 SingleBleetPage.update (SingleBleetPage.Msg.LoadBleet(handle, bleetId)) state.SingleBleetPage
@@ -139,6 +141,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
             { state with ProfileElem = profileElem; CurrentUrl = url }, Cmd.map ProfileElemMsg cmd
         | _ ->
+            printf "not found %A" url
             Router.navigate ("not-found")
             state, Cmd.none
     | AppHeight height -> { state with Height = height }, Cmd.none

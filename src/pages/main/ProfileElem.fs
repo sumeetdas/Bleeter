@@ -360,7 +360,7 @@ let private profileElem
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]
-                            prop.text (profile.Following |> Bleeter.numberToWoman)
+                            prop.text (profile.Following |> Bleeter.condensedCount)
                         ]
                         Html.span [
                             prop.classes [ tw.``ml-1`` ]
@@ -376,7 +376,7 @@ let private profileElem
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]
-                            prop.text (profile.Following |> Bleeter.numberToWoman)
+                            prop.text (profile.Following |> Bleeter.condensedCount)
                         ]
                         Html.span [
                             prop.classes [ tw.``ml-1`` ]
