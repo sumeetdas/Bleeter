@@ -125,7 +125,6 @@ let changeUrl (url: string list, state: State) =
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
-        printf "changeUrl %A" url
         let state = resetHeight state
         let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 

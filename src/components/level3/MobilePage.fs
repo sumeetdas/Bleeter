@@ -9,7 +9,6 @@ open Tailwind
 type State =
     {
         Data: Data.State
-        Display: bool
         CreateBleet: CreateBleet.State
         Meditation: Meditation.State
         CCP: CCP.State
@@ -23,7 +22,6 @@ type State =
     }
 
 type Msg =
-    | Display
     | CreateBleetMsg of CreateBleet.Msg
     | MeditationMsg of Meditation.Msg
     | CCPMsg of CCP.Msg
@@ -37,7 +35,6 @@ type Msg =
 let init (data: Data.State) =
     {
         Data = data
-        Display = false
         CreateBleet = CreateBleet.init ()
         Meditation = Meditation.init ()
         CCP = CCP.init ()
@@ -60,16 +57,37 @@ let updateDistractionList (msg: DistractionElemList.Msg) (state: State) =
     },
     Cmd.map DistractionMsg cmd
 
+let close state = 
+    Router.navigate ("#/" + (state.PreviousUrl |> String.concat "/"))
+    state, Cmd.none
+
 let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
     let createBleet, cmd = CreateBleet.update msg state.CreateBleet
 
-    { state with
-        CreateBleet = createBleet
-        AddBleet = createBleet.Bleet
-    },
-    Cmd.map CreateBleetMsg cmd
+    let state = 
+        { state with
+            CreateBleet = createBleet
+            AddBleet = createBleet.Bleet
+        }
+    
+    let state = 
+        if createBleet.Bleet.IsSome 
+        then 
+            let state, _ = close state
+            state
+        else state
+        
+    state, Cmd.map CreateBleetMsg cmd
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    // clear up transient state 
+    let state =
+        { state with
+            AddBleet = None
+            NotifMsg = None
+            ModalMsg = Modal.DoNothing
+        }
+
     match msg with
     | PreviousUrlUpdate url -> { state with PreviousUrl = url }, Cmd.none
     | DataUpdated data ->
@@ -79,7 +97,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         match state.Data.MyProfile with
         | Some profile -> updateCreateBleet (CreateBleet.DataUpdated profile) state
         | None -> state, Cmd.none
-    | Display -> { state with Display = true }, Cmd.none
     | UrlChanged url ->
         let state = { state with CurrentUrl = url }
         let mobileUrl = [ "mobile" ] @ url
@@ -114,9 +131,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             { state with SearchBox = searchBox }, Cmd.none
         else
             state, Cmd.none
-    | Close ->
-        Router.navigate ("#/" + (state.PreviousUrl |> String.concat "/"))
-        state, Cmd.none
+    | Close -> close state
 
 let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
     Html.div [
@@ -149,8 +164,10 @@ let render (state: State) (dispatch: Msg -> unit) =
         match state.CurrentUrl with
         | [ "create"; "bleet" ] ->
             closeBtnWrapper dispatch (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
-        | [ "modal"; "meditation" ] -> Meditation.render state.Meditation (MeditationMsg >> dispatch)
-        | [ "modal"; "ccp" ] -> CCP.render state.CCP (CCPMsg >> dispatch)
+        | [ "modal"; "meditation" ] -> 
+            closeBtnWrapper dispatch (Meditation.render state.Meditation (MeditationMsg >> dispatch))
+        | [ "modal"; "ccp" ] -> 
+            closeBtnWrapper dispatch (CCP.render state.CCP (CCPMsg >> dispatch))
         | [ "explore" ] -> DistractionElemList.renderMobile state.DistractionElemList (DistractionMsg >> dispatch)
         | [ "search" ] -> SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
         | _ -> Html.none

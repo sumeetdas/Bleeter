@@ -33,6 +33,9 @@ let init () =
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    // clear up transient state 
+    let state = { state with Bleet = None }
+
     match msg with
     | DataUpdated profile -> { state with Profile = profile }, Cmd.none
     | OutsideModalClickClose -> { state with Display = false }, Cmd.none

@@ -86,17 +86,31 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 
-let findProfile (handle: string) (data: Data.State) =
+let getProfile (handle: string) (data: Data.State) : Result<Profile, string> =
     match data.Profiles with
     | Resolved (Ok profiles) ->
-        profiles
-        |> List.tryFind (fun profile -> profile.Handle = handle)
-    | _ -> None
+        let profileOpt = 
+            profiles
+            |> List.tryFind (fun profile -> profile.Handle = handle)
+        
+        match profileOpt with 
+        | Some profile -> Ok profile
+        | None -> 
+            Router.navigate ("not-found")
+            Error "profile not found"    
+    | Resolved (Error _) -> 
+        Router.navigate ("not-found")
+        Error "profile not found"
+    | _ -> Error "data not resolved"
 
 let updateData (state: State) : State * Msg Cmd =
     let state = { state with ModalMsg = Modal.DoNothing }
     // update profile
-    let profileOpt = findProfile state.Handle state.Data
+    let profileRes = getProfile state.Handle state.Data
+    let profileOpt = 
+        match profileRes with 
+        | Ok profile -> Some profile
+        | _ -> None
 
     // update bleets
     let bleets =
@@ -108,7 +122,7 @@ let updateData (state: State) : State * Msg Cmd =
 
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
 
-let report (state: State) (profile: Profile) (first: string, second: string, modalMsg: Modal.Msg) =
+let report (state: State) (first: string, second: string, modalMsg: Modal.Msg) =
     let nextState =
         match state.ReportCount with
         | None ->
@@ -140,12 +154,14 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle ->
-        let profileOpt = findProfile handle state.Data
+        let profileRes = getProfile handle state.Data
+        let profileOpt = 
+            match profileRes with 
+            | Ok profile -> Some profile
+            | _ -> None
 
         match profileOpt with
-        | None ->
-            Router.navigate ("not-found")
-            state, Cmd.none
+        | None -> { state with Handle = handle }, Cmd.none
         | Some profile ->
             let nextReportCount = if handle <> state.Handle then None else state.ReportCount
 
@@ -183,12 +199,12 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 let first = "Operation not permitted!"
                 let second = "OPERATION NOT PERMITTED!!!"
                 let modalMsg = Modal.ShowCCP [ profile.Handle ]
-                report state profile (first, second, modalMsg)
+                report state (first, second, modalMsg)
             else
                 let first = sprintf "We've reported @%s's profile to Bleeter police." profile.Handle
                 let second = "We get it. You are pissed."
                 let modalMsg = Modal.ShowMeditation [ profile.Handle ]
-                report state profile (first, second, modalMsg)
+                report state (first, second, modalMsg)
         | None -> state, Cmd.none
     | BleetListElemMsg msg' -> updateBleetListElem msg' state
 
