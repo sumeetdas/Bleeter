@@ -32,15 +32,18 @@ let banner (url: string option) (height: int) =
         prop.classes [
             tw.``w-full``
             tw.``h-auto``
-            (if url.IsSome then tw.``bg-cover`` else tw.``bg-transparent``)
+            (if url.IsSome then
+                 tw.``bg-cover``
+             else
+                 tw.``bg-transparent``)
         ]
         // prop.style [
         //     style.minHeight height
         //     style.maxHeight height
         // ]
         prop.src (
-            match url with 
-            | Some url -> url 
+            match url with
+            | Some url -> url
             | None -> ""
         )
     ]
@@ -78,11 +81,7 @@ let elem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             prop.children coreComponents
         ]
 
-    let children =
-        [   
-            banner imgUrlOpt 160
-            coreComponentsElem
-        ]
+    let children = [ banner imgUrlOpt 160; coreComponentsElem ]
 
     commonLayout children
 
@@ -99,10 +98,6 @@ let mobileElem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             prop.children coreComponents
         ]
 
-    let children =
-        [
-            banner imgUrlOpt 160
-            coreComponentsElem
-        ]
+    let children = [ banner imgUrlOpt 160; coreComponentsElem ]
 
     commonLayout children

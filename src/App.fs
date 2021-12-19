@@ -51,7 +51,7 @@ let init () =
         AppHeight = None
         Notification = Notification.init ()
         Modal = Modal.init data
-        ScreenSize = Mobile
+        ScreenSize = Small
         MobileMenu = MobileMenu.init ()
     },
     Cmd.batch [
@@ -115,7 +115,8 @@ let changeUrl (url: string list, state: State) =
         if Bleeter.isMobile () then
             let state = resetHeight state
             let main, mainCmd = Main.update (Main.UrlChanged([ "mobile" ] @ url)) state.Main
-            { state with Main = main; CurrentUrl = nextUrl }, 
+
+            { state with Main = main; CurrentUrl = nextUrl },
             Cmd.batch [
                 Cmd.map MainMsg mainCmd
                 Cmd.ofSub resizeCmd
@@ -368,30 +369,31 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 Menu.menuHtml state.AppHeight state.CurrentUrl
 
                 (if state.ScreenSize |> ScreenSize.isMobile then
-                    Html.div [
-                        prop.classes [
-                            tw.``flex``
-                            tw.``flex-col``
-                            tw.``w-full``
-                        ]
-                        prop.style (
-                            match state.AppHeight with
-                            | Some height -> [ style.height height ]
-                            | None -> []
-                        )
-                        prop.children [
-                            Html.div [
-                                prop.classes [
-                                    tw.``flex``
-                                    tw.``flex-row``
-                                    tw.``w-full``
-                                    tw.``h-8``
-                                    tw.``bg-bleeter-blue``
-                                ]
-                            ]
-                            Main.render state.Main (MainMsg >> dispatch)
-                        ]
-                    ]
+                     Html.div [
+                         prop.classes [
+                             tw.flex
+                             tw.``flex-col``
+                             tw.``w-full``
+                         ]
+                         prop.style (
+                             match state.AppHeight with
+                             | Some height -> [ style.height height ]
+                             | None -> []
+                         )
+                         prop.children [
+                             Html.div [
+                                 prop.classes [
+                                     tw.flex
+                                     tw.``flex-row``
+                                     tw.``w-full``
+                                     tw.``h-8``
+                                     tw.``bg-bleeter-blue``
+                                     tw.``flex-shrink-0``
+                                 ]
+                             ]
+                             Main.render state.Main (MainMsg >> dispatch)
+                         ]
+                     ]
                  else
                      Main.render state.Main (MainMsg >> dispatch))
 

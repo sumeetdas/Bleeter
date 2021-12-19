@@ -14,7 +14,10 @@ let render =
             prop.height 360
             // prop.frameBorder 0
             // prop.allowFullScreen
-            prop.classes [ "giphy-embed"; tw.``w-full`` ]
+            prop.classes [
+                "giphy-embed"
+                tw.``w-full``
+            ]
         ]
 
     MainLayout.elem (Some "/img/bleeter-logo.png") [ header; coreComponent ]

@@ -176,7 +176,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``py-4``
                     tw.``px-6``
                     tw.``w-2/4``
-                    tw.``h-48``
+                    tw.``h-60``
                     tw.flex
                     tw.``flex-col``
                 ]
@@ -187,7 +187,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                             tw.``flex-row``
                         ]
                         prop.children [
-                            Bleeter.icon "akar-icons:cross" "12"
+                            Bleeter.icon "akar-icons:cross" "32"
                         ]
                         prop.onClick (fun _ -> dispatch (Close))
                     ]

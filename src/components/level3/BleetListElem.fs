@@ -117,6 +117,7 @@ let loadMore (state: State) (dispatch: Msg -> unit) =
             tw.``justify-center``
             tw.``bleeter-pointer``
             tw.``h-16``
+            tw.``mt-auto``
             (if state.ShowLoadMore then tw.block else tw.hidden)
         ]
 

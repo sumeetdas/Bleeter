@@ -109,20 +109,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         let bleetOption, bleetOptionCmd = EllipsisOption.update msg state.BleetOption
         { state with BleetOption = bleetOption }, bleetOptionCmd
 
-let ytEmbed (src: string) =
-    Html.div [
-        prop.classes [ tw.``iframe-container`` ]
-        prop.children [
-            Html.iframe [
-                prop.custom ("data-src", src)
-                prop.src src
-                prop.custom ("frameBorder", "0")
-                prop.custom ("allow", "accelerometer; autoplay")
-                prop.custom ("allowFullScreen", true)
-            ]
-        ]
-    ]
-
 let getLink (url: string) (name: string) =
     Html.a [
         prop.classes [
@@ -157,7 +143,8 @@ let getBleetContent (content: string) : ReactElement =
         (fun (content: ReactElement list, accText: string, ytThumbUrl: string option) (pair: int * string) ->
             let index, word = pair
 
-            if word.Contains "youtube" then
+            if word.Contains "youtube"
+               && (word.Contains "watch" || word.Contains "embed") then
                 let ytThumbUrl = Some word
                 let content = content @ [ Html.span [ prop.text accText ] ]
                 let accText = ""
@@ -206,7 +193,7 @@ let getBleetContent (content: string) : ReactElement =
                     Html.p content
                     // Html.div [
                     //     prop.classes [ tw.flex; tw.``flex-row`` ]
-                    //     prop.children (ytEmbed url)
+                    //     prop.children (Bleeter.ytEmbed url)
                     // ]
                     ]
             ]
@@ -328,21 +315,21 @@ let render (state: State) (dispatch: Msg -> unit) =
                                 prop.href (sprintf "#/%s/bleets/%d" bleet.Handle bleet.Id)
                                 prop.children [
                                     Bleeter.icon "ei:comment" "24"
-                                    Html.text bleet.Replies
+                                    Html.text (bleet.Replies |> Bleeter.numberToWoman)
                                 ]
                             ]
                             Html.div [
                                 prop.classes [ tw.flex; tw.``flex-1`` ]
                                 prop.children [
                                     Bleeter.icon "ei:retweet" "24"
-                                    Html.text bleet.Rebleets
+                                    Html.text (bleet.Rebleets |> Bleeter.numberToWoman)
                                 ]
                             ]
                             Html.div [
                                 prop.classes [ tw.flex; tw.``flex-1`` ]
                                 prop.children [
                                     Bleeter.icon "ei:heart" "24"
-                                    Html.text bleet.Likes
+                                    Html.text (bleet.Likes |> Bleeter.numberToWoman)
                                 ]
                             ]
                         ]

@@ -15,4 +15,15 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | Display -> { state with Display = true }, Cmd.none
 
-let render (state: State) (dispatch: Msg -> unit) = Html.div [ Html.text "Yolo" ]
+let render (_: State) (dispatch: Msg -> unit) =
+    Html.div [
+        prop.classes [
+            tw.flex
+            tw.``flex-col``
+            tw.``w-full``
+            tw.``h-auto``
+        ]
+        prop.children [
+            Bleeter.ytEmbed "https://www.youtube.com/watch?v=ZToicYcHIOU"
+        ]
+    ]

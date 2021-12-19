@@ -53,6 +53,7 @@ let nav (currentUrl: string) (nav: Nav) =
                 tw.``ml-4``
                 tw.``mt-1``
                 tw.group
+                tw.flex
                 tw.``items-center``
                 tw.``px-2``
                 tw.``py-2``
