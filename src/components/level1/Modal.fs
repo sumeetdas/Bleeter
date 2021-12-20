@@ -173,24 +173,19 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``shadow-lg``
                     tw.``overflow-y-auto``
                     tw.``text-left``
-                    tw.``py-4``
-                    tw.``px-6``
                     tw.``w-2/4``
                     tw.``h-60``
                     tw.``lg:h-96``
                     tw.flex
                     tw.``flex-col``
-                    tw.``md:max-w-md`` 
-                    tw.``lg:max-w-lg`` 
-                    tw.``xl:max-w-xl`` 
+                    tw.``md:max-w-md``
+                    tw.``lg:max-w-lg``
+                    tw.``xl:max-w-xl``
                     tw.``2xl:max-w-2xl``
                 ]
                 prop.children [
                     Html.button [
-                        prop.classes [
-                            tw.flex
-                            tw.``flex-row``
-                        ]
+                        prop.classes [ tw.absolute; tw.``m-4`` ]
                         prop.children [
                             Bleeter.icon "akar-icons:cross" "32"
                         ]

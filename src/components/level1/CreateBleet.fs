@@ -33,7 +33,7 @@ let init () =
     }
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
-    // clear up transient state 
+    // clear up transient state
     let state = { state with Bleet = None }
 
     match msg with
@@ -70,7 +70,7 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.flex
             tw.``flex-row``
-            tw.``mt-4``
+            tw.``mt-12``
         ]
         prop.children [
             Html.img [

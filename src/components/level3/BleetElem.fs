@@ -134,6 +134,12 @@ let getTagLink (tag: string) =
         prop.text tag
     ]
 
+let getSpan (text: string) =
+    Html.span [
+        prop.classes [ tw.``sd-break-word`` ]
+        prop.text text
+    ]
+
 let getBleetContent (content: string) : ReactElement =
     let words = content.Split [| ' ' |]
 
@@ -146,7 +152,7 @@ let getBleetContent (content: string) : ReactElement =
             if word.Contains "youtube"
                && (word.Contains "watch" || word.Contains "embed") then
                 let ytThumbUrl = Some word
-                let content = content @ [ Html.span [ prop.text accText ] ]
+                let content = content @ [ accText |> getSpan ]
                 let accText = ""
                 let urlName = Regex.Replace(word, "http(s?)://", "")
 
@@ -158,13 +164,13 @@ let getBleetContent (content: string) : ReactElement =
 
                 (content, accText, ytThumbUrl)
             else if word.StartsWith "http" || word.StartsWith "www" then
-                let content = content @ [ Html.span [ prop.text accText ] ]
+                let content = content @ [ accText |> getSpan ]
                 let urlName = Regex.Replace(word, "http(s?)://", "")
                 let content = content @ [ getLink word urlName ]
                 let accText = ""
                 (content, accText, ytThumbUrl)
             else if word.StartsWith "#" then
-                let content = content @ [ Html.span [ prop.text accText ] ]
+                let content = content @ [ accText |> getSpan ]
                 let content = content @ [ getTagLink word ]
                 let accText = ""
                 (content, accText, ytThumbUrl)
@@ -174,7 +180,7 @@ let getBleetContent (content: string) : ReactElement =
 
                 let content =
                     if index = words.Length - 1 then
-                        content @ [ Html.span [ prop.text accText ] ]
+                        content @ [ accText |> getSpan ]
                     else
                         content
 

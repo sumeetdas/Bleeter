@@ -55,4 +55,9 @@
         /* min-width: 560px; */
         min-height: 315px;
     }
+
+    .sd-break-word {
+        overflow-wrap: break-word;
+        word-break: break-word; 
+    }
 }

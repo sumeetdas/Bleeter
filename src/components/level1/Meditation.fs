@@ -22,6 +22,7 @@ let render (_: State) (dispatch: Msg -> unit) =
             tw.``flex-col``
             tw.``w-full``
             tw.``h-auto``
+            tw.``mt-12``
         ]
         prop.children [
             Bleeter.ytEmbed "https://www.youtube.com/embed/ZToicYcHIOU"

@@ -54,8 +54,14 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     Cmd.none
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
-    // clear transient state 
-    let state = { state with HeightUpdated = false; AddBleet = None; DeletedBleet = None }
+    // clear transient state
+    let state =
+        { state with
+            HeightUpdated = false
+            AddBleet = None
+            DeletedBleet = None
+        }
+
     match msg with
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
@@ -126,8 +132,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 CurrentUrl = url
             },
             Cmd.map DistractionBleetsMsg distractionBleetsCmd
-        | [ "not-found" ] -> 
-            { state with CurrentUrl = url }, Cmd.none
+        | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
         | [ (handle: string); "bleets"; Route.Int (bleetId: int) ] ->
             let singleBleet, singleBleetCmd =
                 SingleBleetPage.update (SingleBleetPage.Msg.LoadBleet(handle, bleetId)) state.SingleBleetPage

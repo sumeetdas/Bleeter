@@ -57,30 +57,30 @@ let updateDistractionList (msg: DistractionElemList.Msg) (state: State) =
     },
     Cmd.map DistractionMsg cmd
 
-let close state = 
+let close state =
     Router.navigate ("#/" + (state.PreviousUrl |> String.concat "/"))
     state, Cmd.none
 
 let updateCreateBleet (msg: CreateBleet.Msg) (state: State) =
     let createBleet, cmd = CreateBleet.update msg state.CreateBleet
 
-    let state = 
+    let state =
         { state with
             CreateBleet = createBleet
             AddBleet = createBleet.Bleet
         }
-    
-    let state = 
-        if createBleet.Bleet.IsSome 
-        then 
+
+    let state =
+        if createBleet.Bleet.IsSome then
             let state, _ = close state
             state
-        else state
-        
+        else
+            state
+
     state, Cmd.map CreateBleetMsg cmd
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
-    // clear up transient state 
+    // clear up transient state
     let state =
         { state with
             AddBleet = None
@@ -143,8 +143,7 @@ let closeBtnWrapper (dispatch: Msg -> unit) (elem: ReactElement) =
         prop.children [
             Html.button [
                 prop.classes [
-                    tw.flex
-                    tw.``flex-row``
+                    tw.absolute
                     tw.``px-2.5``
                     tw.``py-2.5``
                     tw.``w-11``
@@ -164,10 +163,9 @@ let render (state: State) (dispatch: Msg -> unit) =
         match state.CurrentUrl with
         | [ "create"; "bleet" ] ->
             closeBtnWrapper dispatch (CreateBleet.render state.CreateBleet (CreateBleetMsg >> dispatch))
-        | [ "modal"; "meditation" ] -> 
+        | [ "modal"; "meditation" ] ->
             closeBtnWrapper dispatch (Meditation.render state.Meditation (MeditationMsg >> dispatch))
-        | [ "modal"; "ccp" ] -> 
-            closeBtnWrapper dispatch (CCP.render state.CCP (CCPMsg >> dispatch))
+        | [ "modal"; "ccp" ] -> closeBtnWrapper dispatch (CCP.render state.CCP (CCPMsg >> dispatch))
         | [ "explore" ] -> DistractionElemList.renderMobile state.DistractionElemList (DistractionMsg >> dispatch)
         | [ "search" ] -> SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
         | _ -> Html.none

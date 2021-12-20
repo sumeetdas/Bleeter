@@ -89,16 +89,16 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
 let getProfile (handle: string option) (data: Data.State) : Result<Profile, string> =
     match (data.Profiles, handle) with
     | Resolved (Ok profiles), Some handle ->
-        let profileOpt = 
+        let profileOpt =
             profiles
             |> List.tryFind (fun profile -> profile.Handle = handle)
-        
-        match profileOpt with 
+
+        match profileOpt with
         | Some profile -> Ok profile
         | None ->
             Router.navigate ("not-found")
-            Error "profile not found"    
-    | Resolved (Error _), Some handle -> 
+            Error "profile not found"
+    | Resolved (Error _), Some handle ->
         Router.navigate ("not-found")
         Error "profile not found"
     | _ -> Error "data not resolved"
@@ -107,17 +107,16 @@ let updateData (state: State) : State * Msg Cmd =
     let state = { state with ModalMsg = Modal.DoNothing }
     // update profile
     let profileRes = getProfile state.Handle state.Data
-    let profileOpt = 
-        match profileRes with 
+
+    let profileOpt =
+        match profileRes with
         | Ok profile -> Some profile
         | _ -> None
 
     // update bleets
     let bleets =
         match (state.Data.Bleets, state.Handle) with
-        | Resolved (Ok bleets), Some handle ->
-            bleets
-            |> List.filter (fun bleet -> bleet.Handle = handle )
+        | Resolved (Ok bleets), Some handle -> bleets |> List.filter (fun bleet -> bleet.Handle = handle)
         | _ -> []
 
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
@@ -155,8 +154,9 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle ->
         let profileRes = getProfile (Some handle) state.Data
-        let profileOpt = 
-            match profileRes with 
+
+        let profileOpt =
+            match profileRes with
             | Ok profile -> Some profile
             | _ -> None
 

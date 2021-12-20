@@ -238,29 +238,48 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
 
         let nextState, modalCmd =
-            if nextState.ScreenSize |> ScreenSize.isMobile 
-            then 
-                match nextMain.ModalMsg with 
-                | Modal.ShowCCP _ -> 
+            if nextState.ScreenSize |> ScreenSize.isMobile then
+                match nextMain.ModalMsg with
+                | Modal.ShowCCP _ ->
                     let nextState = resetHeight nextState
-                    let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "ccp"]) nextState.Main
-                    scrollToTop()
-                    { nextState with Main = main }, 
+
+                    let main, mainCmd =
+                        Main.update
+                            (Main.UrlChanged [
+                                "mobile"
+                                "modal"
+                                "ccp"
+                             ])
+                            nextState.Main
+
+                    scrollToTop ()
+
+                    { nextState with Main = main },
                     Cmd.batch [
                         Cmd.map MainMsg mainCmd
                         Cmd.ofSub resizeCmd
                     ]
-                | Modal.ShowMeditation _ -> 
+                | Modal.ShowMeditation _ ->
                     let nextState = resetHeight nextState
-                    let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "meditation"]) nextState.Main
-                    scrollToTop()
-                    { nextState with Main = main }, 
+
+                    let main, mainCmd =
+                        Main.update
+                            (Main.UrlChanged [
+                                "mobile"
+                                "modal"
+                                "meditation"
+                             ])
+                            nextState.Main
+
+                    scrollToTop ()
+
+                    { nextState with Main = main },
                     Cmd.batch [
                         Cmd.map MainMsg mainCmd
                         Cmd.ofSub resizeCmd
                     ]
                 | _ -> nextState, Cmd.none
-            else 
+            else
                 let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
                 { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 

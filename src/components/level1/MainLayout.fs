@@ -98,11 +98,11 @@ let mobileElem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
             prop.children [
                 Html.div [
                     prop.classes [
-                        tw.``flex``
+                        tw.flex
                         tw.``flex-row``
                         tw.``mx-auto``
-                        tw.``mt-4``
                         tw.``w-full``
+                        tw.``h-full``
                         tw.``justify-center``
                     ]
                     prop.children coreComponents
