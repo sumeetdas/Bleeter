@@ -18,7 +18,7 @@ type State =
     {
         Data: Data.State
         ProfileOption: Msg EllipsisOption.State
-        Handle: string
+        Handle: string option
         DeletedBleet: Bleet option
         Profile: Profile option
         BleetListElem: BleetListElem.State
@@ -64,7 +64,7 @@ let init (data: Data.State) =
     {
         Data = data
         ProfileOption = profileOption
-        Handle = ""
+        Handle = None
         DeletedBleet = None
         Profile = None
         BleetListElem = BleetListElem.init bleets
@@ -86,19 +86,19 @@ let updateBleetListElem (msg: BleetListElem.Msg) (state: State) : State * Msg Cm
     },
     Cmd.map BleetListElemMsg bleetListElemCmd
 
-let getProfile (handle: string) (data: Data.State) : Result<Profile, string> =
-    match data.Profiles with
-    | Resolved (Ok profiles) ->
+let getProfile (handle: string option) (data: Data.State) : Result<Profile, string> =
+    match (data.Profiles, handle) with
+    | Resolved (Ok profiles), Some handle ->
         let profileOpt = 
             profiles
             |> List.tryFind (fun profile -> profile.Handle = handle)
         
         match profileOpt with 
         | Some profile -> Ok profile
-        | None -> 
+        | None ->
             Router.navigate ("not-found")
             Error "profile not found"    
-    | Resolved (Error _) -> 
+    | Resolved (Error _), Some handle -> 
         Router.navigate ("not-found")
         Error "profile not found"
     | _ -> Error "data not resolved"
@@ -114,10 +114,10 @@ let updateData (state: State) : State * Msg Cmd =
 
     // update bleets
     let bleets =
-        match state.Data.Bleets with
-        | Resolved (Ok bleets) ->
+        match (state.Data.Bleets, state.Handle) with
+        | Resolved (Ok bleets), Some handle ->
             bleets
-            |> List.filter (fun bleet -> bleet.Handle = state.Handle)
+            |> List.filter (fun bleet -> bleet.Handle = handle )
         | _ -> []
 
     updateBleetListElem (BleetListElem.Msg.DataUpdate bleets) { state with Profile = profileOpt }
@@ -154,16 +154,16 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
     | DataUpdate data -> updateData { state with Data = data }
     | UrlChanged handle ->
-        let profileRes = getProfile handle state.Data
+        let profileRes = getProfile (Some handle) state.Data
         let profileOpt = 
             match profileRes with 
             | Ok profile -> Some profile
             | _ -> None
 
         match profileOpt with
-        | None -> { state with Handle = handle }, Cmd.none
+        | None -> { state with Handle = Some handle }, Cmd.none
         | Some profile ->
-            let nextReportCount = if handle <> state.Handle then None else state.ReportCount
+            let nextReportCount = if handle <> profile.Handle then None else state.ReportCount
 
             let nextBleetList, _ =
                 BleetListElem.update
@@ -174,7 +174,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 
             updateData
                 { state with
-                    Handle = profile.Handle
+                    Handle = Some handle
                     ReportCount = nextReportCount
                     BleetListElem = nextBleetList
                 }
