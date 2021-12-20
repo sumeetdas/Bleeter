@@ -199,7 +199,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let nextMain, mainCmd = Main.update msg' state.Main
         let nextState = { state with Main = nextMain }
 
-        let resizeCmd =
+        let optionalResize =
             if nextMain.HeightUpdated then
                 Cmd.ofSub resizeCmd
             else
@@ -242,11 +242,23 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             then 
                 match nextMain.ModalMsg with 
                 | Modal.ShowCCP _ -> 
+                    let nextState = resetHeight nextState
                     let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "ccp"]) nextState.Main
-                    { nextState with Main = main }, Cmd.map MainMsg mainCmd
+                    scrollToTop()
+                    { nextState with Main = main }, 
+                    Cmd.batch [
+                        Cmd.map MainMsg mainCmd
+                        Cmd.ofSub resizeCmd
+                    ]
                 | Modal.ShowMeditation _ -> 
+                    let nextState = resetHeight nextState
                     let main, mainCmd = Main.update (Main.UrlChanged [ "mobile"; "modal"; "meditation"]) nextState.Main
-                    { nextState with Main = main }, Cmd.map MainMsg mainCmd
+                    scrollToTop()
+                    { nextState with Main = main }, 
+                    Cmd.batch [
+                        Cmd.map MainMsg mainCmd
+                        Cmd.ofSub resizeCmd
+                    ]
                 | _ -> nextState, Cmd.none
             else 
                 let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
@@ -255,7 +267,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         nextState,
         Cmd.batch [
             Cmd.map MainMsg mainCmd
-            resizeCmd
+            optionalResize
             deleteBleetCmd
             addBleetCmd
             notifCmd

@@ -1,8 +1,8 @@
 [
     {
         "Name": "Bleeter",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
-        "Banner": "/img/bleeter_banner.jpg",
+        "ProfilePic": "/img/profile_pics/default.png",
+        "Banner": "/img/banners/bleeter_banner.jpg",
         "Handle": "bleeter",
         "Following": 300119,
         "Followers": 0,
@@ -13,7 +13,7 @@
     },
     {
         "Name": "John Xina",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "JohnXina",
         "Following": 300119,
@@ -25,7 +25,7 @@
     },
     {
         "Name": "Bleeter Music",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "BleeterMusic",
         "Following": 300119,
@@ -37,7 +37,7 @@
     },
     {
         "Name": "Sue Murry",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "SueMurry",
         "Following": 300119,
@@ -49,7 +49,7 @@
     },
     {
         "Name": "Wifebeater TV Show",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "WifebeaterTVShow",
         "Following": 300119,
@@ -61,7 +61,7 @@
     },
     {
         "Name": "Phil Gaga",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "gagaphilpot",
         "Following": 300119,
@@ -73,7 +73,7 @@
     },
     {
         "Name": "Julian Caraways",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "carawaysjulian9",
         "Following": 300119,
@@ -85,7 +85,7 @@
     },
     {
         "Name": "Pole Position Adult Lounge",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "PolePositionAdultLounge",
         "Following": 300119,
@@ -97,7 +97,7 @@
     },
     {
         "Name": "Ludendorff Annie",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "LudendorffAnnie",
         "Following": 300119,
@@ -109,7 +109,7 @@
     },
     {
         "Name": "Organ Farm TV Show",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "OrganFarmTVShow",
         "Following": 300119,
@@ -121,7 +121,7 @@
     },
     {
         "Name": "Clive Rai Ford",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "cliveraiford1949",
         "Following": 300119,
@@ -133,7 +133,7 @@
     },
     {
         "Name": "Implant Outsource TV Show",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "ImplantOutsourceTVShow",
         "Following": 300119,
@@ -145,7 +145,7 @@
     },
     {
         "Name": "Peter DogBiscuit",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "peter_dogbiscuit",
         "Following": 300119,
@@ -157,7 +157,7 @@
     },
     {
         "Name": "Pencil Hypochondriac",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "pencilskab12",
         "Following": 300119,
@@ -169,7 +169,7 @@
     },
     {
         "Name": "Karen Poochluva",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "karenpoochluva",
         "Following": 300119,
@@ -181,7 +181,7 @@
     },
     {
         "Name": "Lester C",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "LesterC",
         "Following": 300119,
@@ -193,7 +193,7 @@
     },
     {
         "Name": "Lazlow",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "Lazlow",
         "Following": 300119,
@@ -205,7 +205,7 @@
     },
     {
         "Name": "Misfire Games",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "MisfireGames",
         "Following": 300119,
@@ -217,7 +217,7 @@
     },
     {
         "Name": "Merryweather Security",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "MerryweatherSecurity",
         "Following": 300119,
@@ -229,7 +229,7 @@
     },
     {
         "Name": "Helen Kerkle",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "stayathome_helen23",
         "Following": 300119,
@@ -241,7 +241,7 @@
     },
     {
         "Name": "Tracey DeSanta",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "TraceyDeSanta",
         "Following": 300119,
@@ -253,7 +253,7 @@
     },
     {
         "Name": "Bill Binder",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "BillBinder",
         "Following": 300119,
@@ -265,7 +265,7 @@
     },
     {
         "Name": "Mitch Dexter",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "MitchDexter",
         "Following": 300119,
@@ -277,7 +277,7 @@
     },
     {
         "Name": "Jock Cranley",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "JockCranley",
         "Following": 300119,
@@ -289,7 +289,7 @@
     },
     {
         "Name": "10x Programmer",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "alphadev_97",
         "Following": 300119,
@@ -301,7 +301,7 @@
     },
     {
         "Name": "Cluckin Bell",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "CluckinBell",
         "Following": 300119,
@@ -313,7 +313,7 @@
     },
     {
         "Name": "Cunning Stunt Academy",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "cunningstuntacademy",
         "Following": 300119,
@@ -325,7 +325,7 @@
     },
     {
         "Name": "Vinewood Lionel",
-        "ProfilePic": "/img/bleeter_profile_pic.png",
+        "ProfilePic": "/img/profile_pics/default.png",
         "Banner": null,
         "Handle": "VinewoodLionel67",
         "Following": 300119,

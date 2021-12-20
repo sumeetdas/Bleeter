@@ -95,7 +95,19 @@ let mobileElem (imgUrlOpt: string option) (coreComponents: ReactElement list) =
                 tw.``h-full``
                 tw.``w-full``
             ]
-            prop.children coreComponents
+            prop.children [
+                Html.div [
+                    prop.classes [
+                        tw.``flex``
+                        tw.``flex-row``
+                        tw.``mx-auto``
+                        tw.``mt-4``
+                        tw.``w-full``
+                        tw.``justify-center``
+                    ]
+                    prop.children coreComponents
+                ]
+            ]
         ]
 
     let children = [ banner imgUrlOpt 160; coreComponentsElem ]

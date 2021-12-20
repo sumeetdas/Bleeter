@@ -41,7 +41,8 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.``bg-gray-100``
             tw.``text-gray-500``
-            tw.``w-80``
+            tw.``w-64``
+            tw.``sm:w-80``
             tw.``xl:w-96``
             tw.``h-10``
             tw.``m-4``
@@ -49,6 +50,11 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``focus-within:border-blue-300``
             tw.``rounded-full``
             tw.flex
+            tw.``border-green-500``
+            tw.``border-solid``
+            tw.``lg:border-none``
+            tw.``border-2``
+            tw.``lg:border-0``
         ]
         prop.children [
             Html.button [
@@ -61,8 +67,9 @@ let render (state: State) (dispatch: Msg -> unit) =
             Html.input [
                 prop.classes [
                     tw.``bg-gray-100``
-                    tw.``h-10``
-                    tw.``w-56``
+                    tw.``h-9``
+                    tw.``w-48``
+                    tw.``sm:w-56``
                     tw.``xl:w-72``
                     tw.``text-sm``
                     tw.``border-0``

@@ -116,7 +116,8 @@ let render (state: State) (dispatch: Msg -> unit) =
 let renderMobile (state: State) (dispatch: Msg -> unit) =
     Html.div [
         prop.classes [
-            tw.``w-max``
+            tw.``w-3/4``
+            tw.``lg:w-max``
             tw.``rounded-lg``
             tw.``bg-gray-100``
             tw.``overflow-hidden``

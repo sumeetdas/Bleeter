@@ -54,6 +54,8 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     Cmd.none
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
+    // clear transient state 
+    let state = { state with HeightUpdated = false; AddBleet = None; DeletedBleet = None }
     match msg with
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
