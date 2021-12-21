@@ -36,7 +36,7 @@ type Msg =
     | ModalMsg of Modal.Msg
     | ScreenSizeUpdated of int option * ScreenSize option
     | MobileMenuMsg of MobileMenu.Msg
-    | LoadingDone of bool
+    | Loading of bool
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -73,7 +73,7 @@ let scrollToTop () =
 
 let getWindowHeight () =
     let scrollHeight =
-        (document.getElementById "elmish-app")
+        (document.getElementById "bleeter-app")
             .scrollHeight
         |> int
 
@@ -84,32 +84,53 @@ let getWindowHeight () =
     else
         windowHeight
 
-let resizeCmd (dispatch: Msg -> unit) =
-    dispatch (LoadingDone true)
-    dispatch (ScreenSizeUpdated(None, None))
+let delayedHeightCheck (dispatch: Msg -> unit) =
+    async {
+        do! Async.Sleep 200
+        let finalHeight = getWindowHeight ()
+        let width = Bleeter.getWindowWidth ()
+        dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize)))
+    }
 
-    let delayedHeightCheck =
-        async {
-            do! Async.Sleep 200
-            let finalHeight = getWindowHeight ()
-            let width = Bleeter.getWindowWidth ()
-            dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize)))
-        }
-
-    let loadingDone =
-        async {
-            do! Async.Sleep 600
-            dispatch (LoadingDone false)
-        }
-
-    [ delayedHeightCheck; delayedHeightCheck; loadingDone ]
+let runSequentialJobs (jobs: ((Msg -> unit) -> unit Async) list) (dispatch: Msg -> unit) =
+    jobs
+    |> List.map (fun job -> job dispatch)
     |> Async.Sequential
     |> Async.Ignore
     |> Async.StartImmediate
 
-let resetHeight state =
-    let main, _ = Main.update (Main.AppHeight None) state.Main
-    { state with Main = main; AppHeight = None }
+let justResizeCmd (dispatch: Msg -> unit) =
+    let cmd =
+        [ delayedHeightCheck; delayedHeightCheck ]
+        |> runSequentialJobs
+
+    cmd dispatch
+
+let loadingDone (dispatch: Msg -> unit) =
+    async {
+        do! Async.Sleep 800
+        dispatch (Loading false)
+    }
+
+let resizeAndLoadCmd (dispatch: Msg -> unit) =
+    let cmd =
+        [ delayedHeightCheck; loadingDone; delayedHeightCheck ]
+        |> runSequentialJobs
+
+    cmd dispatch
+
+let setScreenSize (heightOpt: int option, screenSizeOpt: ScreenSize option) (state: State) : State =
+    let state =
+        let nextMain, _ = Main.update (Main.AppHeight heightOpt) state.Main
+        { state with Main = nextMain; AppHeight = heightOpt }
+
+    match screenSizeOpt with
+    | Some screenSize -> { state with ScreenSize = screenSize }
+    | None -> state
+
+let setLoading (status: bool) (state: State) : State =
+    let main, _ = Main.update (Main.Loading false) state.Main
+    { state with IsLoading = false; Main = main }
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }
@@ -123,27 +144,25 @@ let changeUrl (url: string list, state: State) =
                 state.CurrentUrl
 
         if Bleeter.isMobile () then
-            let state = resetHeight state
+            let state = state |> (setLoading true >> setScreenSize (None, None))
             let main, mainCmd = Main.update (Main.UrlChanged([ "mobile" ] @ url)) state.Main
 
             { state with Main = main; CurrentUrl = nextUrl },
             Cmd.batch [
                 Cmd.map MainMsg mainCmd
-                Cmd.ofSub resizeCmd
+                Cmd.ofSub resizeAndLoadCmd
             ]
         else
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
-        let state = { state with IsLoading = true }
-        let main, _ = Main.update (Main.LoadingDone false) state.Main
-        let state = resetHeight { state with Main = main }
+        let state = state |> (setLoading true >> setScreenSize (None, None))
         let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 
         let distraction, distractionCmd =
-            DistractionElemList.update (DistractionElemList.Msg.UrlChanged url) state.DistractionElemList
+            DistractionElemList.update (DistractionElemList.UrlChanged url) state.DistractionElemList
 
-        let modal, modalCmd = Modal.update (Modal.Msg.UrlChanged url) state.Modal
+        let modal, modalCmd = Modal.update (Modal.UrlChanged url) state.Modal
         scrollToTop ()
 
         { state with
@@ -156,11 +175,12 @@ let changeUrl (url: string list, state: State) =
             Cmd.map MainMsg mainCmd
             Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map ModalMsg modalCmd
-            Cmd.ofSub resizeCmd
+            Cmd.ofSub resizeAndLoadCmd
         ]
 
 let updateData (state: State) =
     if state.Data.DoSyncData then
+        let state = state |> (setLoading true >> setScreenSize (None, None))
         let nextData, dataCmd = Data.update (Data.DoneSyncData) state.Data
         let nextMain, mainCmd = Main.update (Main.DataUpdate state.Data) state.Main
         let nextModal, modalCmd = Modal.update (Modal.DataUpdated state.Data) state.Modal
@@ -179,24 +199,15 @@ let updateData (state: State) =
             Cmd.map DistractionElemListMsg distractionCmd
             Cmd.map DataMsg dataCmd
             Cmd.map ModalMsg modalCmd
-            Cmd.ofSub resizeCmd
+            Cmd.ofSub resizeAndLoadCmd
         ]
     else
         { state with Data = state.Data }, Cmd.none
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
-    | LoadingDone status ->
-        let main, _ = Main.update (Main.LoadingDone status) state.Main
-        { state with IsLoading = status; Main = main }, Cmd.none
-    | ScreenSizeUpdated (heightOpt, screenSizeOpt) ->
-        let state =
-            let nextMain, _ = Main.update (Main.Msg.AppHeight heightOpt) state.Main
-            { state with Main = nextMain; AppHeight = heightOpt }
-
-        match screenSizeOpt with
-        | Some screenSize -> { state with ScreenSize = screenSize }, Cmd.none
-        | None -> state, Cmd.none
+    | Loading status -> state |> setLoading status, Cmd.none
+    | ScreenSizeUpdated (heightOpt, screenSizeOpt) -> state |> setScreenSize (heightOpt, screenSizeOpt), Cmd.none
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -207,16 +218,15 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             (Cmd.map DataMsg dataCmd)
             newCmd
         ]
-    | UrlChanged url ->
-        let state, cmd = changeUrl (url, state)
-        state, cmd
+    | UrlChanged url -> changeUrl (url, state)
     | MainMsg msg' ->
-        let nextMain, mainCmd = Main.update msg' state.Main
-        let nextState = { state with Main = nextMain }
+        let nextState = state |> setScreenSize (None, None)
+        let nextMain, mainCmd = Main.update msg' nextState.Main
+        let nextState = { nextState with Main = nextMain }
 
         let optionalResize =
             if nextMain.HeightUpdated then
-                Cmd.ofSub resizeCmd
+                Cmd.ofSub justResizeCmd
             else
                 Cmd.none
 
@@ -249,14 +259,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
             | None -> nextState, Cmd.none
 
         let nextState, notifCmd =
-            let nextNotif, notifCmd = Notification.update (Notification.Show nextMain.NotifMsg) state.Notification
+            let nextNotif, notifCmd = Notification.update (Notification.Show nextMain.NotifMsg) nextState.Notification
             { nextState with Notification = nextNotif }, Cmd.map NotificationMsg notifCmd
 
         let nextState, modalCmd =
             if nextState.ScreenSize |> ScreenSize.isMobile then
                 match nextMain.ModalMsg with
                 | Modal.ShowCCP _ ->
-                    let nextState = resetHeight nextState
+                    let nextState = nextState |> (setLoading true >> setScreenSize (None, None))
 
                     let main, mainCmd =
                         Main.update
@@ -272,10 +282,10 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     { nextState with Main = main },
                     Cmd.batch [
                         Cmd.map MainMsg mainCmd
-                        Cmd.ofSub resizeCmd
+                        Cmd.ofSub resizeAndLoadCmd
                     ]
                 | Modal.ShowMeditation _ ->
-                    let nextState = resetHeight nextState
+                    let nextState = nextState |> (setLoading true >> setScreenSize (None, None))
 
                     let main, mainCmd =
                         Main.update
@@ -291,11 +301,11 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     { nextState with Main = main },
                     Cmd.batch [
                         Cmd.map MainMsg mainCmd
-                        Cmd.ofSub resizeCmd
+                        Cmd.ofSub resizeAndLoadCmd
                     ]
                 | _ -> nextState, Cmd.none
             else
-                let nextModal, modalCmd = Modal.update nextMain.ModalMsg state.Modal
+                let nextModal, modalCmd = Modal.update nextMain.ModalMsg nextState.Modal
                 { nextState with Modal = nextModal }, Cmd.map ModalMsg modalCmd
 
         nextState,
@@ -479,12 +489,12 @@ let render (state: State) (dispatch: Msg -> Unit) =
     ]
 
 let appOnLoadHeight _ =
-    let sub dispatch = window.addEventListener ("load", (fun _ -> dispatch |> resizeCmd))
+    let sub dispatch = window.addEventListener ("load", (fun _ -> dispatch |> resizeAndLoadCmd))
 
     Cmd.ofSub sub
 
 let appOnResizeHeight _ =
-    let sub dispatch = window.addEventListener ("resize", (fun _ -> dispatch |> resizeCmd))
+    let sub dispatch = window.addEventListener ("resize", (fun _ -> dispatch |> resizeAndLoadCmd))
 
     Cmd.ofSub sub
 
@@ -496,7 +506,7 @@ let appOnOrientationChange _ =
     //         printf "appOnOrientationChange"
     //         sizeUpdate dispatch))
 
-    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> dispatch |> resizeCmd))
+    let sub dispatch = window.addEventListener ("orientationchange", (fun _ -> dispatch |> resizeAndLoadCmd))
 
     Cmd.batch [ Cmd.ofSub sub ]
 
@@ -522,6 +532,6 @@ let subscribers initial =
     ]
 
 Program.mkProgram init update render
-|> Program.withReactSynchronous "elmish-app"
+|> Program.withReactSynchronous "bleeter-app"
 |> Program.withSubscription subscribers
 |> Program.run

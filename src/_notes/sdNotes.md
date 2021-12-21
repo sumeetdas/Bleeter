@@ -56,7 +56,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
     ]
 
 Program.mkSimple init update render
-|> Program.withReactSynchronous "elmish-app"
+|> Program.withReactSynchronous "bleeter-app"
 |> Program.run
 ```
 

@@ -68,8 +68,10 @@ let render (state: State) (dispatch: Msg -> unit) =
              | None -> Html.none)
             (match state.BleetElem with
              | Some bleetElem ->
-                 match bleetElem.Bleet.RepliesType with
-                 | Some repliesType ->
+                 let bleet = bleetElem.Bleet
+
+                 match (bleet.RepliesType, bleet.Replies) with
+                 | Some repliesType, numReplies when numReplies > 0 ->
                      Html.div [
                          prop.classes [
                              tw.flex

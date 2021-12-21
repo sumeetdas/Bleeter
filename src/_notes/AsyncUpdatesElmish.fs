@@ -60,5 +60,5 @@ let render (state: State) (dispatch: Msg -> Unit) =
     ]
 
 Program.mkProgram init update render
-|> Program.withReactSynchronous "elmish-app"
+|> Program.withReactSynchronous "bleeter-app"
 |> Program.run

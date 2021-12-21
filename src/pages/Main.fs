@@ -35,7 +35,7 @@ type Msg =
     | DistractionBleetsMsg of DistractionBleets.Msg
     | SingleBleetPageMsg of SingleBleetPage.Msg
     | MobilePageMsg of MobilePage.Msg
-    | LoadingDone of bool
+    | Loading of bool
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -66,7 +66,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         }
 
     match msg with
-    | LoadingDone status -> { state with IsLoading = status }, Cmd.none
+    | Loading status -> { state with IsLoading = status }, Cmd.none
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem

@@ -53,7 +53,10 @@ module Profile =
 type BleetId = int
 
 [<RequireQualifiedAccess>]
-type RepliesType = | Boring
+type RepliesType =
+    | Boring
+    | Annoying
+    | Offensive
 
 module RepliesType =
     let getReasonToHideReplies (repliesType: RepliesType) : string =
@@ -65,6 +68,8 @@ module RepliesType =
 
         match repliesType with
         | RepliesType.Boring -> template "Boring"
+        | RepliesType.Annoying -> template "Annoying"
+        | RepliesType.Offensive -> template "Offensive"
 
 type Bleet =
     {
