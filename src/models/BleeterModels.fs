@@ -52,7 +52,19 @@ module Profile =
 
 type BleetId = int
 
+[<RequireQualifiedAccess>]
 type RepliesType = | Boring
+
+module RepliesType =
+    let getReasonToHideReplies (repliesType: RepliesType) : string =
+        let template (reason: string) =
+            sprintf
+                "%s all the replies as '%s', and thus were hidden."
+                "Our very sophisticated algorithms have classified"
+                reason
+
+        match repliesType with
+        | RepliesType.Boring -> template "Boring"
 
 type Bleet =
     {
@@ -90,7 +102,7 @@ module Bleet =
 
     let getRepliesType (bleet: Bleet) : RepliesType =
         match bleet.RepliesType with
-        | None -> Boring
+        | None -> RepliesType.Boring
         | Some repliesType -> repliesType
 
     let findBleets (handle: string) (bleetList: Result<Bleet list, string>) : Result<Bleet list, string> =

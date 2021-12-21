@@ -58,7 +58,10 @@ let init (data: Data.State) =
 
 let closeModal (state: State) =
     let initState = init state.Data
-    Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
+
+    if state.PreviousUrl <> Router.currentUrl () then
+        Router.navigate (Router.format (state.PreviousUrl |> List.toArray), HistoryMode.ReplaceState)
+
     { initState with PreviousUrl = state.PreviousUrl }
 
 let updateCreateBleet (msg': CreateBleet.Msg) (state: State) =

@@ -56,7 +56,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 Rebleets = 0
                 Likes = 0
                 Replies = 0
-                RepliesType = Some Boring
+                RepliesType = Some RepliesType.Boring
                 IsMyBleet = true
             }
             |> Some

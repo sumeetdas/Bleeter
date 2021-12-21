@@ -32,6 +32,7 @@ let render (_: State) (dispatch: Msg -> unit) =
                 tw.``text-xl``
                 tw.``text-center``
                 tw.``xl:text-2xl``
+                tw.``text-yellow-300``
             ]
             prop.text "50 social credit points has been deducted from your account."
         ]
@@ -41,6 +42,8 @@ let render (_: State) (dispatch: Msg -> unit) =
             prop.classes [
                 tw.``mt-3``
                 tw.``text-center``
+                tw.``text-yellow-300``
+                tw.``xl:text-xl``
             ]
             prop.text "Contact your local CCP office to revert this decision."
         ]
@@ -63,8 +66,7 @@ let render (_: State) (dispatch: Msg -> unit) =
             tw.``flex-col``
             tw.``w-full``
             tw.``h-full``
-            tw.``bg-red-500``
-            tw.``bg-opacity-40``
+            tw.``bg-red-600``
             tw.``pt-12``
         ]
         prop.children ([ image; message1; message2 ] |> List.map row)

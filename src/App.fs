@@ -22,6 +22,7 @@ type State =
         Modal: Modal.State
         ScreenSize: ScreenSize
         MobileMenu: MobileMenu.State
+        IsLoading: bool
     }
 
 // events
@@ -35,6 +36,7 @@ type Msg =
     | ModalMsg of Modal.Msg
     | ScreenSizeUpdated of int option * ScreenSize option
     | MobileMenuMsg of MobileMenu.Msg
+    | LoadingDone of bool
 
 // need parentheses for indicating that init is a function
 let init () =
@@ -53,6 +55,7 @@ let init () =
         Modal = Modal.init data
         ScreenSize = Small
         MobileMenu = MobileMenu.init ()
+        IsLoading = true
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -82,6 +85,7 @@ let getWindowHeight () =
         windowHeight
 
 let resizeCmd (dispatch: Msg -> unit) =
+    dispatch (LoadingDone true)
     dispatch (ScreenSizeUpdated(None, None))
 
     let delayedHeightCheck =
@@ -92,7 +96,13 @@ let resizeCmd (dispatch: Msg -> unit) =
             dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize)))
         }
 
-    [ delayedHeightCheck; delayedHeightCheck ]
+    let loadingDone =
+        async {
+            do! Async.Sleep 600
+            dispatch (LoadingDone false)
+        }
+
+    [ delayedHeightCheck; delayedHeightCheck; loadingDone ]
     |> Async.Sequential
     |> Async.Ignore
     |> Async.StartImmediate
@@ -125,7 +135,9 @@ let changeUrl (url: string list, state: State) =
             let modal, modalCmd = Modal.update (Modal.ShowCreateBleet nextUrl) state.Modal
             { state with Modal = modal; CurrentUrl = nextUrl }, Cmd.map ModalMsg modalCmd
     | _ ->
-        let state = resetHeight state
+        let state = { state with IsLoading = true }
+        let main, _ = Main.update (Main.LoadingDone false) state.Main
+        let state = resetHeight { state with Main = main }
         let main, mainCmd = Main.update (Main.UrlChanged url) state.Main
 
         let distraction, distractionCmd =
@@ -174,6 +186,9 @@ let updateData (state: State) =
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
+    | LoadingDone status ->
+        let main, _ = Main.update (Main.LoadingDone status) state.Main
+        { state with IsLoading = status; Main = main }, Cmd.none
     | ScreenSizeUpdated (heightOpt, screenSizeOpt) ->
         let state =
             let nextMain, _ = Main.update (Main.Msg.AppHeight heightOpt) state.Main

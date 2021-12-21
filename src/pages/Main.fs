@@ -22,6 +22,7 @@ type State =
         MobilePage: MobilePage.State
         AddBleet: Bleet option
         HeightUpdated: bool
+        IsLoading: bool
     }
 
 type Msg =
@@ -34,6 +35,7 @@ type Msg =
     | DistractionBleetsMsg of DistractionBleets.Msg
     | SingleBleetPageMsg of SingleBleetPage.Msg
     | MobilePageMsg of MobilePage.Msg
+    | LoadingDone of bool
 
 let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
     {
@@ -50,6 +52,7 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         MobilePage = MobilePage.init data
         AddBleet = None
         HeightUpdated = false
+        IsLoading = false
     },
     Cmd.none
 
@@ -63,6 +66,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         }
 
     match msg with
+    | LoadingDone status -> { state with IsLoading = status }, Cmd.none
     | DataUpdate data ->
         let home, homeCmd = Home.update (Home.Msg.DataUpdate data) state.Home
         let profileElem, profileElemCmd = ProfileElem.update (ProfileElem.Msg.DataUpdate data) state.ProfileElem
@@ -212,6 +216,82 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         Cmd.map MobilePageMsg cmd
 
 let render (state: State) (dispatch: Msg -> unit) =
+    let loadingView =
+        let bleetLoading =
+            Html.div [
+                prop.classes [
+                    tw.``animate-pulse``
+                    tw.flex
+                    tw.``flex-row``
+                    tw.``space-x-4``
+                    tw.``w-5/6``
+                    tw.``m-6``
+                ]
+                prop.children [
+                    Html.div [
+                        prop.classes [
+                            tw.``rounded-full``
+                            tw.``bg-blue-400``
+                            tw.``h-12``
+                            tw.``w-12``
+                        ]
+                    ]
+                    Html.div [
+                        prop.classes [
+                            tw.``flex-1``
+                            tw.``space-y-4``
+                            tw.``py-1``
+                        ]
+                        prop.children [
+                            Html.div [
+                                prop.classes [
+                                    tw.``h-4``
+                                    tw.``bg-blue-400``
+                                    tw.rounded
+                                    tw.``w-3/4``
+                                ]
+                            ]
+                            Html.div [
+                                prop.classes [ tw.``space-y-2`` ]
+                                prop.children [
+                                    Html.div [
+                                        prop.classes [
+                                            tw.``h-4``
+                                            tw.``bg-blue-400``
+                                            tw.rounded
+                                        ]
+                                    ]
+                                    Html.div [
+                                        prop.classes [
+                                            tw.``h-4``
+                                            tw.``bg-blue-400``
+                                            tw.rounded
+                                            tw.``w-5/6``
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+
+        let coreComponents =
+            [
+                Html.div [
+                    prop.classes [
+                        tw.flex
+                        tw.``flex-col``
+                        tw.``w-full``
+                        tw.``h-full``
+                        tw.``bg-gray-100``
+                    ]
+                    prop.children (seq { 1 .. 3 } |> Seq.map (fun _ -> bleetLoading))
+                ]
+            ]
+
+        MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents
+
     Html.div [
         prop.classes [
             tw.flex
@@ -226,17 +306,20 @@ let render (state: State) (dispatch: Msg -> unit) =
             | None -> []
         )
         prop.children [
-            match state.CurrentUrl with
-            | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
-            | "mobile" :: _ -> MobilePage.render state.MobilePage (MobilePageMsg >> dispatch)
-            | [ "bleeter-info" ] -> BleeterInfo.page
-            | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
-            | [ "tags"; (_: string) ] ->
-                DistractionBleets.render state.DistractionBleets (DistractionBleetsMsg >> dispatch)
-            | [ "not-found" ] -> NotFound.render
-            | [ (_: string); "bleets"; Route.Int (_: int) ] ->
-                SingleBleetPage.render state.SingleBleetPage (SingleBleetPageMsg >> dispatch)
-            | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
-            | _ -> Html.none
+            if state.IsLoading then
+                loadingView
+            else
+                match state.CurrentUrl with
+                | [ "home" ] -> Home.render state.Home (HomeMsg >> dispatch)
+                | "mobile" :: _ -> MobilePage.render state.MobilePage (MobilePageMsg >> dispatch)
+                | [ "bleeter-info" ] -> BleeterInfo.page
+                | [ "search"; (_: string) ] -> SearchBleets.render state.SearchBleets (SearchBleetsMsg >> dispatch)
+                | [ "tags"; (_: string) ] ->
+                    DistractionBleets.render state.DistractionBleets (DistractionBleetsMsg >> dispatch)
+                | [ "not-found" ] -> NotFound.render
+                | [ (_: string); "bleets"; Route.Int (_: int) ] ->
+                    SingleBleetPage.render state.SingleBleetPage (SingleBleetPageMsg >> dispatch)
+                | [ (_: string) ] -> ProfileElem.render state.ProfileElem (ProfileElemMsg >> dispatch)
+                | _ -> Html.none
         ]
     ]

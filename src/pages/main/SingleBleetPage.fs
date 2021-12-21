@@ -3,6 +3,7 @@ module SingleBleetPage
 
 open Elmish
 open Feliz
+open Tailwind
 
 type State =
     {
@@ -61,9 +62,35 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
 let render (state: State) (dispatch: Msg -> unit) =
     let coreComponents =
         [
-            match state.BleetElem with
-            | Some bleetElem -> BleetElem.render bleetElem (BleetElemMsg >> dispatch)
-            | None -> Html.none
+            MainLayout.heading "Bleet and Replies"
+            (match state.BleetElem with
+             | Some bleetElem -> BleetElem.render bleetElem (BleetElemMsg >> dispatch)
+             | None -> Html.none)
+            (match state.BleetElem with
+             | Some bleetElem ->
+                 match bleetElem.Bleet.RepliesType with
+                 | Some repliesType ->
+                     Html.div [
+                         prop.classes [
+                             tw.flex
+                             tw.``flex-col``
+                             tw.``w-full``
+                             tw.``bg-green-500``
+                             tw.``justify-center``
+                             tw.``mx-auto``
+                             tw.``text-xl``
+                             tw.``text-gray-100``
+                             tw.``h-16``
+                         ]
+                         prop.children [
+                             Html.p [
+                                 prop.classes [ tw.``text-center`` ]
+                                 prop.text (repliesType |> RepliesType.getReasonToHideReplies)
+                             ]
+                         ]
+                     ]
+                 | _ -> Html.none
+             | None -> Html.none)
         ]
 
     MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents
