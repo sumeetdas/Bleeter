@@ -40,6 +40,8 @@ type Msg =
 
 // need parentheses for indicating that init is a function
 let init () =
+    Imports.loadAllIcons()
+
     let currentUrl = Router.currentUrl ()
     let data, dataCmd = Data.init ()
     let main, mainCmd = Main.init currentUrl data
@@ -129,8 +131,8 @@ let setScreenSize (heightOpt: int option, screenSizeOpt: ScreenSize option) (sta
     | None -> state
 
 let setLoading (status: bool) (state: State) : State =
-    let main, _ = Main.update (Main.Loading false) state.Main
-    { state with IsLoading = false; Main = main }
+    let main, _ = Main.update (Main.Loading status) state.Main
+    { state with IsLoading = status; Main = main }
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }

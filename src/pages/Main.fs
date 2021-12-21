@@ -157,15 +157,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     | ProfileElemMsg msg' ->
         let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
 
-        let state =
-            { state with
-                ProfileElem = nextProfileElem
-                NotifMsg = nextProfileElem.NotifMsg
-                ModalMsg = nextProfileElem.ModalMsg
-            }
-
-        let state = { state with DeletedBleet = nextProfileElem.DeletedBleet }
-        state, Cmd.map ProfileElemMsg profileCmd
+        { state with
+            ProfileElem = { nextProfileElem with HeightUpdated = false }
+            NotifMsg = nextProfileElem.NotifMsg
+            ModalMsg = nextProfileElem.ModalMsg
+            DeletedBleet = nextProfileElem.DeletedBleet
+            HeightUpdated = nextProfileElem.HeightUpdated
+        }, Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 
