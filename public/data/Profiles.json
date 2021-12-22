@@ -1,7 +1,7 @@
 [
     {
         "Name": "Bleeter",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/bleeter.jpg",
         "Banner": "/img/banners/bleeter_banner.jpg",
         "Handle": "bleeter",
         "Following": 300119,
@@ -13,7 +13,7 @@
     },
     {
         "Name": "John Xina",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/john_xina.png",
         "Banner": null,
         "Handle": "JohnXina",
         "Following": 300119,
@@ -25,7 +25,7 @@
     },
     {
         "Name": "Bleeter Music",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/BleeterMusic.png",
         "Banner": null,
         "Handle": "BleeterMusic",
         "Following": 300119,
@@ -37,7 +37,7 @@
     },
     {
         "Name": "Sue Murry",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/SueMurry.png",
         "Banner": null,
         "Handle": "SueMurry",
         "Following": 300119,
@@ -181,7 +181,7 @@
     },
     {
         "Name": "Lester C",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/lesterC.png",
         "Banner": null,
         "Handle": "LesterC",
         "Following": 300119,
@@ -205,7 +205,7 @@
     },
     {
         "Name": "Misfire Games",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/MisfireGames.png",
         "Banner": null,
         "Handle": "MisfireGames",
         "Following": 300119,
@@ -217,7 +217,7 @@
     },
     {
         "Name": "Merryweather Security",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/MerryweatherSecurity.png",
         "Banner": null,
         "Handle": "MerryweatherSecurity",
         "Following": 300119,
@@ -241,7 +241,7 @@
     },
     {
         "Name": "Tracey DeSanta",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/TraceyDeSanta.png",
         "Banner": null,
         "Handle": "TraceyDeSanta",
         "Following": 300119,
@@ -277,7 +277,7 @@
     },
     {
         "Name": "Jock Cranley",
-        "ProfilePic": "/img/profile_pics/default.png",
+        "ProfilePic": "/img/profile_pics/JockCranley.png",
         "Banner": null,
         "Handle": "JockCranley",
         "Following": 300119,

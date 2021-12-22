@@ -197,11 +197,14 @@ let getBleetContent (content: string) : ReactElement =
                 ]
                 prop.children [
                     Html.p content
-                    // Html.div [
-                    //     prop.classes [ tw.flex; tw.``flex-row`` ]
-                    //     prop.children (Bleeter.ytEmbed url)
-                    // ]
+                    Html.div [
+                        prop.classes [
+                            tw.flex
+                            tw.``flex-row``
+                        ]
+                        prop.children (Bleeter.ytEmbed url)
                     ]
+                ]
             ]
         | None -> Html.p content)
 
@@ -218,9 +221,8 @@ let bleetProfilePic (bleet: Bleet) =
                 prop.classes [
                     tw.``h-12``
                     tw.``w-12``
-                    tw.``rounded-full``
+                    // tw.``rounded-full``
                     tw.``border-2``
-                    tw.``border-green-100``
                 ]
                 prop.src bleet.ProfilePic
             ]

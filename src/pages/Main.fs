@@ -165,7 +165,8 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             ModalMsg = nextProfileElem.ModalMsg
             DeletedBleet = nextProfileElem.DeletedBleet
             HeightUpdated = nextProfileElem.HeightUpdated
-        }, Cmd.map ProfileElemMsg profileCmd
+        },
+        Cmd.map ProfileElemMsg profileCmd
     | HomeMsg msg' ->
         let nextHome, homeCmd = Home.update msg' state.Home
 

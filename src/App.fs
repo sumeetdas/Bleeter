@@ -24,6 +24,7 @@ type State =
         MobileMenu: MobileMenu.State
         IsLoading: bool
         ScreenHeight: int
+        PlayBleat: bool
     }
 
 // events
@@ -41,7 +42,7 @@ type Msg =
 
 // need parentheses for indicating that init is a function
 let init () =
-    Iconify.loadAllIcons()
+    Iconify.loadAllIcons ()
 
     let currentUrl = Router.currentUrl ()
     let data, dataCmd = Data.init ()
@@ -60,6 +61,7 @@ let init () =
         MobileMenu = MobileMenu.init ()
         IsLoading = true
         ScreenHeight = 500
+        PlayBleat = false
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -124,21 +126,37 @@ let resizeAndLoadCmd (dispatch: Msg -> unit) =
 
     cmd dispatch
 
-let setScreenSizeAndHeight (heightOpt: int option, screenSizeOpt: ScreenSize option, screenHeight: int) (state: State) : State =
+let setScreenSizeAndHeight
+    (heightOpt: int option, screenSizeOpt: ScreenSize option, screenHeight: int)
+    (state: State)
+    : State =
     let state =
-        let nextMain, _ = Main.update (Main.AppHeight (heightOpt, screenHeight)) state.Main
-        { state with Main = nextMain; AppHeight = heightOpt; ScreenHeight = screenHeight }
+        let nextMain, _ = Main.update (Main.AppHeight(heightOpt, screenHeight)) state.Main
+
+        { state with
+            Main = nextMain
+            AppHeight = heightOpt
+            ScreenHeight = screenHeight
+        }
 
     match screenSizeOpt with
     | Some screenSize -> { state with ScreenSize = screenSize }
     | None -> state
 
 let setScreenSize (heightOpt: int option, screenSizeOpt: ScreenSize option) (state: State) : State =
-    state |> setScreenSizeAndHeight(heightOpt, screenSizeOpt, state.ScreenHeight)
+    state
+    |> setScreenSizeAndHeight (heightOpt, screenSizeOpt, state.ScreenHeight)
 
-let setLoading (status: bool) (state: State) : State =
-    let main, _ = Main.update (Main.Loading status) state.Main
-    { state with IsLoading = status; Main = main }
+let setLoading (isLoading: bool) (state: State) : State =
+    let state =
+        if state.PlayBleat && not isLoading then
+            Audio.playBleat ()
+            { state with PlayBleat = false }
+        else
+            state
+
+    let main, _ = Main.update (Main.Loading isLoading) state.Main
+    { state with IsLoading = isLoading; Main = main }
 
 let changeUrl (url: string list, state: State) =
     let state = { state with Modal = Modal.init state.Data }
@@ -215,7 +233,10 @@ let updateData (state: State) =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | Loading status -> state |> setLoading status, Cmd.none
-    | ScreenSizeUpdated (heightOpt, screenSizeOpt, screenHeight) -> state |> setScreenSizeAndHeight (heightOpt, screenSizeOpt, screenHeight), Cmd.none
+    | ScreenSizeUpdated (heightOpt, screenSizeOpt, screenHeight) ->
+        state
+        |> setScreenSizeAndHeight (heightOpt, screenSizeOpt, screenHeight),
+        Cmd.none
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -254,6 +275,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         let nextState, addBleetCmd =
             match nextMain.AddBleet with
             | Some bleet ->
+                let nextState = { nextState with PlayBleat = true }
                 let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
                 let nextState = { nextState with Data = nextData }
                 let nextState, updateDataCmd = updateData nextState
@@ -366,7 +388,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         | None -> nextState, Cmd.map ModalMsg modalCmd
         | Some bleet ->
             let nextModal, _ = Modal.update Modal.Close nextState.Modal
-            let nextState = { nextState with Modal = nextModal }
+            let nextState = { nextState with Modal = nextModal; PlayBleat = true }
             let nextData, dataCmd = Data.update (Data.Msg.AddBleet bleet) nextState.Data
             let nextState = { nextState with Data = nextData }
             let nextState, updateDataCmd = updateData nextState
@@ -420,14 +442,14 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
-    let getFinalHeight() : int option = 
+    let getFinalHeight () : int option =
         match (state.IsLoading, state.AppHeight) with
         | false, Some height -> Some height
         | true, _ -> Some state.ScreenHeight
         | _ -> None
 
-    let heightStyle() =
-        match getFinalHeight() with 
+    let heightStyle () =
+        match getFinalHeight () with
         | Some height -> [ style.height height ]
         | None -> []
 
@@ -439,14 +461,14 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 tw.``min-h-full``
                 tw.``h-full``
             ]
-            prop.style (heightStyle())
+            prop.style (heightStyle ())
             prop.children [
                 (if state.ScreenSize |> ScreenSize.isMobile then
                      mobileElem state dispatch
                  else
                      Html.none)
 
-                Menu.menuHtml (getFinalHeight()) state.CurrentUrl
+                Menu.menuHtml (getFinalHeight ()) state.CurrentUrl
 
                 (if state.ScreenSize |> ScreenSize.isMobile then
                      Html.div [
@@ -455,7 +477,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                              tw.``flex-col``
                              tw.``w-full``
                          ]
-                         prop.style (heightStyle())
+                         prop.style (heightStyle ())
                          prop.children [
                              Html.div [
                                  prop.classes [
@@ -480,7 +502,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         tw.``lg:flex``
                         tw.``lg:flex-col``
                     ]
-                    prop.style (heightStyle())
+                    prop.style (heightStyle ())
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
                         DistractionElemList.render state.DistractionElemList (DistractionElemListMsg >> dispatch)

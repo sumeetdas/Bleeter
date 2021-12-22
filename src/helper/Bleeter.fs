@@ -7,10 +7,10 @@ open Tailwind
 
 let icon (name: string) (size: string) =
     Iconify.icon [
-        Iconify.Icon name
-        Iconify.Width size
-        Iconify.Height size
-    ] []
+                     Iconify.Icon name
+                     Iconify.Width size
+                     Iconify.Height size
+                 ] []
 
 let bigIcon (name: string) = icon name "48"
 

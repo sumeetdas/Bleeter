@@ -256,7 +256,7 @@ let private profileElem
                     prop.classes [
                         tw.``h-24``
                         tw.``w-24``
-                        tw.``rounded-full``
+                        // tw.``rounded-full``
                         tw.``border-4``
                         tw.``border-gray-100``
                         tw.``m-2``

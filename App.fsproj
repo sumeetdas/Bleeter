@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="src\Imports\Iconify.fs" />
+    <Compile Include="src\Imports\Audio.fs" />
     <Compile Include="src\extension\*.fs" />
     <Compile Include="src\models\*.fs" />
     <Compile Include="src\data\*.fs" />
