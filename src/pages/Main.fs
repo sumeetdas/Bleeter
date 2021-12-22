@@ -203,6 +203,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             SingleBleetPage = singleBleet
             NotifMsg = singleBleet.NotifMsg
             ModalMsg = singleBleet.ModalMsg
+            DeletedBleet = singleBleet.DeleteBleet
         },
         Cmd.map SingleBleetPageMsg singleBleetCmd
     | MobilePageMsg msg' ->

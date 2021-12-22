@@ -13,6 +13,7 @@ type State =
         BleetId: int
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
+        DeleteBleet: Bleet option
     }
 
 type Msg =
@@ -28,6 +29,7 @@ let init (data: Data.State) : State =
         BleetId = 0
         NotifMsg = None
         ModalMsg = Modal.DoNothing
+        DeleteBleet = None
     }
 
 let updateData (state: State) : State * Msg Cmd =
@@ -54,6 +56,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
                 BleetElem = Some nextBleetElem
                 NotifMsg = nextBleetElem.NotifMsg
                 ModalMsg = nextBleetElem.ModalMsg
+                DeleteBleet = if nextBleetElem.IsDeleted then Some nextBleetElem.Bleet else None
             },
             Cmd.map BleetElemMsg bleetElemCmd
         | None -> state, Cmd.none
@@ -82,7 +85,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                              tw.``mx-auto``
                              tw.``text-xl``
                              tw.``text-gray-100``
-                             tw.``h-16``
+                             tw.``h-24``
+                             tw.``sm:h-16``
                          ]
                          prop.children [
                              Html.p [

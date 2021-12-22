@@ -418,6 +418,7 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
                 tw.``text-gray-100``
                 tw.``bleeter-pointer``
                 tw.``pl-2``
+                tw.``z-50``
             ]
             prop.onClick (fun _ -> MobileMenu.Display |> MobileMenuMsg |> dispatch)
             prop.children [
@@ -431,6 +432,7 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
                 tw.``right-0``
                 tw.``mr-2``
                 tw.``mt-4``
+                tw.``z-50``
                 (if Router.currentUrl () = [ "create"; "bleet" ] then
                      tw.hidden
                  else
