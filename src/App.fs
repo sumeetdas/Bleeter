@@ -40,7 +40,7 @@ type Msg =
 
 // need parentheses for indicating that init is a function
 let init () =
-    Imports.loadAllIcons()
+    Iconify.loadAllIcons()
 
     let currentUrl = Router.currentUrl ()
     let data, dataCmd = Data.init ()

@@ -6,12 +6,11 @@ open Browser.Dom
 open Tailwind
 
 let icon (name: string) (size: string) =
-    Html.span [
-        prop.className "iconify-inline"
-        prop.custom ("data-icon", name)
-        prop.custom ("data-width", size)
-        prop.custom ("data-height", size)
-    ]
+    Iconify.icon [
+        Iconify.Icon name
+        Iconify.Width size
+        Iconify.Height size
+    ] []
 
 let bigIcon (name: string) = icon name "48"
 
