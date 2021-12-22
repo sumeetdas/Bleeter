@@ -145,6 +145,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
     // clear up transient state
     let state =
         { state with
+            HeightUpdated = false
             DeletedBleet = None
             NotifMsg = None
             ModalMsg = Modal.DoNothing
@@ -163,8 +164,6 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         match profileOpt with
         | None -> { state with Handle = Some handle }, Cmd.none
         | Some profile ->
-            let nextReportCount = if handle <> profile.Handle then None else state.ReportCount
-
             let nextBleetList, _ =
                 BleetListElem.update
                     (BleetListElem.UrlChanged [
@@ -175,7 +174,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
             updateData
                 { state with
                     Handle = Some handle
-                    ReportCount = nextReportCount
+                    ReportCount = None
                     BleetListElem = nextBleetList
                 }
     | Follow ->

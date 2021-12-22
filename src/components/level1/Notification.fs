@@ -22,7 +22,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | Some notifMsg ->
             let delayedClose =
                 async {
-                    do! Async.Sleep 500000
+                    do! Async.Sleep 5000
                     return Close
                 }
 

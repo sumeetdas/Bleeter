@@ -23,11 +23,12 @@ type State =
         AddBleet: Bleet option
         HeightUpdated: bool
         IsLoading: bool
+        ScreenHeight: int
     }
 
 type Msg =
     | UrlChanged of string list
-    | AppHeight of int option
+    | AppHeight of int option * int
     | ProfileElemMsg of ProfileElem.Msg
     | HomeMsg of Home.Msg
     | DataUpdate of Data.State
@@ -52,7 +53,8 @@ let init (currentUrl: string list) (data: Data.State) : State * Msg Cmd =
         MobilePage = MobilePage.init data
         AddBleet = None
         HeightUpdated = false
-        IsLoading = false
+        IsLoading = true
+        ScreenHeight = 500
     },
     Cmd.none
 
@@ -153,7 +155,7 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | _ ->
             Router.navigate ("not-found")
             state, Cmd.none
-    | AppHeight height -> { state with Height = height }, Cmd.none
+    | AppHeight (height, screenHeight) -> { state with Height = height; ScreenHeight = screenHeight }, Cmd.none
     | ProfileElemMsg msg' ->
         let nextProfileElem, profileCmd = ProfileElem.update msg' state.ProfileElem
 
@@ -224,6 +226,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                     tw.``space-x-4``
                     tw.``w-5/6``
                     tw.``m-6``
+                    tw.``h-full``
                 ]
                 prop.children [
                     Html.div [
@@ -299,9 +302,10 @@ let render (state: State) (dispatch: Msg -> unit) =
             tw.``w-full``
         ]
         prop.style (
-            match state.Height with
-            | Some height -> [ style.height height ]
-            | None -> []
+            match (state.IsLoading, state.Height) with
+            | true, _ -> [ style.height state.ScreenHeight ]
+            | false, Some height -> [ style.height height ]
+            | _ -> []
         )
         prop.children [
             if state.IsLoading then

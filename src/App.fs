@@ -23,6 +23,7 @@ type State =
         ScreenSize: ScreenSize
         MobileMenu: MobileMenu.State
         IsLoading: bool
+        ScreenHeight: int
     }
 
 // events
@@ -34,7 +35,7 @@ type Msg =
     | SearchBoxMsg of SearchBox.Msg
     | NotificationMsg of Notification.Msg
     | ModalMsg of Modal.Msg
-    | ScreenSizeUpdated of int option * ScreenSize option
+    | ScreenSizeUpdated of int option * ScreenSize option * int
     | MobileMenuMsg of MobileMenu.Msg
     | Loading of bool
 
@@ -58,6 +59,7 @@ let init () =
         ScreenSize = Small
         MobileMenu = MobileMenu.init ()
         IsLoading = true
+        ScreenHeight = 500
     },
     Cmd.batch [
         (Cmd.map MainMsg mainCmd)
@@ -91,7 +93,8 @@ let delayedHeightCheck (dispatch: Msg -> unit) =
         do! Async.Sleep 200
         let finalHeight = getWindowHeight ()
         let width = Bleeter.getWindowWidth ()
-        dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize)))
+        let screenHeight = window.screen.height |> int
+        dispatch (ScreenSizeUpdated(Some finalHeight, Some(width |> ScreenSize.getSize), screenHeight))
     }
 
 let runSequentialJobs (jobs: ((Msg -> unit) -> unit Async) list) (dispatch: Msg -> unit) =
@@ -121,14 +124,17 @@ let resizeAndLoadCmd (dispatch: Msg -> unit) =
 
     cmd dispatch
 
-let setScreenSize (heightOpt: int option, screenSizeOpt: ScreenSize option) (state: State) : State =
+let setScreenSizeAndHeight (heightOpt: int option, screenSizeOpt: ScreenSize option, screenHeight: int) (state: State) : State =
     let state =
-        let nextMain, _ = Main.update (Main.AppHeight heightOpt) state.Main
-        { state with Main = nextMain; AppHeight = heightOpt }
+        let nextMain, _ = Main.update (Main.AppHeight (heightOpt, screenHeight)) state.Main
+        { state with Main = nextMain; AppHeight = heightOpt; ScreenHeight = screenHeight }
 
     match screenSizeOpt with
     | Some screenSize -> { state with ScreenSize = screenSize }
     | None -> state
+
+let setScreenSize (heightOpt: int option, screenSizeOpt: ScreenSize option) (state: State) : State =
+    state |> setScreenSizeAndHeight(heightOpt, screenSizeOpt, state.ScreenHeight)
 
 let setLoading (status: bool) (state: State) : State =
     let main, _ = Main.update (Main.Loading status) state.Main
@@ -209,7 +215,7 @@ let updateData (state: State) =
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | Loading status -> state |> setLoading status, Cmd.none
-    | ScreenSizeUpdated (heightOpt, screenSizeOpt) -> state |> setScreenSize (heightOpt, screenSizeOpt), Cmd.none
+    | ScreenSizeUpdated (heightOpt, screenSizeOpt, screenHeight) -> state |> setScreenSizeAndHeight (heightOpt, screenSizeOpt, screenHeight), Cmd.none
     | DataMsg msg' ->
         let data, dataCmd = Data.update msg' state.Data
         let nextState = { state with Data = data }
@@ -222,15 +228,14 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         ]
     | UrlChanged url -> changeUrl (url, state)
     | MainMsg msg' ->
-        let nextState = state |> setScreenSize (None, None)
-        let nextMain, mainCmd = Main.update msg' nextState.Main
-        let nextState = { nextState with Main = nextMain }
+        let nextMain, mainCmd = Main.update msg' state.Main
+        let nextState = { state with Main = nextMain }
 
-        let optionalResize =
+        let nextState, optionalResize =
             if nextMain.HeightUpdated then
-                Cmd.ofSub justResizeCmd
+                nextState |> setScreenSize (None, None), Cmd.ofSub justResizeCmd
             else
-                Cmd.none
+                nextState, Cmd.none
 
         let nextState, deleteBleetCmd =
             match nextMain.DeletedBleet with
@@ -415,8 +420,14 @@ let mobileElem (state: State) (dispatch: Msg -> unit) =
     ]
 
 let render (state: State) (dispatch: Msg -> Unit) =
-    let heightStyle =
-        match state.AppHeight with
+    let getFinalHeight() : int option = 
+        match (state.IsLoading, state.AppHeight) with
+        | false, Some height -> Some height
+        | true, _ -> Some state.ScreenHeight
+        | _ -> None
+
+    let heightStyle() =
+        match getFinalHeight() with 
         | Some height -> [ style.height height ]
         | None -> []
 
@@ -428,14 +439,14 @@ let render (state: State) (dispatch: Msg -> Unit) =
                 tw.``min-h-full``
                 tw.``h-full``
             ]
-            prop.style heightStyle
+            prop.style (heightStyle())
             prop.children [
                 (if state.ScreenSize |> ScreenSize.isMobile then
                      mobileElem state dispatch
                  else
                      Html.none)
 
-                Menu.menuHtml state.AppHeight state.CurrentUrl
+                Menu.menuHtml (getFinalHeight()) state.CurrentUrl
 
                 (if state.ScreenSize |> ScreenSize.isMobile then
                      Html.div [
@@ -444,11 +455,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                              tw.``flex-col``
                              tw.``w-full``
                          ]
-                         prop.style (
-                             match state.AppHeight with
-                             | Some height -> [ style.height height ]
-                             | None -> []
-                         )
+                         prop.style (heightStyle())
                          prop.children [
                              Html.div [
                                  prop.classes [
@@ -473,7 +480,7 @@ let render (state: State) (dispatch: Msg -> Unit) =
                         tw.``lg:flex``
                         tw.``lg:flex-col``
                     ]
-                    prop.style heightStyle
+                    prop.style (heightStyle())
                     prop.children [
                         SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
                         DistractionElemList.render state.DistractionElemList (DistractionElemListMsg >> dispatch)

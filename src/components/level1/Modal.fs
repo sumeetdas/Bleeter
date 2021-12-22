@@ -167,7 +167,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                 prop.id (state.ModalId + "Main")
                 prop.classes [
                     tw.border
-                    tw.``border-blue-500``
+                    (if state.ModalType = ModalType.CCP then tw.``border-red-500`` else tw.``border-blue-500``)
                     tw.``shadow-lg``
                     tw.``bg-white``
                     tw.``md:max-w-md``
