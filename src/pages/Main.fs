@@ -5,7 +5,6 @@ open Elmish
 open Feliz
 open Tailwind
 open Feliz.Router
-open Browser.Dom
 
 type State =
     {
@@ -141,7 +140,13 @@ let update (msg: Msg) (state: State) : State * Msg Cmd =
         | [ "not-found" ] -> { state with CurrentUrl = url }, Cmd.none
         | [ (handle: string); "bleets"; Route.Int (bleetId: int) ] ->
             let singleBleet, singleBleetCmd =
-                SingleBleetPage.update (SingleBleetPage.Msg.LoadBleet(handle, bleetId)) state.SingleBleetPage
+                SingleBleetPage.update (SingleBleetPage.LoadBleet(handle, bleetId)) state.SingleBleetPage
+
+            let singleBleet, _ =
+                if state.CurrentUrl <> url then
+                    SingleBleetPage.update (SingleBleetPage.PreviousUrlUpdate url) singleBleet
+                else
+                    singleBleet, Cmd.none
 
             { state with
                 SingleBleetPage = singleBleet

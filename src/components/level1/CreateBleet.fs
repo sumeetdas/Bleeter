@@ -70,7 +70,10 @@ let render (state: State) (dispatch: Msg -> unit) =
         prop.classes [
             tw.flex
             tw.``flex-row``
-            tw.``mt-12``
+            tw.``mt-16``
+            tw.``sm:my-auto``
+            tw.``mx-2``
+            tw.``sm:mx-4``
         ]
         prop.children [
             Html.img [
@@ -98,6 +101,8 @@ let render (state: State) (dispatch: Msg -> unit) =
                         prop.classes [
                             tw.``resize-none``
                             tw.``outline-none``
+                            tw.``border-2``
+                            tw.``border-green-500``
                         ]
                         prop.rows 3
                         prop.value state.BleetContent
@@ -110,6 +115,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                         prop.classes [
                             tw.flex
                             tw.``flex-row-reverse``
+                            tw.``mt-2``
                         ]
                         prop.children [
                             Html.button [

@@ -64,7 +64,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                 tw.``lg:bottom-16``
                 tw.``w-full``
                 tw.``h-16``
-                tw.``sm:h-8``
+                tw.``lg:h-8``
                 tw.``items-center``
                 tw.``justify-center``
             ]

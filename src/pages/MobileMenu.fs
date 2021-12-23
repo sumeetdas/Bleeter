@@ -32,7 +32,6 @@ let private nav (currentUrl: string) (dispatch: Msg -> unit) (nav: Nav) =
         prop.classes (
             [
                 tw.``mt-1``
-                tw.group
                 tw.flex
                 tw.``items-center``
                 tw.``px-2``

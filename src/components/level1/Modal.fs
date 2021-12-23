@@ -173,21 +173,18 @@ let render (state: State) (dispatch: Msg -> unit) =
                          tw.``border-blue-500``)
                     tw.``shadow-lg``
                     tw.``bg-white``
-                    tw.``md:max-w-md``
                     tw.``mx-auto``
                     tw.rounded
                     tw.``shadow-lg``
                     tw.``overflow-y-auto``
                     tw.``text-left``
                     tw.``w-2/4``
-                    tw.``h-60``
-                    tw.``lg:h-96``
+                    tw.``h-72``
+                    tw.``lg:h-80``
                     tw.flex
                     tw.``flex-col``
-                    tw.``md:max-w-md``
+                    tw.``max-w-md``
                     tw.``lg:max-w-lg``
-                    tw.``xl:max-w-xl``
-                    tw.``2xl:max-w-2xl``
                 ]
                 prop.children [
                     Html.button [

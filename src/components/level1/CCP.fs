@@ -20,6 +20,10 @@ let render (_: State) (dispatch: Msg -> unit) =
         Html.img [
             prop.classes [
                 tw.``w-32``
+                tw.``sm:w-16``
+                tw.``md:w-20``
+                tw.``lg:w-24``
+                tw.``xl:w-28``
                 tw.``h-auto``
             ]
             prop.src "img/ccp.svg"

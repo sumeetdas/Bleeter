@@ -3,9 +3,15 @@
 // https://github.com/fable-compiler/webpack-config-template
 
 var path = require("path");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-    mode: "development",
+    // mode: "development",
+    mode: 'production',
+    optimization: {
+        minimizer: [new UglifyJsPlugin()],
+    },
+    // devtool: 'source-map',
     entry: "./src/App.fs.js",
     output: {
         path: path.join(__dirname, "./public"),

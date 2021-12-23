@@ -57,6 +57,9 @@ let refreshBleetList (state: State) =
     { state with DeletedBleet = None }
 
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
+    // clear transient state
+    let state = { state with HeightUpdated = false }
+
     match msg with
     | UrlChanged url ->
         let updatedElems =

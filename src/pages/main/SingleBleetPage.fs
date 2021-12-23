@@ -3,6 +3,7 @@ module SingleBleetPage
 
 open Elmish
 open Feliz
+open Feliz.Router
 open Tailwind
 
 type State =
@@ -14,12 +15,14 @@ type State =
         NotifMsg: ReactElement option
         ModalMsg: Modal.Msg
         DeleteBleet: Bleet option
+        PreviousUrl: string list
     }
 
 type Msg =
     | LoadBleet of string * int
     | BleetElemMsg of BleetElem.Msg
     | DataUpdate of Data.State
+    | PreviousUrlUpdate of string list
 
 let init (data: Data.State) : State =
     {
@@ -30,6 +33,7 @@ let init (data: Data.State) : State =
         NotifMsg = None
         ModalMsg = Modal.DoNothing
         DeleteBleet = None
+        PreviousUrl = []
     }
 
 let updateData (state: State) : State * Msg Cmd =
@@ -46,17 +50,27 @@ let updateData (state: State) : State * Msg Cmd =
 
 let update (msg: Msg) (state: State) : State * Msg Cmd =
     match msg with
+    | PreviousUrlUpdate url -> { state with PreviousUrl = url }, Cmd.none
     | LoadBleet (handle: string, bleetId: int) -> updateData { state with Handle = handle; BleetId = bleetId }
     | BleetElemMsg msg' ->
         match state.BleetElem with
         | Some bleetElem ->
             let nextBleetElem, bleetElemCmd = BleetElem.update msg' bleetElem
 
+            if nextBleetElem.IsDeleted then
+                Router.navigate ("#/" + (state.PreviousUrl |> String.concat "/"))
+            else
+                1 |> ignore
+
             { state with
                 BleetElem = Some nextBleetElem
                 NotifMsg = nextBleetElem.NotifMsg
                 ModalMsg = nextBleetElem.ModalMsg
-                DeleteBleet = if nextBleetElem.IsDeleted then Some nextBleetElem.Bleet else None
+                DeleteBleet =
+                    if nextBleetElem.IsDeleted then
+                        Some nextBleetElem.Bleet
+                    else
+                        None
             },
             Cmd.map BleetElemMsg bleetElemCmd
         | None -> state, Cmd.none
@@ -86,7 +100,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                              tw.``text-xl``
                              tw.``text-gray-100``
                              tw.``h-24``
-                             tw.``sm:h-16``
+                             tw.``sm:h-20``
                          ]
                          prop.children [
                              Html.p [

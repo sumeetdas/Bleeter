@@ -1,5 +1,11 @@
 module.exports = {
-  purge: [],
+  purge: {
+    enabled: true,
+    content: [
+      './src/**/*.js',
+      './src/style.css',
+    ]
+  },
   darkMode: false, // or 'media' or 'class'
   theme: {
     flexGrow: {

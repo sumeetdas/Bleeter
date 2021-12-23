@@ -4,8 +4,10 @@
     "postinstall": "dotnet tool restore",
     "start": "dotnet fable watch App.fsproj --run webpack-dev-server",
     "build": "npm run css && npm run format && npm run fsbuild",
+    "prodbuild": "npm run prodcss && npm run format && npm run fsbuild",
     "fsbuild": "dotnet fable App.fsproj && webpack",
     "css": "tailwindcss build -i src/style.css -o public/style.css",
+    "prodcss": "tailwindcss build -i src/style.css -o public/style.css --minify",
     "format": "fantomas src -r"
   },
   "devDependencies": {
@@ -13,6 +15,7 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.3.11",
     "tailwindcss": "^2.2.19",
+    "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.11.2"
