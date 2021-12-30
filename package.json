@@ -6,8 +6,8 @@
     "build": "npm run css && npm run format && npm run fsbuild",
     "prodbuild": "npm run prodcss && npm run format && npm run fsbuild",
     "fsbuild": "dotnet fable App.fsproj && webpack",
-    "css": "tailwindcss build -i src/style.css -o public/style.css",
-    "prodcss": "tailwindcss build -i src/style.css -o public/style.css --minify",
+    "css": "tailwindcss build -i src/style.css -o docs/style.css",
+    "prodcss": "tailwindcss build -i src/style.css -o docs/style.css --minify",
     "format": "fantomas src -r"
   },
   "devDependencies": {

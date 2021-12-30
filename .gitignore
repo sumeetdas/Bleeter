@@ -297,9 +297,9 @@ autogen_README.md
 
 src/sdNotes.fs
 .ionide
-public/style.css
+docs/style.css
 
 TODO.md
 
 .vscode
-public/bundle.js.map
+docs/bundle.js.map

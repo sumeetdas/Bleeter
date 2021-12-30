@@ -2,4 +2,4 @@ module Tailwind
 
 open Zanaptak.TypedCssClasses
 
-type tw = CssClasses<"public/style.css">
+type tw = CssClasses<"docs/style.css">
