@@ -4,6 +4,11 @@
 @tailwind utilities;
 
 @layer components {
+
+    html {
+        font-size: 18px;
+    }
+
     .bg-bleet-dim {
         --bg-opacity: 1;
         @apply bg-green-100;
