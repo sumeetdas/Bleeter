@@ -26,7 +26,7 @@ let render (_: State) (dispatch: Msg -> unit) =
                 tw.``xl:w-28``
                 tw.``h-auto``
             ]
-            prop.src "Bleeter/img/ccp.svg"
+            prop.src "/Bleeter/img/ccp.svg"
         ]
 
     let message1 =
