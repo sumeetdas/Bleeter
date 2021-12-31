@@ -6,6 +6,8 @@ Bleeter is GTA V's Twitter parody website. Few months ago, I learned about a fun
 
 This website also uses React, React Router and Tailwind CSS.
 
+Bleets were source from [Bleeter wiki](https://gta.fandom.com/wiki/Bleeter/Bleets).
+
 ## Libraries used
 
 * Various Fable libraries:

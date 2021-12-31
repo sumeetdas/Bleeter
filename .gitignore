@@ -1,7 +1,6 @@
 # Fable generated files
 .fable
 *.fs.js
-bundle.js
 temp/**
 
 ## Ignore Visual Studio temporary files, build results, and
@@ -297,7 +296,6 @@ autogen_README.md
 
 src/sdNotes.fs
 .ionide
-docs/style.css
 
 TODO.md
 
