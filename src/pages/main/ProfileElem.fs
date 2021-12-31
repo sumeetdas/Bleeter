@@ -215,7 +215,7 @@ let private profileElem
     =
     let followBtn =
         let noShowBtnClasses = [ tw.hidden ]
-        let yesFollowClasses = [ tw.``w-28``; tw.``bg-green-500``; tw.``text-white`` ]
+        let yesFollowClasses = [ tw.``w-24``; tw.``bg-green-500``; tw.``text-white`` ]
         let noFollowClasses = [ tw.``w-20``; tw.``text-green-500`` ]
 
         let classes =

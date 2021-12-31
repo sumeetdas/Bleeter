@@ -6,9 +6,15 @@
 @layer components {
 
     html {
-        font-size: 18px;
+        font-size: 14px;
     }
 
+    @media (min-width:640px) {
+        html {
+            font-size: 16px;
+        }
+    }
+    
     .bg-bleet-dim {
         --bg-opacity: 1;
         @apply bg-green-100;
