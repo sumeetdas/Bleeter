@@ -391,7 +391,7 @@ let private profileElem
                     prop.children [
                         Html.span [
                             prop.classes [ tw.``font-bold`` ]
-                            prop.text (profile.Following |> Bleeter.condensedCount)
+                            prop.text (profile.Followers |> Bleeter.condensedCount)
                         ]
                         Html.span [
                             prop.classes [ tw.``ml-1`` ]
