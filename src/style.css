@@ -28,13 +28,13 @@
         @apply bg-bleeter-blue;
         @apply overflow-y-scroll;
         @apply bleeter-scroll;   
-        background-image: url('/img/birds.png'), url('/img/clouds.png');
+        background-image: url('/Bleeter/img/birds.png'), url('/Bleeter/img/clouds.png');
         background-repeat: repeat, repeat;
-        cursor: url('/img/bleeter-arrow.png'), auto;
+        cursor: url('/Bleeter/img/bleeter-arrow.png'), auto;
     }
 
     .bleeter-pointer {
-        cursor: url('/img/bleeter-pointer.png'), auto;
+        cursor: url('/Bleeter/img/bleeter-pointer.png'), auto;
     }
 
     a {

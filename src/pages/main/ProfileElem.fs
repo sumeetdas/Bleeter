@@ -418,7 +418,7 @@ let private profileElem
     let bannerUrl =
         match profile.Banner with
         | Some url -> Some url
-        | None -> Some "/img/bleeter-logo.png"
+        | None -> Some "/Bleeter/img/bleeter-logo.png"
 
     MainLayout.elem bannerUrl coreComponents
 

@@ -20,4 +20,4 @@ let render =
             ]
         ]
 
-    MainLayout.elem (Some "/img/bleeter-logo.png") [ header; coreComponent ]
+    MainLayout.elem (Some "/Bleeter/img/bleeter-logo.png") [ header; coreComponent ]

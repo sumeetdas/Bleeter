@@ -136,4 +136,4 @@ let page =
 
     let coreComponents = [ mainHeading; bleeterInfoContent; noteFromDevelopers ]
 
-    MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents
+    MainLayout.elem (Some "/Bleeter/img/bleeter-logo.png") coreComponents

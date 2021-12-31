@@ -298,7 +298,7 @@ let render (state: State) (dispatch: Msg -> unit) =
                 ]
             ]
 
-        MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents
+        MainLayout.elem (Some "/Bleeter/img/bleeter-logo.png") coreComponents
 
     Html.div [
         prop.classes [

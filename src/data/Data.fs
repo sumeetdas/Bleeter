@@ -75,7 +75,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         AsyncOperationStatus.loadData
             state
             asyncOpStatus
-            "/data/Profiles.json"
+            "/Bleeter/data/Profiles.json"
             (fun json -> json |> Profile.decodeListResult)
             (fun result -> LoadProfiles(Finished result))
             (fun state -> { state with Profiles = InProgress })
@@ -89,7 +89,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         AsyncOperationStatus.loadData
             state
             asyncOpStatus
-            "/data/Bleets.json"
+            "/Bleeter/data/Bleets.json"
             (fun json -> json |> Bleet.decodeListResult)
             (fun result -> LoadBleets(Finished result))
             (fun state -> { state with Bleets = InProgress })
@@ -99,7 +99,7 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         AsyncOperationStatus.loadData
             state
             asyncOpStatus
-            "/data/Distractions.json"
+            "/Bleeter/data/Distractions.json"
             (fun json -> json |> Distraction.decodeListResult)
             (fun result -> LoadDistractions(Finished result))
             (fun state -> { state with Distractions = InProgress })

@@ -170,4 +170,4 @@ let render (state: State) (dispatch: Msg -> unit) =
         | [ "search" ] -> SearchBox.render state.SearchBox (SearchBoxMsg >> dispatch)
         | _ -> Html.none
 
-    MainLayout.mobileElem (Some "/img/bleeter-logo.png") [ coreComponent ]
+    MainLayout.mobileElem (Some "/Bleeter/img/bleeter-logo.png") [ coreComponent ]

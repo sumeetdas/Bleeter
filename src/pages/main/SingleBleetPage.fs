@@ -113,4 +113,4 @@ let render (state: State) (dispatch: Msg -> unit) =
              | None -> Html.none)
         ]
 
-    MainLayout.elem (Some "/img/bleeter-logo.png") coreComponents
+    MainLayout.elem (Some "/Bleeter/img/bleeter-logo.png") coreComponents
